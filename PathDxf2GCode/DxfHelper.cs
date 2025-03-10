@@ -9,15 +9,16 @@ using netDxf.Header;
 public static class DxfHelper {
     public static DxfDocument? LoadDxfDocument(string dxfFilePath, bool dump, string pathNamePattern,
             out Dictionary<string, Linetype> layerLinetypes, MessageHandler messages) {
-        messages.Write($"---- Einlesen von {dxfFilePath}");
+        messages.Write(Messages.Info + Messages.DxfHelper_ReadingFile__FileName, dxfFilePath);
 
         DxfVersion v = DxfDocument.CheckDxfFileVersion(dxfFilePath, out bool isBinary);
-        messages.WriteLine($" (DXF-Version: {v}, isBinary: {isBinary})");
+        messages.WriteLine(" (DXF-Version: {0}, isBinary: {1})", v, isBinary);
 
         DxfDocument d = DxfDocument.Load(dxfFilePath);
+        string x = "a" + v + " c";
 
         if (d == null) {
-            messages.AddError("Input", $"DXF-Datei {dxfFilePath} kann nicht geladen werden");
+            messages.AddError("Input", "DXF-Datei {0} kann nicht geladen werden", dxfFilePath);
             layerLinetypes = new();
         } else {
             layerLinetypes = d.Layers.ToDictionary(layer => layer.Name, layer => layer.Linetype);
@@ -30,7 +31,7 @@ public static class DxfHelper {
     }
 
     private static void Dump(string dxfFilePath, DrawingEntities d, Dictionary<string, Linetype> layerLinetypes, string pathNamePattern) {
-        Console.WriteLine($"---- DUMP von {dxfFilePath}");
+        Console.WriteLine("---- DUMP {dxfFilePath}");
         foreach (var e in d.All.Where(e => e.IsOnPathLayer(pathNamePattern, dxfFilePath))) {
             Console.WriteLine(e.ToLongString(layerLinetypes));
         }

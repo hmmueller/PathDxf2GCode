@@ -66,7 +66,7 @@ public class Transformation3 : Transformation2 {
             string result = z_mm.F3() + $"={z_mm.F3()}+{string.Join("+",
                 ws.Select((wt, i) => $"{(wt.Weight / weightSum).F3()}*#{2001 + i}-{(wt.T_mm * wt.Weight / weightSum).F3()}"))}".AsComment(0);
             if (!Regex.IsMatch(result, "^" + GCodeConstants.ZAdjustmentExpressionRegex + "$")) {
-                throw new Exception($"Interner Fehler: '{result}' matcht nicht /^{GCodeConstants.ZAdjustmentExpressionRegex}$/");
+                throw new Exception($"Internal Error: '{result}' does not match /^{GCodeConstants.ZAdjustmentExpressionRegex}$/");
             }
             return result;
         } else {

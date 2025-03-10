@@ -88,6 +88,7 @@ public class MillChain : PathSegment {
         }
     }
 
+    // No longer used - just as a fallback and for documentation of a simple algorithm
     public Vector3 EmitGCodeSIMPLE(Vector3 currPos, Transformation3 t,
                                       StreamWriter sw, Statistics stats, string dxfFileName, MessageHandler messages) {
         Vector2 segmentStart = _segments.First().Start;
@@ -98,7 +99,7 @@ public class MillChain : PathSegment {
         double firstB_mm = _segments.First().Bottom_mm;
         for (double millingLayer_mm = _params!.T_mm - _params!.I_mm; millingLayer_mm >= bottomLayer_mm; millingLayer_mm -= _params!.I_mm) {
             currPos = GCodeHelpers.SweepAndDrillSafelyFromTo(from: currPos,
-                to: start.AsVector3(Math.Max(firstB_mm, millingLayer_mm)), // Nicht tiefer als erstes Segment will
+                to: start.AsVector3(Math.Max(firstB_mm, millingLayer_mm)), // Not deeper than first segment
                 t_mm: _params!.T_mm, s_mm: _params!.RawK_mm ?? _params!.S_mm, _params!.F_mmpmin, backtracking: false,
                 t, sw, stats);
             foreach (var s in _segments) {
@@ -176,7 +177,7 @@ public class MillChain : PathSegment {
 
             sortedEdges.Add(nearest!);
             if (nearest!.Milled != EdgeMilled.Unknown) {
-                throw new Exception("Interner Fehler");
+                throw new Exception("Internal Error");
             }
             nearest.Milled = nearestConnectAtStart ? EdgeMilled.Start2End : EdgeMilled.End2Start;
             headPos = nearestConnectAtStart ? nearest.End(t) : nearest.Start(t);
@@ -335,9 +336,9 @@ public class HelixSegment : PathMarkOrMillSegment, IRawSegment {
         Radius_mm = radius_mm;
     }
 
-    // Mehrere Helixen an derselben Stelle sollen von innen nach außen gefräst werden, daher
-    // müssen jene mit kleinerem Radius eine niedrigere Order haben. Die Order muss "stark negativ"
-    // sein, damit sie "weit" vor den üblichen N-Orders liegt.
+    // Multiple helixes at the same place must be milled from inside out (to avoid cores
+    // that tumble around), this those with a smaller radius must have a lower order.
+    // Moreover, the order must be "very negative" so that they are far before the N orders.
     public double Order => -1000000 + Radius_mm;
 
     public override Vector2 Start => Center;
@@ -363,16 +364,16 @@ public class HelixSegment : PathMarkOrMillSegment, IRawSegment {
         double bottom_mm = Bottom_mm;
 
         double millingRadius_mm = Radius_mm - _params!.O_mm / 2;
-        // Lauter kleine fallende Halbkreise fräsen
+        // Milling many small semicircles
         double y0 = c.Y - millingRadius_mm;
         double y1 = c.Y + millingRadius_mm;
 
         GCodeHelpers.DrillOrPullZFromTo(currPos.XY(), currPos.Z, t_mm, t_mm: t_mm, f_mmpmin: f_mmpmin, t, sw, stats);
         sw.WriteLine($"MillHelix l={c.F3()} r={Radius_mm.F3()}".AsComment(2));
-        sw.WriteLine($"G01 X{c.X.F3()} Y{y0.F3()} F{f_mmpmin.F3()}"); // G01, weil wir am Top ankratzen.
+        sw.WriteLine($"G01 X{c.X.F3()} Y{y0.F3()} F{f_mmpmin.F3()}"); // G01, as we touch the top
         stats.AddMillLength(c.Y, y0, f_mmpmin);
 
-        // Sacklöcher gehen so nicht - da bleibt der Kern stehen; die Kreise dafür will ich explizit konstruieren.
+        // This will not create full holes - a core will remain; paths for full holes must be manually drawn.
         double done_mm = t_mm;
         for (double d_mm = t_mm; done_mm > bottom_mm; d_mm -= i_mm) {
             sw.WriteLine($"MillSemiCircle l={d_mm.F3()}".AsComment(4));
@@ -409,7 +410,7 @@ public class HelixSegment : PathMarkOrMillSegment, IRawSegment {
 
 public class DrillSegment : PathMarkOrMillSegment, IRawSegment {
     public Vector2 Center { get; }
-    // Siehe HelixSegment
+    // See HelixSegment
     public double Order => -1000000;
 
     public DrillSegment(EntityObject source, ParamsText pars, Vector2 center, bool isMark) : base(source, pars, isMark) {
@@ -456,11 +457,11 @@ public class SubPathSegment : PathSegmentWithParamsText, IRawSegment {
         Order = order;
         string? path = text.GetString('>', '<', out _backward);
         if (path == null) {
-            throw new ArgumentException(MessageHandler.Context(source, start, dxfFilePath) + $": >... oder <... fehlt");
+            throw new ArgumentException(MessageHandler.Context(source, start, dxfFilePath) + ": " + Messages.PathSegment_GtLtMissing);
         } else {
             _name = path.AsPathReference(pathNamePattern, dxfFilePath)
-                ?? throw new ArgumentException(MessageHandler.Context(source, start, dxfFilePath) +
-                    $": '{(_backward ? '<' : '>')}{path}' ist kein gültiger Pfadname");
+                ?? throw new ArgumentException(string.Format(MessageHandler.Context(source, start, dxfFilePath) +
+                    ": " + Messages.PathSegment_InvalidPathName_Dir_Path, _backward ? '<' : '>', path));
         }
     }
 
@@ -487,11 +488,11 @@ public class SubPathSegment : PathSegmentWithParamsText, IRawSegment {
                         searchedFiles += (searchedFiles == "" ? "" : ", ") + f;
                         break;
                     }
-                    // Auch weitere passende Dateien laden - wir wollen wissen, ob der Pfad nicht mehrfach definiert ist.
+                    // Load all matching files! - we want to know whether the path might be defined more than once.
                 }
             }
             if (!subModels.Contains(_name)) {
-                messages.AddError(_overlayTextForErrors, $"Pfad {_name.AsString()} nicht in Datei(en) {searchedFiles} gefunden");
+                messages.AddError(_overlayTextForErrors, Messages.PathSegment_PathNotFound_Name_Files, _name.AsString(), searchedFiles);
                 return;
             }
         }
@@ -500,7 +501,7 @@ public class SubPathSegment : PathSegmentWithParamsText, IRawSegment {
         double modelSize = _model.Start.Distance(_model.End);
         double referenceSize = Start.Distance(End);
         if (!modelSize.Near(referenceSize, 1e-3)) {
-            messages.AddError(_overlayTextForErrors, $"Distanz {referenceSize} ist nicht gleich Distanz in Subpfad-Konstruktion {modelSize}");
+            messages.AddError(_overlayTextForErrors, Messages.PathSegment_DistanceDiffers_CallerDist_CalledDist, referenceSize.F3(), modelSize.F3());
         }
     }
 
@@ -522,14 +523,14 @@ public class SubPathSegment : PathSegmentWithParamsText, IRawSegment {
     }
 
     public override void CreateParams(PathParams pathParams, string dxfFileName, Action<string, string> onError) {
-        if (_model != null) { // Fehler "Pfad nicht gefunden" wurde schon früher gemeldet.
+        if (_model != null) { // Error "path not found" has already been emitted.
             string errorContext = ErrorContext(dxfFileName);
             _params = new SubpathParams(ParamsText, errorContext, pathParams, onError);
             if (_params.M != _model.Params.M) {
-                onError(errorContext, $"M={_params.M} an Subpfad {_model.Name} weicht von M={_model.Params.M} in referenziertem Modell ab");
+                onError(errorContext, string.Format(Messages.PathSegment_DifferingM_Caller_Path_Called, _params.M, _model.Name, _model.Params.M));
             }
             if (_params.O_mm != _model.Params.O_mm) {
-                onError(errorContext, $"O={_params.O_mm} an Subpfad {_model.Name} weicht von O={_model.Params.O_mm} in referenziertem Modell ab");
+                onError(errorContext, string.Format(Messages.PathSegment_DifferingO_Caller_Path_Called, _params.O_mm, _model.Name, _model.Params.O_mm));
             }
         }
     }
@@ -537,8 +538,8 @@ public class SubPathSegment : PathSegmentWithParamsText, IRawSegment {
     public override Vector3 EmitGCode(Vector3 currPos, Transformation3 t,
         StreamWriter sw, Statistics stats, string dxfFileName, MessageHandler messages) {
         if (_backward) {
-            messages.AddError(Source, Start, dxfFileName, "< noch nicht implementiert");
-            throw new NotImplementedException("< noch nicht implementiert");
+            messages.AddError(Source, Start, dxfFileName, Messages.PathSegment_LtNotImplemented);
+            throw new NotImplementedException(Messages.PathSegment_LtNotImplemented);
         }
         Transformation3 compound = t.Transform3(new Transformation2(_model!.Start, _model.End, _start, _end));
         sw.WriteLine($"START Subpath {_name} t={compound}".AsComment(2));

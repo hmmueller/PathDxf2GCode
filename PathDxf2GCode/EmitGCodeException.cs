@@ -5,5 +5,10 @@
         public EmitGCodeException(string errorContext, string message) : base(message) {
             ErrorContext = errorContext;
         }
+
+        public EmitGCodeException(string errorContext, string message, char key) : base(string.Format(message, key)) {
+            ErrorContext = errorContext;
+        }
+
     }
 }

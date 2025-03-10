@@ -19,7 +19,7 @@ public class Transformation2 {
         double fromDistance = Vector2.Distance(fromStart, fromEnd);
         double toDistance = Vector2.Distance(toStart, toEnd);
         if (!fromDistance.Near(toDistance)) {
-            throw new ArgumentException($"**** Distanz {fromStart}...{fromEnd} = {fromDistance} ist nicht gleich Distanz {toStart}...{toEnd} = {toDistance}");
+            throw new ArgumentException(string.Format(Messages.Transformation2_DifferentDistances_FromS_FromE_FromD_ToS_ToE_ToD, fromStart.F3(), fromEnd.F3(), fromDistance.F3(), toStart.F3(), toEnd.F3(), toDistance.F3()));
         }
         _fromStart = fromStart;
         _fromEnd = fromEnd;
@@ -29,8 +29,9 @@ public class Transformation2 {
         Vector2 from = fromEnd - fromStart;
         Vector2 to = toEnd - toStart;
         double a_rad = Vector2.AngleBetween(from, to);
-        // cos ist für Links- und Rechtsdrehungen leider gleich - deshalb muss man schauen, welche Richtung korrekt ist.
-        _rotation_rad = Vector2.Rotate(from, a_rad).Near(to) ? a_rad : Vector2.Rotate(from, -a_rad).Near(to) ? -a_rad : throw new Exception("**** cos liefert keine passende Drehung");
+        // cos is equal for clockwise and counterclockwise rotations, unfortunately -
+        // an explicit direction check is therefore necessary.
+        _rotation_rad = Vector2.Rotate(from, a_rad).Near(to) ? a_rad : Vector2.Rotate(from, -a_rad).Near(to) ? -a_rad : throw new Exception("**** cos cannot rotate as required");
         Rotation_deg = MathHelper.NormalizeAngle(_rotation_rad * MathHelper.RadToDeg);
     }
 

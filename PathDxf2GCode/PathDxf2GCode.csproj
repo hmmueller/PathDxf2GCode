@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -15,6 +15,32 @@
   <ItemGroup>
     <ProjectReference Include="..\..\netDxf-master\netDxf\netDxf.csproj" />
     <ProjectReference Include="..\PathGCodeLibrary\PathGCodeLibrary.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Messages.de.Designer.cs">
+      <DependentUpon>Messages.de.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Messages.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Messages.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Messages.de.resx">
+      <CustomToolNamespace>de.hmmueller.PathDxf2GCode</CustomToolNamespace>
+      <LastGenOutput>Messages.de.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Messages.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Messages.Designer.cs</LastGenOutput>
+      <CustomToolNamespace>de.hmmueller.PathDxf2GCode</CustomToolNamespace>
+    </EmbeddedResource>
   </ItemGroup>
 
 </Project>

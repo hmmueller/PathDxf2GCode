@@ -73,17 +73,18 @@ public class PathModel {
     private static Dictionary<PathName, RawPathModel> CollectSegments(DrawingEntities entities,
             Dictionary<string, Linetype> layerLinetypes, PathModelCollection subPathDefs,
             string dxfFilePath, Options options, MessageHandler messages) {
-        // Pfadart:
-        // strichlierte Linie = DASHED:           __ __ __ __ = Leerfahrt (G00)
-        // langstrichlierte Linie = HIDDEN:       ____ _____  = Leerfahrt (G00) ohne Parameterangaben
-        // durchgezogene Linie = CONTINUOUS:      ___________ = Fräsen mit voller Tiefe
-        // strichdoppelpunktierte Linie = DIVIDE: ___ . . ___ = Fräsen mit Markierungstiefe
-        // strichpunktierte Linie = DASHDOT:      ___ . ___ . = Subpfad 
+        // Path lines:
+        // DASHED:     __ __ __ __ = Sweep (G00)
+        // HIDDEN:     ____ _____  = Sweep (G00) without parameters
+        // CONTINUOUS: ___________ = Mill (G01/02) to full depth (B)
+        // DIVIDE:     ___ . . ___ = Mill (G01/02) to mark depth (D)
+        // DASHDOT:    ___ . ___ . = Subpath
 
-        // Spezielle Formen:
-        // Kreis mit 1mm Durchmesser und __ _ _ __ (PHANTOM)-Linie = Pfadstart
-        // Kreis mit 1,5 mm Durchmesser und __ _ _ __ (PHANTOM)-Linie = Pfad-Wendepunkt 
-        // Kreis mit 2mm Durchmesser und  __ _ _ __ (PHANTOM)-Linie = Pfadende
+        // Special circles:
+        // Circle with 1mm diameter und line type __ _ _ __ (PHANTOM) = Path start
+        // Circle with 1.5 mm diameter und line type __ _ _ __ (PHANTOM) = Path reversal 
+        // Circle with 2mm diameter und line type  __ _ _ __ (PHANTOM) = Path end
+        // Circle with 6mm diameter und line type  __ _ _ __ (PHANTOM) = ZProbe
 
         Dictionary<PathName, RawPathModel> name2Model = new();
         Dictionary<EntityObject, ParamsText> texts = new();
@@ -91,7 +92,7 @@ public class PathModel {
         ParamsText GetText(EntityObject e) {
             if (texts.TryGetValue(e, out ParamsText? t)) {
                 if (e.Layer.Name != t.LayerName) {
-                    messages.AddError(e, t.Position, dxfFilePath, $"Text-Layername '{t.LayerName}' weicht von Element-Layername {e.Layer.Name} ab");
+                    messages.AddError(e, t.Position, dxfFilePath, Messages.PathModel_TextLayerDifferentFromElementLayer, t.LayerName ?? "", e.Layer.Name);
                 }
                 return t;
             } else {
@@ -102,25 +103,25 @@ public class PathModel {
         RawPathModel GetRawModel(EntityObject e, Vector2 position) {
             var p = new PathName(e.Layer.Name, dxfFilePath);
             return name2Model.TryGetValue(p, out RawPathModel? result)
-                                              ? result
-                                              : throw new Exception(MessageHandler.Context(e, position, dxfFilePath) + $": Pfaddefinition {p.AsString()} nicht gefunden");
+                     ? result
+                     : throw new Exception(MessageHandler.Context(e, position, dxfFilePath) + ": " + string.Format(Messages.PathModel_MissingPathDefinition_PathName, p.AsString()));
         }
 
         RawPathModel GetOrCreateRawModel(EntityObject e) {
             var p = new PathName(e.Layer.Name, dxfFilePath);
             return name2Model.TryGetValue(p, out RawPathModel? result)
-                                              ? result
-                                              : name2Model[p] = new RawPathModel(p);
+                     ? result
+                     : name2Model[p] = new RawPathModel(p);
         }
 
-        // Ablauf:
-        // 1. Alle Objekte, die sich auf Layern befinden, einsammeln - Kreise, Strecken und Bögen
-        // 2. Texte mit Objekten verbinden -> Dictionary<EntityObject, string>
-        // 3. Kleine Kreise = Markierungen bearbeiten
-        // 4. Geometrie = richtige Kreise, Strecken  und Bögen bearbeiten
-        // 5. SubPaths ganz am Ende laden - Tail-Rekursion vermeidet hoffentlich manche Probleme
+        // Algorithm:
+        // 1. Collect all objects on path layers - circles, lines, arcs, and texts
+        // 2. Connect texts with objects -> Dictionary<EntityObject, string>
+        // 3. Handle special circles
+        // 4. Handle geometry - non-special circles, lines and arcs
+        // 5. Load subpaths at the very end (tail-recursion hopefully reduces problems)
 
-        // 1. Alle Objekte, die sich auf Layern befinden, einsammeln - Kreise, Strecken und Bögen
+        // 1. Collect all objects on path layers - circles, lines, and arcs
         List<Circle> circles = entities.Circles.Where(e => e.IsOnPathLayer(options.PathNamePattern, dxfFilePath)).ToList();
         List<Line> lines = entities.Lines.Where(e => e.IsOnPathLayer(options.PathNamePattern, dxfFilePath)).ToList();
         List<Arc> arcs = entities.Arcs.Where(e => e.IsOnPathLayer(options.PathNamePattern, dxfFilePath)).ToList();
@@ -129,7 +130,7 @@ public class PathModel {
         HashSet<Line> hiddenLines = lines.Where(e => LineTypeName(layerLinetypes, e) == "HIDDEN").ToHashSet();
         HashSet<Arc> hiddenArcs = arcs.Where(e => LineTypeName(layerLinetypes, e) == "HIDDEN").ToHashSet();
 
-        // 2. Texte mit Objekten verbinden -> Dictionary<EntityObject, string>
+        // 2. Connect texts with objects -> Dictionary<EntityObject, string>
         foreach ((Circle2? TextCircle, string Text, EntityObject TextObject, Vector2 Position) in
             entities.Texts.Where(e => e.IsOnPathLayer(options.PathNamePattern, dxfFilePath))
                 .Select(e => (TextCircle: GetOverlapSurrounding(e, dxfFilePath, messages), Text: e.Value, E: (EntityObject)e, Position: e.Position.AsVector2()))
@@ -137,12 +138,12 @@ public class PathModel {
                 .Select(e => (TextCircle: GetOverlapSurrounding(e, dxfFilePath, messages), Text: e.PlainText(), E: (EntityObject)e, Position: e.Position.AsVector2()))
             ).Where(bs => bs.TextCircle != null)) {
             EntityObject? overlappingObject =
-                   // Reihenfolge wichtig: Kreise gewinnen; dann Arcs; dann Lines.
+                   // Order is important: Circles in pole position, then arcs, then lines.
                    NearestOverlappingCircle(circles.Except(texts.Keys.OfType<Circle>()).Except(hiddenCircles), TextCircle!, Text)
                 ?? NearestOverlappingArc(arcs.Except(texts.Keys.OfType<Arc>()).Except(hiddenArcs), TextCircle!, Text)
                 ?? NearestOverlappingLine(lines.Except(texts.Keys.OfType<Line>()).Except(hiddenLines), TextCircle!, Text);
             if (overlappingObject == null) {
-                messages.AddError(TextObject, Position, dxfFilePath, $"Kein überlappender Kreis, Bogen und keine überlappende Linie für '{Text}' gefunden; evtl. Textmitte nicht nahe genug (Textkreis: {TextCircle!.Center.F3()}, Durchm. {(TextCircle!.Radius * 2).F3()}) oder überlappender weiterer Text");
+                messages.AddError(TextObject, Position, dxfFilePath, Messages.PathModel_NoObjectFound_Text_Center_Diameter, Text, TextCircle!.Center.F3(), (TextCircle!.Radius * 2).F3());
             } else {
                 texts[overlappingObject] = new ParamsText(Text, TextObject, Position, TextCircle!.Center, TextCircle.Radius);
             }
@@ -153,10 +154,9 @@ public class PathModel {
                 ParamsText t = kvp.Value;
                 if (options.ShowTextAssignments.IsMatch(t.Text)) {
                     messages.WriteLine();
-                    messages.WriteLine("Objekt ...");
-                    messages.WriteLine(kvp.Key.ToLongString(layerLinetypes));
-                    messages.WriteLine("... hat zugeordneten Text");
-                    messages.WriteLine($"'{t.Text}' @ {t.TextCenter.F3()} D={(2 * t.TextRadius).F3()}");
+                    messages.WriteLine(Messages.PathModel_TextAssignment_Obj_Text,
+                        kvp.Key.ToLongString(layerLinetypes),
+                        $"'{t.Text}' @ {t.TextCenter.F3()} d={(2 * t.TextRadius).F3()}");
                 }
             }
             messages.WriteLine();
@@ -164,7 +164,7 @@ public class PathModel {
 
         bool IsPhantomCircle(Circle c) => GeometryHelpers.GetLinetype(c, layerLinetypes)?.Name == "PHANTOM";
 
-        // 3. Spezialkreise bearbeiten
+        // 3. Handle special circles
         foreach (var circle in circles.Where(c => IsPhantomCircle(c))) {
             ParamsText circleText = GetText(circle);
             RawPathModel rawModel = GetOrCreateRawModel(circle);
@@ -174,7 +174,7 @@ public class PathModel {
                 rawModel.Turns.Add(center);
             } else if (circle.Radius.Near(0.5)) { // Start
                 if (rawModel.Start != null) {
-                    messages.AddError(circle, center, dxfFilePath, $"Zwei Anfangspunkte definiert: {rawModel.Start.Value().F3()} und {center.F3()}");
+                    messages.AddError(circle, center, dxfFilePath, Messages.PathModel_TwoStarts_S1_S2, rawModel.Start.Value().F3(), center.F3());
                 } else {
                     rawModel.Start = center;
                     rawModel.StartObject = circle;
@@ -182,63 +182,48 @@ public class PathModel {
                 }
             } else if (circle.Radius.Near(1)) { // End
                 if (rawModel.End != null) {
-                    messages.AddError(circle, center, dxfFilePath, $"Zwei Endpunkte definiert: {rawModel.End.Value().F3()} und {center.F3()}");
+                    messages.AddError(circle, center, dxfFilePath,
+                        Messages.PathModel_TwoEnds_E1_E2, rawModel.End.Value().F3(), center.F3());
                 } else {
                     rawModel.End = center;
                 }
             } else if (circle.Radius.Near(3)) { // ZProbe
                 rawModel.ZProbes.Add(new ZProbe(circle, circleText, center));
             } else {
-                messages.AddError(circle, center, dxfFilePath,
-                    $"Kreis mit Linientyp PHANTOM (__ _ _ __) mit Durchmesser {2 * circle.Radius:F3} hat keine spezielle Bedeutung");
+                messages.AddError(circle, center, dxfFilePath, Messages.PathModel_NotSpecialCircle_D, (2 * circle.Radius).F3());
             }
         }
 
-        //bool hasErrors = false;
-        //foreach (var kvp in name2Model) {
-        //    RawPathModel rawModel = kvp.Value;
-        //    if (rawModel.Start == null) {
-        //        messages.AddError(kvp.Key.AsString(), "Kein Anfangspunkt gefunden");
-        //        hasErrors = true;
-        //    } else if (rawModel.ParamsText == null) {
-        //        messages.AddError(kvp.Key.AsString(), "Keine Parameter festgelegt");
-        //        hasErrors = true;
-        //    }
-        //    if (rawModel.End == null) {
-        //        messages.AddError(kvp.Key.AsString(), "Kein Endpunkt gefunden");
-        //        hasErrors = true;
-        //    }
-        //}
-
-        // 4. Geometrie = richtige Kreise, Strecken und Bögen bearbeiten
-        // 4a. "richtige" Kreise
+        // 4. Handle geometry - non-special circles, lines and arcs
+        // 4a. Circles
         foreach (var circle in circles.Where(c => !IsPhantomCircle(c))) {
             ParamsText circleText = GetText(circle);
             RawPathModel rawModel = GetRawModel(circle, circle.Center.AsVector2());
             double? bitRadius_mm = rawModel.ParamsText?.GetDouble('O') / 2;
             Vector2 center = circle.Center.AsVector2();
             if (bitRadius_mm == null) {
-                messages.AddError(MessageHandler.Context(circle, center, dxfFilePath), "O-Wert fehlt");
+                messages.AddError(MessageHandler.Context(circle, center, dxfFilePath),
+                    Messages.PathModel_MissingKey_Key, 'O');
             } else if (circle.Radius.Near(bitRadius_mm.Value)) {
                 bool isMark = IsLineType(layerLinetypes, circle, "DIVIDE");
                 if (isMark || IsLineType(layerLinetypes, circle, "CONTINUOUS")) {
                     rawModel.RawSegments.Add(new DrillSegment(circle, circleText, center, isMark));
                 } else {
-                    messages.AddError(circle, center, dxfFilePath, $"Linienart {LineTypeName(layerLinetypes, circle)} nicht unterstützt");
+                    messages.AddError(circle, center, dxfFilePath, Messages.PathModel_LineTypeNotSupported_LineType, LineTypeName(layerLinetypes, circle));
                 }
             } else if (circle.Radius > bitRadius_mm.Value) {
                 bool isMark = IsLineType(layerLinetypes, circle, "DIVIDE");
                 if (isMark || IsLineType(layerLinetypes, circle, "CONTINUOUS")) {
                     rawModel.RawSegments.Add(new HelixSegment(circle, circleText, center, circle.Radius, isMark));
                 } else {
-                    messages.AddError(circle, center, dxfFilePath, $"Linienart {LineTypeName(layerLinetypes, circle)} nicht unterstützt");
+                    messages.AddError(circle, center, dxfFilePath, Messages.PathModel_LineTypeNotSupported_LineType, LineTypeName(layerLinetypes, circle));
                 }
             } else {
-                messages.AddError(circle, center, dxfFilePath, "O-Wert fehlt");
+                messages.AddError(circle, center, dxfFilePath, Messages.PathModel_CircleTooSmall_D_O, (2 * circle.Radius).F3(), (2 * bitRadius_mm.Value).F3());
             }
         }
 
-        // 4b. Strecken
+        // 4b. Lines
         List<SubPathSegment> subPaths = new();
         foreach (var line in lines) {
             ParamsText lineText = GetText(line);
@@ -251,7 +236,7 @@ public class PathModel {
             HandleLineOrArc(layerLinetypes, dxfFilePath, options, messages, subPaths, line, start, end, lineText, rawModel, order, geometry);
         }
 
-        // 4c. Bögen
+        // 4c. Arcs
         foreach (var arc in arcs) {
             ParamsText arcText = GetText(arc);
             var arcGeometry = new ArcGeometry(arc.Center.AsVector2(), arc.Radius, arc.StartAngle, arc.EndAngle, counterclockwise: true);
@@ -262,7 +247,7 @@ public class PathModel {
                 arcText, rawModel, order, arcGeometry);
         }
 
-        // 5. SubPaths ganz am Ende laden - Tail-Rekursion vermeidet hoffentlich manche Probleme)
+        // 5. Load subpaths at the very end (tail-recursion hopefully reduces problems)
         foreach (var s in subPaths) {
             s.Load(subPathDefs, dxfFilePath, options, messages);
         }
@@ -288,7 +273,7 @@ public class PathModel {
             || IsLineType(layerLinetypes, lineOrArc, "HIDDEN")) { // Sweep
             rawModel.RawSegments.Add(new SweepSegment(lineOrArc, text, start, end, order));
         } else {
-            messages.AddError(lineOrArc, start, dxfFilePath, $"Linienart {LineTypeName(layerLinetypes, lineOrArc)} nicht unterstützt");
+            messages.AddError(lineOrArc, start, dxfFilePath, Messages.PathModel_LineTypeNotSupported_LineType, LineTypeName(layerLinetypes, lineOrArc));
         }
     }
 
@@ -378,11 +363,11 @@ public class PathModel {
         if (!text.Rotation.Between(-1, 1) && !text.Rotation.Between(359, 361)
             || text.AttachmentPoint != MTextAttachmentPoint.BottomLeft
                && text.AttachmentPoint != MTextAttachmentPoint.TopLeft) {
-            messages.AddError(text, text.Position.AsVector2(), dxfFilePath, $"Text {text.Value} muss unrotiert mit Anker unten links oder oben links sein.");
+            messages.AddError(text, text.Position.AsVector2(), dxfFilePath, Messages.PathModel_TextLayout_Text, text.Value);
             return null;
         } else {
             string[] lines = text.PlainText().Split('\n');
-            // TODO: \W für geratene Breite usw. verwenden?
+            // TODO: \W for estimated width etc.?
             double guessedWidth = text.Height * lines.Max(s => s.Length) * 0.6;
             double guessedHeight = text.Height * lines.Length;
 
@@ -398,20 +383,20 @@ public class PathModel {
     private static PathModel? CreatePathModel(PathName name, RawPathModel rawModel, string dxfFilePath,
         Options options, MessageHandler messages) {
         if (rawModel.Start == null) {
-            messages.AddError(name, "Start-Markierung fehlt");
+            messages.AddError(name, Messages.PathModel_MissingStart);
         }
         if (rawModel.End == null) {
-            messages.AddError(name, "Ende-Markierung fehlt");
+            messages.AddError(name, Messages.PathModel_MissingEnd);
         }
         if (rawModel.Start == null || rawModel.End == null) {
             return null;
         }
 
-        // A. RawSegments zu langer Kette verbinden
-        // Algorithmus:
-        // * Ab currEnd immer wieder verlängern; dabei
-        // - Ast, der mit Turn endet, wieder zurückgehen und ab jedem Knoten versuchen, weiterzugehen
-        // - bei mehreren Kandidaten (die noch nicht traversed sind) jenem mit geringster Order nachgehen.
+        // A. Connect RawSegments to a long chain
+        // Algorithm:
+        // * repeatedly extend chain at currEnd;
+        // - if there is more than one un-traversed candidate, continue by order (N);
+        // - at a branch that ends with a turn return node by node and try to continue there;
         List<IRawSegment> orderedRawSegments = new();
         {
             Stack<IRawSegment> backtrackForTurns = new();
@@ -440,16 +425,15 @@ public class PathModel {
                             IRawSegment example = rawModel.RawSegments.First(s => !traversed.Contains(s));
                             int ct = rawModel.RawSegments.Count(s => !traversed.Contains(s));
 
-                            messages.AddError(example.Source, example.Start, dxfFilePath,
-                                $"{ct} Segmente (u.a. dieses hier) wurden nicht erreicht - evtl. fehlt N-Auszeichnung");
+                            messages.AddError(example.Source, example.Start, dxfFilePath,Messages.PathModel_UnreachedSegments, ct);
                         }
                         break;
                     } else {
                         IRawSegment? last = orderedRawSegments.LastOrDefault();
                         if (last != null) {
-                            messages.AddError(last.Source, last.Start, dxfFilePath, $"Keine weiteren Segmente ab Punkt {currEnd.F3()} gefunden");
+                            messages.AddError(last.Source, last.Start, dxfFilePath, Messages.PathModel_NoMoreSegmentsFound_P, currEnd.F3());
                         } else {
-                            messages.AddError(name, $"Keine weiteren Segmente ab Punkt {currEnd.F3()} gefunden");
+                            messages.AddError(name, Messages.PathModel_NoMoreSegmentsFound_P, currEnd.F3());
                         }
                         break;
                     }
@@ -460,7 +444,8 @@ public class PathModel {
                 }
             }
         }
-        // B. MillChains aufbauen
+
+        // B. Create MillChains
         List<PathSegment> segments = new();
         {
             List<ChainSegment> currChain = new();
@@ -481,7 +466,7 @@ public class PathModel {
                 segments.Add(new MillChain(currChain.ToArray()));
             }
         }
-        // C. Params erzeugen
+        // C. Create Params
         void OnError(string context, string msg) {
             messages.AddError(context, msg);
         }
@@ -498,7 +483,7 @@ public class PathModel {
             }
         }
 
-        // D. _zProbes besser sortieren
+        // D. Sort _zProbes
         List<ZProbe> orderedZProbes = new();
         {
             Vector2 currZEnd = rawModel.Start.Value;
@@ -509,7 +494,7 @@ public class PathModel {
             }
         }
 
-        // Z. PathModel erzeugen
+        // Z. Finally, create PathModel
         return new PathModel(rawModel.Name, pathParams, rawModel.Start.Value, rawModel.End.Value, segments, orderedZProbes, dxfFilePath);
     }
 
@@ -547,7 +532,7 @@ public class PathModel {
             try {
                 currPos = z.EmitGCode(currPos, t, sw, stats, dxfFileName, messages);
                 if (!currPos.Z.Near(sweepHeight)) {
-                    throw new Exception($"Interner Fehler - {currPos.Z} <> {sweepHeight}");
+                    throw new Exception($"Internal Error - {currPos.Z} <> {sweepHeight}");
                 }
             } catch (EmitGCodeException ex) {
                 messages.AddError(ex.ErrorContext, ex.Message);

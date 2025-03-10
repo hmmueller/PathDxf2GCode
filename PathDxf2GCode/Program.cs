@@ -8,16 +8,18 @@ public class Program {
     public static int Main(string[] args) {
         var messages = new MessageHandler(Console.Error);
 
-        messages.WriteLine($"---- PathDxf2GCode (c) HMMüller 2024-2025 V.{VERSION}");
+        messages.WriteLine(Messages.Info + "PathDxf2GCode (c) HMMüller 2024-2025 V.{0}", VERSION);
         messages.WriteLine();
 
         Options? options = Options.Create(args, messages);
 
         if (options == null) {
+            WriteErrors(messages);
             Options.Usage(messages);
             return 2;
         } else if (!options.DxfFilePaths.Any()) {
-            messages.WriteLine($"**** Keine DXF-Dateien angegeben");
+            WriteErrors(messages);
+            messages.WriteLine(Messages.Error + Messages.Program_NoDxfFiles);
             return 3;
         } else {
             PathModelCollection pathModels = new();
@@ -32,20 +34,23 @@ public class Program {
                 }
             }
 
-            if (messages.Errors.Any()) {
-                messages.WriteLine("Fehler:");
-                foreach (var e in messages.Errors) {
-                    messages.WriteLine($"**** {e}");
-                }
-                return 1;
-            } else {
-                return 0;
+            return WriteErrors(messages) ? 1 : 0;
+        }
+    }
+
+    private static bool WriteErrors(MessageHandler messages) {
+        if (messages.Errors.Any()) {
+            foreach (var e in messages.Errors) {
+                messages.WriteLine(e);
             }
+            return true;
+        } else {
+            return false;
         }
     }
 
     private static void Generate(string outputPath, MessageHandler messages, Action<StreamWriter> write) {
-        messages.WriteLine($"---- Schreiben von {outputPath}");
+        messages.WriteLine(Messages.Info + Messages.Program_Writing_Path, outputPath);
 
         using (StreamWriter sw = new(outputPath)) {
             write(sw);
@@ -60,16 +65,16 @@ public class Program {
         var models = pathModels.Load(dxfFilePath, options, dxfFilePath, messages);
         if (options.CheckModels) {
             foreach (var m in models) {
-                messages.WriteLine($"Überprüfung von {m.Key}");
+                messages.WriteLine(Messages.Info + Messages.Program_Checking_Path, m.Key);
                 using (StreamWriter sw = StreamWriter.Null) {
                     WriteMillingGCode(m.Value, sw, dxfFilePath, messages);
                 }
             }
         } else {
             if (models.Count > 1) {
-                messages.AddError(dxfFilePath, $"DXF-Datei {dxfFilePath} enthält mehr als einen CNC-Pfad-LayerName: {string.Join(", ", models.Keys)}");
+                messages.AddError(dxfFilePath, Messages.Program_MoreThanOnePathLayer_File_Paths, dxfFilePath, string.Join(", ", models.Keys));
             } else if (models.Count == 0) {
-                messages.AddError(dxfFilePath, $"DXF-Datei {dxfFilePath} enthält keinen CNC-Pfad-LayerName ohne Fehler");
+                messages.AddError(dxfFilePath, Messages.Program_NoErrorFreePathLayer_File, dxfFilePath);
             } else {
                 if (!messages.Errors.Any()) {
                     PathModel model = models.Single().Value;
@@ -88,7 +93,7 @@ public class Program {
 
     private static void WriteMillingGCode(PathModel m, StreamWriter sw, string dxfFilePath, MessageHandler messages) {
         if (m.IsEmpty()) {
-            messages.AddError(dxfFilePath, "Keine Segmente gefunden");
+            messages.AddError(dxfFilePath, Messages.Program_NoSegmentsFound);
         } else {
 
             if (!messages.Errors.Any()) {
@@ -104,17 +109,19 @@ public class Program {
                 stats.AddSweepLength(currpos.Z, init.Z);
 
                 static string AsMin(TimeSpan t) => $"ca.{Math.Ceiling(t.TotalMinutes),3:F0}";
-                void WriteStat(string s) {
-                    messages.Write(s + ";");
-                    sw.WriteLine(s.AsComment(2));
+                void WriteStat(string s, string name) {
+                    string m = string.Format(s, name);
+                    messages.Write(m + ";");
+                    sw.WriteLine(m.AsComment(2));
                 }
-
-                WriteStat($"  Fräslänge:   {stats.MillLength_mm,5:F0} mm   {AsMin(stats.RoughMillTime)} min");
-                WriteStat($"  Bohrungen:   {stats.DrillLength_mm,5:F0} mm   {AsMin(stats.RoughDrillTime)} min");
-                WriteStat($"  Leerfahrten: {stats.SweepLength_mm,5:F0} mm   {AsMin(stats.RoughSweepTime)} min");
+                
+                WriteStat($"  {{0,-15}}: {stats.MillLength_mm,5:F0} mm   {AsMin(stats.RoughMillTime)} min", Messages.Program_MillingLength);
+                WriteStat($"  {{0,-15}}: {stats.DrillLength_mm,5:F0} mm   {AsMin(stats.RoughDrillTime)} min", Messages.Program_DrillingLength);
                 messages.WriteLine();
-                WriteStat($"  Summe:       {stats.TotalLength_mm,5:F0} mm   {AsMin(stats.TotalTime)} min");
-                WriteStat($"  Befehlszahl: {stats.CommandCount}");
+                WriteStat($"  {{0,-15}}: {stats.SweepLength_mm,5:F0} mm   {AsMin(stats.RoughSweepTime)} min", Messages.Program_SweepLength);
+                WriteStat($"  {{0,-15}}: {stats.TotalLength_mm,5:F0} mm   {AsMin(stats.TotalTime)} min", Messages.Program_SumLength);
+                messages.WriteLine();
+                WriteStat($"  {{0,-15}}: {stats.CommandCount}", Messages.Program_CommandCount);
                 messages.WriteLine();
 
                 WriteEpilogue(sw);

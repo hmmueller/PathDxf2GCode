@@ -71,7 +71,7 @@ public class ParamsText {
     }
 
     public void AddError(MessageHandler mh, string errorContext, string message) {
-        if (_uniqueErrors.Add(message)) { // ParamsText soll jeden Fehler nur einmal ausgeben
+        if (_uniqueErrors.Add(message)) { // Each error should be output only once ausgeben
             mh.AddError(errorContext, message);
         }
     }
@@ -119,51 +119,52 @@ public abstract class AbstractParams : IParams {
         _onError = onError;
     }
 
-    protected void Error(string msg) {
-        if (_uniqueErrors.Add(msg)) {
-            _onError(_errorContext, msg);
+    protected void Error(string msg, params object[] pars) {
+        string m = string.Format(msg, pars);
+        if (_uniqueErrors.Add(m)) {
+            _onError(_errorContext, m);
         }
     }
 
     protected void CheckKeysAndValues(ParamsText text, string expectedKeys) {
         foreach (char c in text.Keys.Except(expectedKeys)) {
-            Error($"Nicht unterstützter {c}-Wert; {text.Context}");
+            Error(Messages.Params_UnsupportedKey_Name_Context, c, text.Context);
         }
         if (F_mmpmin <= 0) {
-            Error($"F={F_mmpmin} muss > 0 sein");
+            Error(Messages.Params_FMustBeGtThan0_F, F_mmpmin);
         }
         if (RawI_mm <= 0) {
-            Error($"I={RawI_mm} muss > 0 sein");
+            Error(Messages.Params_IMustBeGtThan0_I, RawI_mm);
         }
         if (RawC <= 0) {
-            Error($"C={RawC} muss > 0 sein");
+            Error(Messages.Params_CMustBeGtThan0_C, RawC);
         }
         if (V_mmpmin <= 0) {
-            Error($"V={V_mmpmin} muss > 0 sein");
+            Error(Messages.Params_VMustBeGtThan0_V, V_mmpmin);
         }
         if (O_mm <= 0) {
-            Error($"O={O_mm} muss > 0 sein");
+            Error(Messages.Params_OMustBeGtThan0_O, O_mm);
         }
         if (T_mm <= 0) {
-            Error($"Text={T_mm} muss > 0 sein");
+            Error(Messages.Params_TMustBeGtThan0_T, T_mm);
         }
         if (RawS_mm <= T_mm) {
-            Error($"S={RawS_mm} darf nicht unter oder nahe an Text={T_mm} liegen");
+            Error(Messages.Params_SMustBeGtThanT_S_T, RawS_mm, T_mm);
         }
         if (RawB_mm.HasValue && RawB_mm > T_mm && !RawB_mm.Value.Near(T_mm)) {
-            Error($"B={RawB_mm} darf nicht über Text={T_mm} liegen");
+            Error(Messages.Params_BMustBeLessThanT_B_T, RawB_mm, T_mm);
         }
         if (RawD_mm.HasValue && RawD_mm > T_mm && !RawD_mm.Value.Near(T_mm)) {
-            Error($"D={RawD_mm} darf nicht über Text={T_mm} liegen");
+            Error(Messages.Params_DMustBeLessThanT_D_T, RawD_mm, T_mm);
         }
     }
 
     protected static string GetString(ParamsText text, char key, Action<string> onError) {
         string MissingOnError(string s) {
             onError(s);
-            return "---FEHLT---";
+            return "***Missing***";
         }
-        return text.GetString(key) ?? MissingOnError($"{key}-Wert fehlt");
+        return text.GetString(key) ?? MissingOnError(string.Format(Messages.Params_MissingKey_Key, key));
     }
 
     public abstract double F_mmpmin { get; }
@@ -178,12 +179,12 @@ public abstract class AbstractParams : IParams {
     public abstract double O_mm { get; }
     public abstract string M { get; }
 
-    public double B_mm => RawB_mm ?? throw new EmitGCodeException(_errorContext, $"B-Wert fehlt");
-    public double D_mm => RawD_mm ?? throw new EmitGCodeException(_errorContext, $"D-Wert fehlt");
-    public double I_mm => RawI_mm ?? throw new EmitGCodeException(_errorContext, $"I-Wert fehlt");
-    public double S_mm => RawS_mm ?? throw new EmitGCodeException(_errorContext, $"S-Wert fehlt");
-    public double K_mm => RawK_mm ?? throw new EmitGCodeException(_errorContext, $"K-Wert fehlt");
-    public int C => RawC ?? throw new EmitGCodeException(_errorContext, $"C-Wert fehlt");
+    public double B_mm => RawB_mm ?? throw new EmitGCodeException(_errorContext, Messages.Params_MissingKey_Key, 'B');
+    public double D_mm => RawD_mm ?? throw new EmitGCodeException(_errorContext, Messages.Params_MissingKey_Key, 'D');
+    public double I_mm => RawI_mm ?? throw new EmitGCodeException(_errorContext, Messages.Params_MissingKey_Key, 'I');
+    public double S_mm => RawS_mm ?? throw new EmitGCodeException(_errorContext, Messages.Params_MissingKey_Key, 'S');
+    public double K_mm => RawK_mm ?? throw new EmitGCodeException(_errorContext, Messages.Params_MissingKey_Key, 'K');
+    public int C => RawC ?? throw new EmitGCodeException(_errorContext, Messages.Params_MissingKey_Key, 'C');
 }
 
 public class PathParams : AbstractParams {
@@ -205,7 +206,7 @@ public class PathParams : AbstractParams {
         _options = options;
         CheckKeysAndValues(text, "FBDCIKSTOM");
         if (RawD_mm.HasValue && RawB_mm.HasValue && (RawD_mm < RawB_mm || RawD_mm.Value.Near(RawB_mm.Value))) {
-            Error($"D={RawD_mm} muss über B={B_mm} liegen");
+            Error(Messages.Params_DMustBeGtThanB_D_B, RawD_mm, B_mm);
         }
     }
 }
@@ -254,7 +255,7 @@ public class BackSweepParams : AbstractChildParams {
     public override double? RawK_mm => Text.GetDouble('K') ?? base.RawS_mm;
 
     public BackSweepParams(ParamsText text, string errorContext, IParams pathParams, Action<string, string> onError) : base(text, errorContext, pathParams, onError) {
-        CheckKeysAndValues(text, "FBDCIKSTOMN<>"); // Backsweeps sind für alle Arten von Objekten erlaubt, weil sie deren ParamsText erben, sind alle Keys erlaubt
+        CheckKeysAndValues(text, "FBDCIKSTOMN<>"); // Backsweeps are allowed for all sorts of objects, as they inherit their parents' fulll parameter set
     }
 }
 

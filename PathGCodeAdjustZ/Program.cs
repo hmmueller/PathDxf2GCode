@@ -95,6 +95,9 @@ internal class ExprEval {
         _expr = expr;
         Next();
         Value = Expr();
+        if (C != '=') {
+            throw new Exception($"end of expression expected at pos {_pos - 1}");
+        }
     }
 
     private double Expr() {

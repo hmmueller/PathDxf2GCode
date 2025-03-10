@@ -1,8 +1,10 @@
 ﻿namespace de.hmmueller.PathGCodeAdjustZ;
 
+using de.hmmueller.PathGCodeLibrary;
 using System.Diagnostics;
+using System.Globalization;
 
-public class Options {
+public class Options : AbstractOptions {
     /// <summary>
     /// Zu verarbeitende GCode-Dateien
     /// </summary>    
@@ -35,6 +37,9 @@ public class Options {
                             case "h":
                             case "?":
                                 doNotRun = true;
+                                break;
+                            case "l":
+                                Thread.CurrentThread.CurrentUICulture = new CultureInfo(GetStringOption3(args, ref i, "**** Missing locale"));
                                 break;
                             default:
                                 doNotRun = true;

@@ -10,7 +10,7 @@ public readonly struct PathName {
     private readonly string _fileNameForMessages;
 
     public PathName(string name, string fileNameForMessages) {
-        // Pfade in DXF haben _ statt (wie in Caddy) ., * usw. -> zurücktransformieren!
+        // Paths in DXF have _ instead of . (e.g. in Caddy) ., * etc. -> transform back!
         _name = ConvertDxfLayerToPathName(name);
         _fileNameForMessages = fileNameForMessages;
     }
@@ -52,13 +52,13 @@ public readonly struct PathName {
                 groupsWithValue2++;
             }
             if (s1 != "" && s2 != "") {
-                // Nur wenn beide Teile noch "im Rennen sind", werden sie verglichen
+                // Compare parts only if both still "active"
                 int c = string.Compare(s1, s2, ignoreCase: true);
                 if (c != 0) {
                     return c;
                 }
             } else {
-                break; // Sonst brechen wir ab und vergleichen nun die Gruppenanzahlen
+                break; // Otherwise, only the group numbers are compared
             }
         }
         return groupsWithValue2 > groupsWithValue1 ? 0 : groupsWithValue1 - groupsWithValue2;
@@ -81,7 +81,7 @@ public class PathModelCollection {
                     if (_models.TryAdd(kvp.Key, kvp.Value)) {
                         result.Add(kvp.Key.AsString(), kvp.Value);
                     } else {
-                        messages.AddError(contextForErrors, $"Pfad {kvp.Key} schon einmal definiert in {kvp.Value.DxfFilePath}");
+                        messages.AddError(contextForErrors, Messages.PathModelCollection_PathDefinedTwice_Path_File, kvp.Key, kvp.Value.DxfFilePath);
                     }
                 }
             }

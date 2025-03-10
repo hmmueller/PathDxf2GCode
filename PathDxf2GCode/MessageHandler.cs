@@ -12,31 +12,31 @@ public class MessageHandler {
         _error = error;
     }
 
-    public void Write(string s) {
-        _error.Write(s);
+    public void Write(string s, params object[] pars) {
+        _error.Write(s, pars);
     }
 
-    public void WriteLine(string s) {
-        _error.WriteLine(s);
+    public void WriteLine(string s, params object[] pars) {
+        _error.WriteLine(s, pars);
     }
 
     public void WriteLine() {
         _error.WriteLine();
     }
 
-    public void AddError(string context, string message) {
-        string fullMsg = context.Replace("\r\n", "|") + ": " + message;
+    public void AddError(string context, string message, params object?[] pars) {
+        string fullMsg = Messages.Error + context.Replace("\r\n", "|") + ": " + string.Format(message, pars);
         if (!_errors.Contains(fullMsg)) {
             _errors.Add(fullMsg);
         }
     }
 
-    public void AddError(PathName name, string message) {
-        AddError(name.ToString(), message);
+    public void AddError(PathName name, string message, params object?[] pars) {
+        AddError(name.ToString(), message, pars);
     }
 
-    public void AddError(EntityObject errorObject, Vector2 position, string dxfFileName, string message) {
-        AddError(Context(errorObject, position, dxfFileName), message);
+    public void AddError(EntityObject errorObject, Vector2 position, string dxfFileName, string message, params object?[] pars) {
+        AddError(Context(errorObject, position, dxfFileName), message, pars);
     }
 
     public static string Context(EntityObject errorObject, Vector2 position, string dxfFileName)

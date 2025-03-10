@@ -1,10 +1,11 @@
 ﻿namespace de.hmmueller.PathDxf2GCode;
 
+using de.hmmueller.PathGCodeLibrary;
 using System.Diagnostics;
 using System.Globalization;
 using System.Text.RegularExpressions;
 
-public class Options {
+public class Options : AbstractOptions {
     /// <summary>
     /// /d: Suchverzeichnisse für referenzierte DXF-Dateien
     /// </summary>
@@ -67,39 +68,26 @@ public class Options {
     public IEnumerable<string> DxfFilePaths => _dxfFilePaths;
 
     public static void Usage(MessageHandler messages) {
-        messages.WriteLine("""
-            Aufruf: PathDxf2GCode [Parameter] [DXF-Dateien]
-
-            Parameter:
-                /h     Hilfe-Anzeige
-                /f 000 Fräsgeschwindigkeit in mm/min; Pflichtwert
-                /v 000 Maximalgeschwindigkeit für Leerfahrten in mm/min; Pflichtwert
-                /c     Überprüfen aller Pfade in der DXF-Datei ohne G-Code-Ausgabe; wenn /c nicht 
-                       angegeben wird, dann darf die DXF-Datei nur einen Pfad enthalten
-                /t zzz Gibt für alle auf diese Regex passenden Texte aus, welchem DXF-Objekt 
-                       sie zugeordnet sind
-                /d zzz Suchpfad für referenzierte DXF-Dateien
-                /p zzz Reg.Ausdruck für Pfadbezeichnungen
-            """);
+        messages.WriteLine(Messages.Info + Messages.Options_Help);
     }
 
     public static Options? Create(string[] args, MessageHandler messages) {
         bool doNotRun = false;
 
         string GetStringOption(ref int i) {
-            return args[i].Length > 2 ? args[i][2..] : i < args.Length - 1 ? args[++i] : throw new FormatException($"**** Fehlender Parameterwert für {args[i - 1]}");
+            return GetStringOption3(args, ref i, Messages.Options_MissingValue_Name);
         }
 
-        double GetDoubleOption(ref int i) {
-            string a = args[i][2..];
+            double GetDoubleOption(ref int i) {
+                string a = args[i][2..];
             string v = GetStringOption(ref i).Replace(',', '.');
             double result;
             try {
                 result = double.Parse(v, CultureInfo.InvariantCulture);
             } catch (FormatException) {
-                throw new FormatException($"**** Parameterwert {v} für {a} ist keine Zahl");
+                throw FormatException(Messages.Options_NaN_Name_Value, v, a);
             }
-            return result >= 0 ? result : throw new FormatException($"**** Parameterwert {v} für {a} ist nicht >= 0");
+            return result >= 0 ? result : throw FormatException(Messages.Options_LessThan0_Name_Value, v, a);
         }
 
         Options options = new();
@@ -109,7 +97,7 @@ public class Options {
                 if (a.StartsWith('/') || a.StartsWith('-')) {
                     if (a.Length == 1) {
                         doNotRun = true;
-                        messages.AddError("Options", $"Fehlende Option nach {a}");
+                        messages.AddError("Options", Messages.Options_MissingOptionAfter_Name, a);
                     } else if (a[1..] == "debug") {
                         Debugger.Launch();
                     } else if (a[1..] == "dump") {
@@ -126,7 +114,7 @@ public class Options {
                             case "c":
                                 options.CheckModels = true;
                                 break;
-                            case "t":
+                            case "x":
                                 options.ShowTextAssignments = new Regex(GetStringOption(ref i));
                                 break;
                             case "p":
@@ -138,9 +126,12 @@ public class Options {
                             case "v":
                                 options.GlobalSweepRate_mmpmin = GetDoubleOption(ref i);
                                 break;
+                            case "l":
+                                Thread.CurrentThread.CurrentUICulture = new CultureInfo(GetStringOption(ref i));
+                                break;
                             default:
                                 doNotRun = true;
-                                messages.AddError("Options", $"Option {a} nicht unterstützt");
+                                messages.AddError("Options", Messages.Options_NotSupported_Name, a);
                                 break;
                         }
                     }
@@ -154,11 +145,11 @@ public class Options {
         }
 
         if (options.GlobalFeedRate_mmpmin <= 0) {
-            messages.AddError("Options", "/f nicht angegeben oder nicht größer als 0");
+            messages.AddError("Options", Messages.Options_MissingF);
             doNotRun = true;
         }
         if (options.GlobalSweepRate_mmpmin <= 0) {
-            messages.AddError("Options", "/v nicht angegeben oder nicht größer als 0");
+            messages.AddError("Options", Messages.Options_MissingV);
             doNotRun = true;
         }
 
