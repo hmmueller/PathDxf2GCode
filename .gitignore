@@ -1,0 +1,11 @@
+#ignore
+
+**/bin/
+**/obj/
+*.bak
+__*.*
+*.png
+*.jpg
+*.jpeg
+TestResults/
+.vs/

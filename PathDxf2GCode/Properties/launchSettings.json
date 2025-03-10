@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "PathDxf2GCode": {
+      "commandName": "Project",
+      "commandLineArgs": "\"C:\\Private\\Eisenbahn\\StellwerkHMM\\DXF\\Bl. 2913 P.dxf\""
+    }
+  }
+}
