@@ -1,0 +1,306 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="DxfHelper_ReadingFile__FileName" xml:space="preserve">
+    <value>Einlesen von {0}</value>
+  </data>
+  <data name="Error" xml:space="preserve">
+    <value>**** </value>
+  </data>
+  <data name="Info" xml:space="preserve">
+    <value>---- </value>
+  </data>
+  <data name="Options_Help" xml:space="preserve">
+    <value>Aufruf: PathDxf2GCode [Optionen] [DXF-Dateien]
+
+Optionen:
+    /h     Hilfe-Anzeige
+    /f 000 Fräsgeschwindigkeit in mm/min; Pflichtwert
+    /v 000 Maximalgeschwindigkeit für Leerfahrten in mm/min; Pflichtwert
+    /c     Überprüfen aller Pfade in der DXF-Datei ohne G-Code-Ausgabe; wenn /c nicht 
+           angegeben wird, dann darf die DXF-Datei nur einen Pfad enthalten
+    /x zzz Gibt für alle auf diese Regex passenden Texte aus, welchem DXF-Objekt 
+           sie zugeordnet sind
+    /d zzz Suchpfad für referenzierte DXF-Dateien
+    /p zzz Reg.Ausdruck für Pfadbezeichnungen
+    /l zzz Meldungssprache</value>
+  </data>
+  <data name="Options_LessThan0_Name_Value" xml:space="preserve">
+    <value>Parameterwert {1} für {0} ist nicht &gt;= 0</value>
+  </data>
+  <data name="Options_MissingF" xml:space="preserve">
+    <value>/f nicht angegeben oder nicht größer als 0</value>
+  </data>
+  <data name="Options_MissingOptionAfter_Name" xml:space="preserve">
+    <value>Fehlender Wert nach {0}</value>
+  </data>
+  <data name="Options_MissingV" xml:space="preserve">
+    <value>/v nicht angegeben oder nicht größer als 0</value>
+  </data>
+  <data name="Options_MissingValue_Name" xml:space="preserve">
+    <value>Fehlender Parameterwert für {0}</value>
+  </data>
+  <data name="Options_NaN_Name_Value" xml:space="preserve">
+    <value>Parameterwert {1} für {0} ist keine Zahl</value>
+  </data>
+  <data name="Options_NotSupported_Name" xml:space="preserve">
+    <value>Option {0} nicht unterstützt</value>
+  </data>
+  <data name="Params_BMustBeLessThanT_B_T" xml:space="preserve">
+    <value>B={0} darf nicht über T={1} liegen</value>
+  </data>
+  <data name="Params_CMustBeGtThan0_C" xml:space="preserve">
+    <value>C={0} muss &gt; 0 sein</value>
+  </data>
+  <data name="Params_DMustBeGtThanB_D_B" xml:space="preserve">
+    <value>D={0} muss über B={1} liegen</value>
+  </data>
+  <data name="Params_DMustBeLessThanT_D_T" xml:space="preserve">
+    <value>D={0} darf nicht über T={1} liegen</value>
+  </data>
+  <data name="Params_FMustBeGtThan0_F" xml:space="preserve">
+    <value>F={0} muss &gt; 0 sein</value>
+  </data>
+  <data name="Params_IMustBeGtThan0_I" xml:space="preserve">
+    <value>I={0} muss &gt; 0 sein</value>
+  </data>
+  <data name="Params_MissingKey_Key" xml:space="preserve">
+    <value>{0}-Wert fehlt</value>
+  </data>
+  <data name="Params_OMustBeGtThan0_O" xml:space="preserve">
+    <value>O={0} muss &gt; 0 sein</value>
+  </data>
+  <data name="Params_SMustBeGtThanT_S_T" xml:space="preserve">
+    <value>S={0} darf nicht unter oder nahe an T={1} liegen</value>
+  </data>
+  <data name="Params_TMustBeGtThan0_T" xml:space="preserve">
+    <value>T={0} muss &gt; 0 sein</value>
+  </data>
+  <data name="Params_UnsupportedKey_Name_Context" xml:space="preserve">
+    <value>Nicht unterstützter {0}-Wert; {1}</value>
+  </data>
+  <data name="Params_VMustBeGtThan0_V" xml:space="preserve">
+    <value>V={0} muss &gt; 0 sein</value>
+  </data>
+  <data name="PathModelCollection_PathDefinedTwice_Path_File" xml:space="preserve">
+    <value>Pfad {0} schon einmal definiert in {1}</value>
+  </data>
+  <data name="PathModel_CircleTooSmall_D_O" xml:space="preserve">
+    <value>Durchmesser {0} ist kleiner als O={1}</value>
+  </data>
+  <data name="PathModel_LineTypeNotSupported_LineType" xml:space="preserve">
+    <value>Linienart {0} nicht unterstützt</value>
+  </data>
+  <data name="PathModel_MissingEnd" xml:space="preserve">
+    <value>Ende-Markierung fehlt</value>
+  </data>
+  <data name="PathModel_MissingKey_Key" xml:space="preserve">
+    <value>{0}-Wert fehlt</value>
+  </data>
+  <data name="PathModel_MissingPathDefinition_PathName" xml:space="preserve">
+    <value>Pfaddefinition {0} nicht gefunden</value>
+  </data>
+  <data name="PathModel_MissingStart" xml:space="preserve">
+    <value>Start-Markierung fehlt</value>
+  </data>
+  <data name="PathModel_NoMoreSegmentsFound_P" xml:space="preserve">
+    <value>Keine weiteren Segmente ab Punkt {0} gefunden</value>
+  </data>
+  <data name="PathModel_NoObjectFound_Text_Center_Diameter" xml:space="preserve">
+    <value>Kein überlappender Kreis, Bogen und keine überlappende Linie für '{0}' gefunden; evtl. Textmitte nicht nahe genug (Textkreis: {1}, Durchm. {2}) oder überlappender weiterer Text</value>
+  </data>
+  <data name="PathModel_NotSpecialCircle_D" xml:space="preserve">
+    <value>Kreis mit Linientyp PHANTOM (__ _ _ __) mit Durchmesser {0} hat keine spezielle Bedeutung</value>
+  </data>
+  <data name="PathModel_TextAssignment_Obj_Text" xml:space="preserve">
+    <value>Objekt ...\n{0}\n...hat zugeordneten Text '{1}'</value>
+  </data>
+  <data name="PathModel_TextLayerDifferentFromElementLayer" xml:space="preserve">
+    <value>Text-Layername '{0}' weicht von Element-Layername '{1}' ab</value>
+  </data>
+  <data name="PathModel_TextLayout_Text" xml:space="preserve">
+    <value>Text {0} muss unrotiert mit Anker unten links oder oben links sein</value>
+  </data>
+  <data name="PathModel_TwoEnds_E1_E2" xml:space="preserve">
+    <value>Zwei Endpunkte definiert: {0} und {1}</value>
+  </data>
+  <data name="PathModel_TwoStarts_S1_S2" xml:space="preserve">
+    <value>Zwei Anfangspunkte definiert: {0} und {1}</value>
+  </data>
+  <data name="PathModel_UnreachedSegments" xml:space="preserve">
+    <value>{0} Segmente (u.a. dieses hier) wurden nicht erreicht - evtl. fehlt N-Auszeichnung</value>
+  </data>
+  <data name="PathSegment_DifferingM_Caller_Path_Called" xml:space="preserve">
+    <value>M={0} an Subpfad {1} weicht von M={2} in referenziertem Modell ab</value>
+  </data>
+  <data name="PathSegment_DifferingO_Caller_Path_Called" xml:space="preserve">
+    <value>O={0} an Subpfad {1} weicht von O={2} in referenziertem Modell ab</value>
+  </data>
+  <data name="PathSegment_DistanceDiffers_CallerDist_CalledDist" xml:space="preserve">
+    <value>Distanz {0} ist nicht gleich Distanz {1} in referenziertem Subpfad</value>
+  </data>
+  <data name="PathSegment_GtLtMissing" xml:space="preserve">
+    <value>&gt;... oder &lt;... fehlt</value>
+  </data>
+  <data name="PathSegment_InvalidPathName_Dir_Path" xml:space="preserve">
+    <value>'{0}{1}' ist kein gültiger Pfadname</value>
+  </data>
+  <data name="PathSegment_LtNotImplemented" xml:space="preserve">
+    <value>&lt; noch nicht implementiert</value>
+  </data>
+  <data name="PathSegment_PathNotFound_Name_Files" xml:space="preserve">
+    <value>Pfad {0} nicht in Datei(en) {1} gefunden</value>
+  </data>
+  <data name="Program_Checking_Path" xml:space="preserve">
+    <value>Überprüfung von {0}</value>
+  </data>
+  <data name="Program_CommandCount" xml:space="preserve">
+    <value>Befehlsanzahl</value>
+  </data>
+  <data name="Program_DrillingLength" xml:space="preserve">
+    <value>Bohrungen</value>
+  </data>
+  <data name="Program_MillingLength" xml:space="preserve">
+    <value>Fräslänge</value>
+  </data>
+  <data name="Program_MoreThanOnePathLayer_File_Paths" xml:space="preserve">
+    <value>DXF-Datei {0} enthält mehr als einen Pfad-LayerName: {1}</value>
+  </data>
+  <data name="Program_NoDxfFiles" xml:space="preserve">
+    <value>Keine DXF-Dateien angegeben</value>
+  </data>
+  <data name="Program_NoErrorFreePathLayer_File" xml:space="preserve">
+    <value>DXF-Datei {0} enthält keinen Pfad-LayerName ohne Fehler</value>
+  </data>
+  <data name="Program_NoSegmentsFound" xml:space="preserve">
+    <value>Keine Segmente gefunden</value>
+  </data>
+  <data name="Program_SumLength" xml:space="preserve">
+    <value>Summe</value>
+  </data>
+  <data name="Program_SweepLength" xml:space="preserve">
+    <value>Leerfahrten</value>
+  </data>
+  <data name="Program_Writing_Path" xml:space="preserve">
+    <value>Schreiben von {0}</value>
+  </data>
+  <data name="Transformation2_DifferentDistances_FromS_FromE_FromD_ToS_ToE_ToD" xml:space="preserve">
+    <value>Distanz {0}...{1} = {2} ist nicht gleich Distanz {3}...{4} = {5}</value>
+  </data>
+</root>
