@@ -3,6 +3,7 @@
 **/bin/
 **/obj/
 *.bak
+*.user
 __*.*
 *.png
 *.jpg
