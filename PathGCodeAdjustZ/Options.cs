@@ -21,7 +21,7 @@ public class Options : AbstractOptions {
                 if (a.StartsWith('/') || a.StartsWith('-')) {
                     if (a.Length == 1) {
                         doNotRun = true;
-                        messages.WriteLine("Fehlende Option nach {0}", a);
+                        messages.AddError("Options", Messages.Options_MissingOptionAfter_Name, a);
                     } else if (a[1..] == "debug") {
                         Debugger.Launch();
                     } else {
@@ -35,7 +35,7 @@ public class Options : AbstractOptions {
                                 break;
                             default:
                                 doNotRun = true;
-                                messages.WriteLine($"Option {a} nicht unterstützt");
+                                messages.AddError("Options", Messages.Options_NotSupported_Name, a);
                                 break;
                         }
                     }

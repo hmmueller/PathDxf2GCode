@@ -13,6 +13,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Messages.de.Designer.cs">
+      <DependentUpon>Messages.de.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
     <Compile Update="Messages.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -21,6 +26,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Update="Messages.de.resx">
+      <CustomToolNamespace>de.hmmueller.PathGCodeAdjustZ</CustomToolNamespace>
+      <LastGenOutput>Messages.de.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
     <EmbeddedResource Update="Messages.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Messages.Designer.cs</LastGenOutput>

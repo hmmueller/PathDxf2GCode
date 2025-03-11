@@ -136,22 +136,22 @@ Optionen:
     /l zzz Meldungssprache</value>
   </data>
   <data name="Options_LessThan0_Name_Value" xml:space="preserve">
-    <value>Parameterwert {1} für {0} ist nicht &gt;= 0</value>
+    <value>Wert {1} für Option {0} ist nicht &gt;= 0</value>
   </data>
   <data name="Options_MissingF" xml:space="preserve">
     <value>/f nicht angegeben oder nicht größer als 0</value>
   </data>
   <data name="Options_MissingOptionAfter_Name" xml:space="preserve">
-    <value>Fehlender Wert nach {0}</value>
+    <value>Fehlende Option nach {0}</value>
   </data>
   <data name="Options_MissingV" xml:space="preserve">
     <value>/v nicht angegeben oder nicht größer als 0</value>
   </data>
   <data name="Options_MissingValue_Name" xml:space="preserve">
-    <value>Fehlender Parameterwert für {0}</value>
+    <value>Fehlender Wert für Option {0}</value>
   </data>
   <data name="Options_NaN_Name_Value" xml:space="preserve">
-    <value>Parameterwert {1} für {0} ist keine Zahl</value>
+    <value>Wert {1} für Option {0} ist keine Zahl</value>
   </data>
   <data name="Options_NotSupported_Name" xml:space="preserve">
     <value>Option {0} nicht unterstützt</value>

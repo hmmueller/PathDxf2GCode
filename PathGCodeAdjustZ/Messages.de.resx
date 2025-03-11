@@ -118,41 +118,41 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Options_Help" xml:space="preserve">
-    <value>Call: PathGCodeAdjustZ [Options] [GCode files]
+    <value>Aufruf: PathGCodeAdjustZ [Parameter] [GCode-Dateien]
 
-Options:
-    /h     Help text
-    /l zzz Language
-</value>
+Parameter:
+    /h     Hilfe-Anzeige
+    /l zzz Sprache
+    </value>
   </data>
   <data name="Options_MissingOptionAfter_Name" xml:space="preserve">
-    <value>Missing value after option {0}</value>
+    <value>Fehlender Wert nach {0}</value>
   </data>
   <data name="Options_NotSupported_Name" xml:space="preserve">
-    <value>Option {0} not supported</value>
+    <value>Option {0} nicht unterstützt</value>
   </data>
   <data name="Program_EndOfExprExpected_Pos" xml:space="preserve">
-    <value>End of expression expected at column {0}</value>
+    <value>Ende der Formel in Spalte {0} erwartet</value>
   </data>
   <data name="Program_InvalidLineFormat" xml:space="preserve">
-    <value>Line does not have format '(comment) #...=value'</value>
+    <value>Zeile hat nicht das Format '(Kommentar) #...=Wert'</value>
   </data>
   <data name="Program_NaN_Name_Value" xml:space="preserve">
-    <value>Value '{1}' for {0} is not a valid number</value>
+    <value>Wert '{1}' für {0} ist keine gültige Zahl</value>
   </data>
   <data name="Program_NoGCodeFiles" xml:space="preserve">
-    <value>No GCode files specified</value>
+    <value>Keine G-Code-Dateien angegeben</value>
   </data>
   <data name="Program_Reading_File" xml:space="preserve">
-    <value>Reading {0}</value>
+    <value>Einlesen von {0}</value>
   </data>
   <data name="Program_RParExpected_Pos" xml:space="preserve">
-    <value>')' expected at column {0}</value>
+    <value>')' in Spalte {0} erwartet</value>
   </data>
   <data name="Program_Unexpected_Char_Pos" xml:space="preserve">
-    <value>Unexpected symbol '{0}' at column {1}</value>
+    <value>Unerwartetes Zeichen '{0}' in Spalte{1}</value>
   </data>
   <data name="Program_Writing_File" xml:space="preserve">
-    <value>Writing {0}</value>
+    <value>Schreiben von {0}</value>
   </data>
 </root>

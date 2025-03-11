@@ -22,14 +22,14 @@ namespace de.hmmueller.PathGCodeAdjustZ {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Messages {
+    internal class Messages___Kopieren {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal Messages() {
+        internal Messages___Kopieren() {
         }
         
         /// <summary>
@@ -39,7 +39,7 @@ namespace de.hmmueller.PathGCodeAdjustZ {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("PathGCodeAdjustZ.Messages", typeof(Messages).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("PathGCodeAdjustZ.Messages - Kopieren", typeof(Messages___Kopieren).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -61,12 +61,10 @@ namespace de.hmmueller.PathGCodeAdjustZ {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Call: PathGCodeAdjustZ [Options] [GCode files]
+        ///   Sucht eine lokalisierte Zeichenfolge, die             Aufruf: PathGCodeAdjustZ [Parameter] [GCode-Dateien]
         ///
-        ///Options:
-        ///    /h     Help text
-        ///    /l zzz Language
-        /// ähnelt.
+        ///            Parameter:
+        ///                /h     Hilfe-Anzeige ähnelt.
         /// </summary>
         internal static string Options_Help {
             get {
@@ -75,25 +73,7 @@ namespace de.hmmueller.PathGCodeAdjustZ {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Missing value after option {0} ähnelt.
-        /// </summary>
-        internal static string Options_MissingOptionAfter_Name {
-            get {
-                return ResourceManager.GetString("Options_MissingOptionAfter_Name", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Option {0} not supported ähnelt.
-        /// </summary>
-        internal static string Options_NotSupported_Name {
-            get {
-                return ResourceManager.GetString("Options_NotSupported_Name", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die End of expression expected at column {0} ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die end of expression expected at column {0} ähnelt.
         /// </summary>
         internal static string Program_EndOfExprExpected_Pos {
             get {
@@ -102,7 +82,7 @@ namespace de.hmmueller.PathGCodeAdjustZ {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Line does not have format &apos;(comment) #...=value&apos; ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Zeile hat nicht das Format &apos;(Kommentar) #...=Wert&apos; ähnelt.
         /// </summary>
         internal static string Program_InvalidLineFormat {
             get {
@@ -111,7 +91,7 @@ namespace de.hmmueller.PathGCodeAdjustZ {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Value &apos;{1}&apos; for {0} is not a valid number ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Wert &apos;{1}&apos; für {0} ist keine gültige Zahl ähnelt.
         /// </summary>
         internal static string Program_NaN_Name_Value {
             get {
@@ -120,7 +100,7 @@ namespace de.hmmueller.PathGCodeAdjustZ {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die No GCode files specified ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Keine G-Code-Dateien angegeben ähnelt.
         /// </summary>
         internal static string Program_NoGCodeFiles {
             get {
@@ -129,7 +109,7 @@ namespace de.hmmueller.PathGCodeAdjustZ {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Reading {0} ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Einlesen von {0} ähnelt.
         /// </summary>
         internal static string Program_Reading_File {
             get {
@@ -147,7 +127,7 @@ namespace de.hmmueller.PathGCodeAdjustZ {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Unexpected symbol &apos;{0}&apos; at column {1} ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Unexpected &apos;{0}&apos; at column {1} ähnelt.
         /// </summary>
         internal static string Program_Unexpected_Char_Pos {
             get {
@@ -156,7 +136,7 @@ namespace de.hmmueller.PathGCodeAdjustZ {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Writing {0} ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Schreiben von {0} ähnelt.
         /// </summary>
         internal static string Program_Writing_File {
             get {
