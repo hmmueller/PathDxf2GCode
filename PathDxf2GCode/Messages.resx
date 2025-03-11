@@ -120,12 +120,6 @@
   <data name="DxfHelper_ReadingFile__FileName" xml:space="preserve">
     <value>Reading {0}</value>
   </data>
-  <data name="Error" xml:space="preserve">
-    <value>**** </value>
-  </data>
-  <data name="Info" xml:space="preserve">
-    <value>---- </value>
-  </data>
   <data name="Options_Help" xml:space="preserve">
     <value>Call: PathDxf2GCode [options] [DXF files]
 
@@ -271,13 +265,13 @@ Options:
     <value>Checking {0}</value>
   </data>
   <data name="Program_CommandCount" xml:space="preserve">
-    <value>Command count</value>
+    <value>Command count:</value>
   </data>
   <data name="Program_DrillingLength" xml:space="preserve">
-    <value>Drill length</value>
+    <value>Drill length:</value>
   </data>
   <data name="Program_MillingLength" xml:space="preserve">
-    <value>Milling length</value>
+    <value>Milling length:</value>
   </data>
   <data name="Program_MoreThanOnePathLayer_File_Paths" xml:space="preserve">
     <value>DXF file {0} contains more than one path layer: {1}</value>
@@ -292,10 +286,10 @@ Options:
     <value>No segments found</value>
   </data>
   <data name="Program_SumLength" xml:space="preserve">
-    <value>Sum</value>
+    <value>Sum:</value>
   </data>
   <data name="Program_SweepLength" xml:space="preserve">
-    <value>Sweeps</value>
+    <value>Sweeps:</value>
   </data>
   <data name="Program_Writing_Path" xml:space="preserve">
     <value>Writing {0}</value>

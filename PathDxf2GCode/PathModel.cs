@@ -57,7 +57,7 @@ public class PathModel {
 
     public static Dictionary<PathName, PathModel> TransformDxf2PathModel(
         string dxfFilePath, DrawingEntities entities, Dictionary<string, Linetype> layerLinetypes,
-        Options options, MessageHandler messages, PathModelCollection subPathDefs) {
+        Options options, MessageHandlerForEntities messages, PathModelCollection subPathDefs) {
         Dictionary<PathName, RawPathModel> models =
             CollectSegments(entities, layerLinetypes, subPathDefs, dxfFilePath, options, messages);
         Dictionary<PathName, PathModel> result = new();
@@ -72,7 +72,7 @@ public class PathModel {
 
     private static Dictionary<PathName, RawPathModel> CollectSegments(DrawingEntities entities,
             Dictionary<string, Linetype> layerLinetypes, PathModelCollection subPathDefs,
-            string dxfFilePath, Options options, MessageHandler messages) {
+            string dxfFilePath, Options options, MessageHandlerForEntities messages) {
         // Path lines:
         // DASHED:     __ __ __ __ = Sweep (G00)
         // HIDDEN:     ____ _____  = Sweep (G00) without parameters
@@ -104,7 +104,7 @@ public class PathModel {
             var p = new PathName(e.Layer.Name, dxfFilePath);
             return name2Model.TryGetValue(p, out RawPathModel? result)
                      ? result
-                     : throw new Exception(MessageHandler.Context(e, position, dxfFilePath) + ": " + string.Format(Messages.PathModel_MissingPathDefinition_PathName, p.AsString()));
+                     : throw new Exception(MessageHandlerForEntities.Context(e, position, dxfFilePath) + ": " + string.Format(Messages.PathModel_MissingPathDefinition_PathName, p.AsString()));
         }
 
         RawPathModel GetOrCreateRawModel(EntityObject e) {
@@ -202,7 +202,7 @@ public class PathModel {
             double? bitRadius_mm = rawModel.ParamsText?.GetDouble('O') / 2;
             Vector2 center = circle.Center.AsVector2();
             if (bitRadius_mm == null) {
-                messages.AddError(MessageHandler.Context(circle, center, dxfFilePath),
+                messages.AddError(MessageHandlerForEntities.Context(circle, center, dxfFilePath),
                     Messages.PathModel_MissingKey_Key, 'O');
             } else if (circle.Radius.Near(bitRadius_mm.Value)) {
                 bool isMark = IsLineType(layerLinetypes, circle, "DIVIDE");
@@ -256,7 +256,7 @@ public class PathModel {
     }
 
     private static void HandleLineOrArc(Dictionary<string, Linetype> layerLinetypes, string dxfFilePath,
-        Options options, MessageHandler messages, List<SubPathSegment> subPaths, EntityObject lineOrArc,
+        Options options, MessageHandlerForEntities messages, List<SubPathSegment> subPaths, EntityObject lineOrArc,
         Vector2 start, Vector2 end, ParamsText text, RawPathModel rawModel, double order, MillGeometry geometry) {
         void OnError(string s) {
             messages.AddError(rawModel.Name.AsString(), s);
@@ -344,7 +344,7 @@ public class PathModel {
         return nearestOverlapping;
     }
 
-    private static Circle2? GetOverlapSurrounding(Text text, string dxfFilePath, MessageHandler messages) {
+    private static Circle2? GetOverlapSurrounding(Text text, string dxfFilePath, MessageHandlerForEntities messages) {
         if (text.IsBackward
             || text.IsUpsideDown
             || !text.Rotation.Near(0)
@@ -359,7 +359,7 @@ public class PathModel {
         }
     }
 
-    private static Circle2? GetOverlapSurrounding(MText text, string dxfFilePath, MessageHandler messages) {
+    private static Circle2? GetOverlapSurrounding(MText text, string dxfFilePath, MessageHandlerForEntities messages) {
         if (!text.Rotation.Between(-1, 1) && !text.Rotation.Between(359, 361)
             || text.AttachmentPoint != MTextAttachmentPoint.BottomLeft
                && text.AttachmentPoint != MTextAttachmentPoint.TopLeft) {
@@ -381,7 +381,7 @@ public class PathModel {
     }
 
     private static PathModel? CreatePathModel(PathName name, RawPathModel rawModel, string dxfFilePath,
-        Options options, MessageHandler messages) {
+        Options options, MessageHandlerForEntities messages) {
         if (rawModel.Start == null) {
             messages.AddError(name, Messages.PathModel_MissingStart);
         }
@@ -471,7 +471,7 @@ public class PathModel {
             messages.AddError(context, msg);
         }
         PathParams pathParams = new(rawModel.ParamsText!,
-            MessageHandler.Context(rawModel.StartObject!, rawModel.Start.Value, dxfFilePath), options, OnError);
+            MessageHandlerForEntities.Context(rawModel.StartObject!, rawModel.Start.Value, dxfFilePath), options, OnError);
         {
 
             foreach (var s in segments) {
@@ -506,7 +506,7 @@ public class PathModel {
     public bool HasZProbes => _zProbes.Any();
 
     public Vector3 EmitMillingGCode(Vector3 currPos, Transformation3 t,
-        StreamWriter sw, Statistics stats, string dxfFileName, MessageHandler messages) {
+        StreamWriter sw, Statistics stats, string dxfFileName, MessageHandlerForEntities messages) {
         foreach (var s in _segments) {
             try {
                 currPos = s.EmitGCode(currPos, t, sw, stats, dxfFileName, messages);
@@ -524,7 +524,7 @@ public class PathModel {
         }
     }
 
-    public Vector3 EmitZProbingGCode(Vector3 currPos, StreamWriter sw, Statistics stats, string dxfFileName, MessageHandler messages) {
+    public Vector3 EmitZProbingGCode(Vector3 currPos, StreamWriter sw, Statistics stats, string dxfFileName, MessageHandlerForEntities messages) {
         double sweepHeight = currPos.Z;
         var t = new Transformation2(Start, Start + Vector2.UnitX, Vector2.Zero, Vector2.UnitX);
         foreach (var z in _zProbes) {

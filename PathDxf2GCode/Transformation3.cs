@@ -19,16 +19,16 @@ public class ZProbe {
     }
 
     public void CreateParams(PathParams pathParams, string dxfFileName, Action<string, string> onError) {
-        _params = new ZProbeParams(ParamsText, MessageHandler.Context(Source, Center, dxfFileName), pathParams, onError);
+        _params = new ZProbeParams(ParamsText, MessageHandlerForEntities.Context(Source, Center, dxfFileName), pathParams, onError);
     }
 
     public double T_mm => _params!.T_mm;
     public string? L => _params!.L;
 
     public Vector3 EmitGCode(Vector3 currPos, Transformation2 t,
-                             StreamWriter sw, Statistics stats, string dxfFileName, MessageHandler messages) {
+                             StreamWriter sw, Statistics stats, string dxfFileName, MessageHandlerForEntities messages) {
         Vector2 c = t.Transform(Center);
-        PathSegment.AssertNear(currPos.XY(), c, MessageHandler.Context(Source, Center, dxfFileName));
+        PathSegment.AssertNear(currPos.XY(), c, MessageHandlerForEntities.Context(Source, Center, dxfFileName));
 
         // sw.WriteLine($"G00 Z{(_params!.T_mm + 2).F3()}  (Knapp über expected Z gehen)");
         sw.WriteLine("G38.3 Z0"); // Langsame Probe auf Z - Zeit, um Fühler drunterzulegen

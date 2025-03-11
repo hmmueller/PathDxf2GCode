@@ -67,11 +67,11 @@ public class Options : AbstractOptions {
 
     public IEnumerable<string> DxfFilePaths => _dxfFilePaths;
 
-    public static void Usage(MessageHandler messages) {
-        messages.WriteLine(Messages.Info + Messages.Options_Help);
+    public static void Usage(MessageHandlerForEntities messages) {
+        messages.WriteLine(MessageHandler.InfoPrefix + Messages.Options_Help);
     }
 
-    public static Options? Create(string[] args, MessageHandler messages) {
+    public static Options? Create(string[] args, MessageHandlerForEntities messages) {
         bool doNotRun = false;
 
         string GetStringOption(ref int i) {

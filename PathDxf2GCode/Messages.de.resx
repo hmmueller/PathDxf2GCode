@@ -120,12 +120,6 @@
   <data name="DxfHelper_ReadingFile__FileName" xml:space="preserve">
     <value>Einlesen von {0}</value>
   </data>
-  <data name="Error" xml:space="preserve">
-    <value>**** </value>
-  </data>
-  <data name="Info" xml:space="preserve">
-    <value>---- </value>
-  </data>
   <data name="Options_Help" xml:space="preserve">
     <value>Aufruf: PathDxf2GCode [Optionen] [DXF-Dateien]
 
@@ -271,13 +265,13 @@ Optionen:
     <value>Überprüfung von {0}</value>
   </data>
   <data name="Program_CommandCount" xml:space="preserve">
-    <value>Befehlsanzahl</value>
+    <value>Befehlszahl:</value>
   </data>
   <data name="Program_DrillingLength" xml:space="preserve">
-    <value>Bohrungen</value>
+    <value>Bohrungen:</value>
   </data>
   <data name="Program_MillingLength" xml:space="preserve">
-    <value>Fräslänge</value>
+    <value>Fräslänge:</value>
   </data>
   <data name="Program_MoreThanOnePathLayer_File_Paths" xml:space="preserve">
     <value>DXF-Datei {0} enthält mehr als einen Pfad-LayerName: {1}</value>
@@ -292,10 +286,10 @@ Optionen:
     <value>Keine Segmente gefunden</value>
   </data>
   <data name="Program_SumLength" xml:space="preserve">
-    <value>Summe</value>
+    <value>Summe:</value>
   </data>
   <data name="Program_SweepLength" xml:space="preserve">
-    <value>Leerfahrten</value>
+    <value>Leerfahrten:</value>
   </data>
   <data name="Program_Writing_Path" xml:space="preserve">
     <value>Schreiben von {0}</value>

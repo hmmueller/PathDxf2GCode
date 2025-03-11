@@ -70,7 +70,7 @@ public class ParamsText {
         return foundKey2 ? GetString(key2) : value1;
     }
 
-    public void AddError(MessageHandler mh, string errorContext, string message) {
+    public void AddError(MessageHandlerForEntities mh, string errorContext, string message) {
         if (_uniqueErrors.Add(message)) { // Each error should be output only once ausgeben
             mh.AddError(errorContext, message);
         }

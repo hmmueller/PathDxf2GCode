@@ -6,12 +6,12 @@ using System.Text.RegularExpressions;
 using static System.FormattableString;
 
 public class Program {
-    private const string VERSION = "2025-02-28";
+    private const string VERSION = "2025-03-11";
 
     private static int Main(string[] args) {
-        Messages messages = new(Console.Error);
+        MessageHandler messages = new(Console.Error);
 
-        messages.WriteLine($"---- PathGCodeAdjustZ (c) HMMüller 2024-2025 V.{VERSION}");
+        messages.WriteLine(MessageHandler.InfoPrefix + $"PathGCodeAdjustZ (c) HMMüller 2024-2025 V.{VERSION}");
 
         Options? options = Options.Create(args, messages);
 
@@ -19,7 +19,7 @@ public class Program {
             Options.Usage(messages);
             return 2;
         } else if (!options.GCodeFilePaths.Any()) {
-            messages.Error($"**** Keine G-Code-Dateien angegeben");
+            messages.AddError("Options", Messages.Program_NoGCodeFiles);
             return 3;
         } else {
             foreach (var f in options.GCodeFilePaths) {
@@ -29,7 +29,7 @@ public class Program {
         }
     }
 
-    private static void Process(string f, Messages messages) {
+    private static void Process(string f, MessageHandler messages) {
         string basePath =
             f.EndsWith("_Z.txt", StringComparison.InvariantCultureIgnoreCase) ? f[..^6] :
             f.EndsWith("_Clean.gcode", StringComparison.InvariantCultureIgnoreCase) ? f[..^12] :
@@ -37,7 +37,7 @@ public class Program {
             f.EndsWith(".gcode", StringComparison.InvariantCultureIgnoreCase) ? f[..^6] : f;
         var vars = new Dictionary<string, double>();
         string zFile = basePath + "_Z.txt";
-        messages.WriteLine($"---- Einlesen von {zFile}");
+        messages.WriteLine(Messages.Program_Reading_File, zFile);
         using (var sr = new StreamReader(zFile)) {
             int lineNo = 1;
             for (string? line = null; (line = sr.ReadLine()) != null; lineNo++) {
@@ -45,25 +45,25 @@ public class Program {
                 if (fields.Length == 0) {
                     // ignore - Leerzeile
                 } else if (fields.Length < 3) {
-                    messages.Error($"**** Z.{lineNo}: Zeile hat nicht das Format '(Kommentar) #...=Wert'");
+                    messages.AddError(f + ":" + lineNo, Messages.Program_InvalidLineFormat);
                 } else {
                     string varName = fields[1];
                     string value = fields[2];
                     try {
                         vars.Add(varName, double.Parse(value.Replace(',', '.'), CultureInfo.InvariantCulture));
                     } catch (FormatException) {
-                        messages.Error($"**** Z.{lineNo}: Wert '{value}' für {varName} ist keine gültige Zahl");
+                        messages.AddError(f + ":" + lineNo, Messages.Program_NaN_Name_Value, varName, value);
                     }
                 }
             }
         }
 
-        if (!messages.HasErrors) {
+        if (!messages.Errors.Any()) {
             string cleanFile = basePath + "_Clean.gcode";
-            messages.WriteLine($"---- Einlesen von {cleanFile}");
+            messages.WriteLine(MessageHandler.InfoPrefix + Messages.Program_Reading_File, cleanFile);
             using (var sr = new StreamReader(cleanFile)) {
                 string millingFile = basePath + "_Milling.gcode";
-                messages.WriteLine($"---- Schreiben von {millingFile}");
+                messages.WriteLine(MessageHandler.InfoPrefix + Messages.Program_Writing_File, millingFile);
                 using (var sw = new StreamWriter(millingFile)) {
                     int lineNo = 1;
                     for (string? line = null; (line = sr.ReadLine()) != null; lineNo++) {
@@ -96,7 +96,7 @@ internal class ExprEval {
         Next();
         Value = Expr();
         if (C != '=') {
-            throw new Exception($"end of expression expected at pos {_pos - 1}");
+            throw new Exception(string.Format(Messages.Program_EndOfExprExpected_Pos, _pos - 1));
         }
     }
 
@@ -140,7 +140,7 @@ internal class ExprEval {
             Next();
             d = Expr();
             if (C != ')') {
-                throw new Exception($"')' expected at pos {_pos - 1}");
+                throw new Exception(string.Format(Messages.Program_RParExpected_Pos, _pos - 1));
             }
             Next();
         } else if (C == '-') {
@@ -153,34 +153,8 @@ internal class ExprEval {
             }
             d = double.Parse(v, CultureInfo.InvariantCulture);
         } else {
-            throw new Exception($"Unexpected '{C}' at pos {_pos - 1}");
+            throw new Exception(string.Format(Messages.Program_Unexpected_Char_Pos, C, _pos - 1));
         }
         return d;
-    }
-}
-
-public class Messages {
-    private TextWriter _sw;
-
-    public bool HasErrors { get; private set; }
-
-    public Messages(TextWriter sw) {
-        _sw = sw;
-    }
-
-    public void WriteLine() {
-        _sw.WriteLine();
-    }
-
-    public void WriteLine(string msg) {
-        _sw.WriteLine(msg);
-    }
-
-    public void Error(string msg) {
-        if (!HasErrors) {
-            WriteLine();
-        }
-        WriteLine(msg);
-        HasErrors = true;
     }
 }

@@ -69,7 +69,7 @@ public class PathModelCollection {
     private readonly Dictionary<PathName, PathModel> _models = new();
     private readonly HashSet<string> _readFiles = new();
 
-    public SortedDictionary<string, PathModel> Load(string dxfFilePath, Options options, string contextForErrors, MessageHandler messages) {
+    public SortedDictionary<string, PathModel> Load(string dxfFilePath, Options options, string contextForErrors, MessageHandlerForEntities messages) {
         var result = new SortedDictionary<string, PathModel>();
         if (_readFiles.Add(dxfFilePath)) {
             DxfDocument? d = DxfHelper.LoadDxfDocument(dxfFilePath, options.Dump, options.PathNamePattern,

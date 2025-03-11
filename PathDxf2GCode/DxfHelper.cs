@@ -5,11 +5,12 @@ using netDxf.Collections;
 using netDxf.Entities;
 using netDxf.Tables;
 using netDxf.Header;
+using de.hmmueller.PathGCodeLibrary;
 
 public static class DxfHelper {
     public static DxfDocument? LoadDxfDocument(string dxfFilePath, bool dump, string pathNamePattern,
-            out Dictionary<string, Linetype> layerLinetypes, MessageHandler messages) {
-        messages.Write(Messages.Info + Messages.DxfHelper_ReadingFile__FileName, dxfFilePath);
+            out Dictionary<string, Linetype> layerLinetypes, MessageHandlerForEntities messages) {
+        messages.Write(MessageHandler.InfoPrefix + Messages.DxfHelper_ReadingFile__FileName, dxfFilePath);
 
         DxfVersion v = DxfDocument.CheckDxfFileVersion(dxfFilePath, out bool isBinary);
         messages.WriteLine(" (DXF-Version: {0}, isBinary: {1})", v, isBinary);

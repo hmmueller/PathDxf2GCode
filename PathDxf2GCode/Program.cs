@@ -1,14 +1,15 @@
 ﻿namespace de.hmmueller.PathDxf2GCode;
 
+using de.hmmueller.PathGCodeLibrary;
 using netDxf;
 
 public class Program {
-    public const string VERSION = "2025-03-08";
+    public const string VERSION = "2025-03-11";
 
     public static int Main(string[] args) {
-        var messages = new MessageHandler(Console.Error);
+        var messages = new MessageHandlerForEntities(Console.Error);
 
-        messages.WriteLine(Messages.Info + "PathDxf2GCode (c) HMMüller 2024-2025 V.{0}", VERSION);
+        messages.WriteLine(MessageHandler.InfoPrefix + "PathDxf2GCode (c) HMMüller 2024-2025 V.{0}", VERSION);
         messages.WriteLine();
 
         Options? options = Options.Create(args, messages);
@@ -19,7 +20,7 @@ public class Program {
             return 2;
         } else if (!options.DxfFilePaths.Any()) {
             WriteErrors(messages);
-            messages.WriteLine(Messages.Error + Messages.Program_NoDxfFiles);
+            messages.WriteLine(MessageHandler.ErrorPrefix + Messages.Program_NoDxfFiles);
             return 3;
         } else {
             PathModelCollection pathModels = new();
@@ -38,7 +39,7 @@ public class Program {
         }
     }
 
-    private static bool WriteErrors(MessageHandler messages) {
+    private static bool WriteErrors(MessageHandlerForEntities messages) {
         if (messages.Errors.Any()) {
             foreach (var e in messages.Errors) {
                 messages.WriteLine(e);
@@ -49,15 +50,15 @@ public class Program {
         }
     }
 
-    private static void Generate(string outputPath, MessageHandler messages, Action<StreamWriter> write) {
-        messages.WriteLine(Messages.Info + Messages.Program_Writing_Path, outputPath);
+    private static void Generate(string outputPath, MessageHandlerForEntities messages, Action<StreamWriter> write) {
+        messages.WriteLine(MessageHandler.InfoPrefix + Messages.Program_Writing_Path, outputPath);
 
         using (StreamWriter sw = new(outputPath)) {
             write(sw);
         }
     }
 
-    private static void GenerateGCode(string dxfFilePath, PathModelCollection pathModels, MessageHandler messages, Options options) {
+    private static void GenerateGCode(string dxfFilePath, PathModelCollection pathModels, MessageHandlerForEntities messages, Options options) {
         if (!dxfFilePath.EndsWith(".dxf", StringComparison.CurrentCultureIgnoreCase)) {
             dxfFilePath += ".dxf";
         }
@@ -65,7 +66,7 @@ public class Program {
         var models = pathModels.Load(dxfFilePath, options, dxfFilePath, messages);
         if (options.CheckModels) {
             foreach (var m in models) {
-                messages.WriteLine(Messages.Info + Messages.Program_Checking_Path, m.Key);
+                messages.WriteLine(MessageHandler.InfoPrefix + Messages.Program_Checking_Path, m.Key);
                 using (StreamWriter sw = StreamWriter.Null) {
                     WriteMillingGCode(m.Value, sw, dxfFilePath, messages);
                 }
@@ -91,7 +92,7 @@ public class Program {
         }
     }
 
-    private static void WriteMillingGCode(PathModel m, StreamWriter sw, string dxfFilePath, MessageHandler messages) {
+    private static void WriteMillingGCode(PathModel m, StreamWriter sw, string dxfFilePath, MessageHandlerForEntities messages) {
         if (m.IsEmpty()) {
             messages.AddError(dxfFilePath, Messages.Program_NoSegmentsFound);
         } else {
@@ -115,13 +116,13 @@ public class Program {
                     sw.WriteLine(m.AsComment(2));
                 }
                 
-                WriteStat($"  {{0,-15}}: {stats.MillLength_mm,5:F0} mm   {AsMin(stats.RoughMillTime)} min", Messages.Program_MillingLength);
-                WriteStat($"  {{0,-15}}: {stats.DrillLength_mm,5:F0} mm   {AsMin(stats.RoughDrillTime)} min", Messages.Program_DrillingLength);
+                WriteStat($"  {{0,-12}} {stats.MillLength_mm,5:F0} mm   {AsMin(stats.RoughMillTime)} min", Messages.Program_MillingLength);
+                WriteStat($"  {{0,-12}} {stats.DrillLength_mm,5:F0} mm   {AsMin(stats.RoughDrillTime)} min", Messages.Program_DrillingLength);
                 messages.WriteLine();
-                WriteStat($"  {{0,-15}}: {stats.SweepLength_mm,5:F0} mm   {AsMin(stats.RoughSweepTime)} min", Messages.Program_SweepLength);
-                WriteStat($"  {{0,-15}}: {stats.TotalLength_mm,5:F0} mm   {AsMin(stats.TotalTime)} min", Messages.Program_SumLength);
+                WriteStat($"  {{0,-12}} {stats.SweepLength_mm,5:F0} mm   {AsMin(stats.RoughSweepTime)} min", Messages.Program_SweepLength);
+                WriteStat($"  {{0,-12}} {stats.TotalLength_mm,5:F0} mm   {AsMin(stats.TotalTime)} min", Messages.Program_SumLength);
                 messages.WriteLine();
-                WriteStat($"  {{0,-15}}: {stats.CommandCount}", Messages.Program_CommandCount);
+                WriteStat($"  {{0,-12}} {stats.CommandCount}", Messages.Program_CommandCount);
                 messages.WriteLine();
 
                 WriteEpilogue(sw);
@@ -155,7 +156,7 @@ public class Program {
         sw.WriteLine("%");
     }
 
-    private static void WriteZProbingGCode(PathModel m, StreamWriter sw, string dxfFilePath, MessageHandler messages) {
+    private static void WriteZProbingGCode(PathModel m, StreamWriter sw, string dxfFilePath, MessageHandlerForEntities messages) {
         if (!messages.Errors.Any()) {
             // See http://www.linuxcnc.org/docs/html/gcode/overview.html#_g_code_best_practices
             Statistics _ = new(m.Params.V_mmpmin);
@@ -171,7 +172,7 @@ public class Program {
         }
     }
 
-    private static void WriteEmptyZ(PathModel m, StreamWriter sw, string dxfFilePath, MessageHandler messages) {
+    private static void WriteEmptyZ(PathModel m, StreamWriter sw, string dxfFilePath, MessageHandlerForEntities messages) {
         if (!messages.Errors.Any()) {
             m.WriteEmptyZ(sw);
         }

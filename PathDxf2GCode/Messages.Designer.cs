@@ -70,24 +70,6 @@ namespace de.hmmueller.PathDxf2GCode {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die ****  ähnelt.
-        /// </summary>
-        internal static string Error {
-            get {
-                return ResourceManager.GetString("Error", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die ----  ähnelt.
-        /// </summary>
-        internal static string Info {
-            get {
-                return ResourceManager.GetString("Info", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Call: PathDxf2GCode [options] [DXF files]
         ///
         ///Options:
@@ -494,7 +476,7 @@ namespace de.hmmueller.PathDxf2GCode {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Command count ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Command count: ähnelt.
         /// </summary>
         internal static string Program_CommandCount {
             get {
@@ -503,7 +485,7 @@ namespace de.hmmueller.PathDxf2GCode {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Drill length ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Drill length: ähnelt.
         /// </summary>
         internal static string Program_DrillingLength {
             get {
@@ -512,7 +494,7 @@ namespace de.hmmueller.PathDxf2GCode {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Milling length ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Milling length: ähnelt.
         /// </summary>
         internal static string Program_MillingLength {
             get {
@@ -557,7 +539,7 @@ namespace de.hmmueller.PathDxf2GCode {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Sum ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Sum: ähnelt.
         /// </summary>
         internal static string Program_SumLength {
             get {
@@ -566,7 +548,7 @@ namespace de.hmmueller.PathDxf2GCode {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Sweeps ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Sweeps: ähnelt.
         /// </summary>
         internal static string Program_SweepLength {
             get {

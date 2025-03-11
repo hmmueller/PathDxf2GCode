@@ -5,21 +5,13 @@ using System.Diagnostics;
 using System.Globalization;
 
 public class Options : AbstractOptions {
-    /// <summary>
-    /// Zu verarbeitende GCode-Dateien
-    /// </summary>    
     public readonly List<string> GCodeFilePaths = new();
 
-    public static void Usage(Messages messages) {
-        messages.WriteLine("""
-            Aufruf: PathGCodeAdjustZ [Parameter] [GCode-Dateien]
-
-            Parameter:
-                /h     Hilfe-Anzeige
-            """);
+    public static void Usage(MessageHandler messages) {
+        messages.WriteLine(Messages.Options_Help);
     }
 
-    public static Options? Create(string[] args, Messages messages) {
+    public static Options? Create(string[] args, MessageHandler messages) {
         bool doNotRun = false;
 
         Options options = new();
@@ -29,7 +21,7 @@ public class Options : AbstractOptions {
                 if (a.StartsWith('/') || a.StartsWith('-')) {
                     if (a.Length == 1) {
                         doNotRun = true;
-                        messages.WriteLine("Fehlende Option nach {a}");
+                        messages.WriteLine("Fehlende Option nach {0}", a);
                     } else if (a[1..] == "debug") {
                         Debugger.Launch();
                     } else {
