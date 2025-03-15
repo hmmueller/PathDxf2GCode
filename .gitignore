@@ -4,6 +4,7 @@
 **/obj/
 *.bak
 *.user
+*.odt#
 __*.*
 *.png
 *.jpg
