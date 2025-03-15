@@ -33,4 +33,12 @@ public class MessageHandler {
     }
 
     public IEnumerable<string> Errors => _errors;
+
+    public bool WriteErrors() {
+        foreach (var e in Errors) {
+            WriteLine(e);
+        }
+        return Errors.Any();
+    }
+
 }

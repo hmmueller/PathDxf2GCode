@@ -114,6 +114,13 @@ public class PathModel {
                      : name2Model[p] = new RawPathModel(p);
         }
 
+        bool IsLineTypeHidden(EntityObject e) => GeometryHelpers.GetLinetype(e, layerLinetypes)?.Name == "HIDDEN";
+        bool IsLineTypePhantomCircle(Circle c) => GeometryHelpers.GetLinetype(c, layerLinetypes)?.Name == "PHANTOM";
+        bool IsStartMarker(Circle c) => IsLineTypePhantomCircle(c) && c.Radius.Near(0.5);
+        bool IsTurnMarker(Circle c) => IsLineTypePhantomCircle(c) && c.Radius.Near(0.75);
+        bool IsEndMarker(Circle c) => IsLineTypePhantomCircle(c) && c.Radius.Near(1);
+        bool IsZProbe(Circle c) => IsLineTypePhantomCircle(c) && c.Radius.Near(3);
+
         // Algorithm:
         // 1. Collect all objects on path layers - circles, lines, arcs, and texts
         // 2. Connect texts with objects -> Dictionary<EntityObject, string>
@@ -126,9 +133,9 @@ public class PathModel {
         List<Line> lines = entities.Lines.Where(e => e.IsOnPathLayer(options.PathNamePattern, dxfFilePath)).ToList();
         List<Arc> arcs = entities.Arcs.Where(e => e.IsOnPathLayer(options.PathNamePattern, dxfFilePath)).ToList();
 
-        HashSet<Circle> hiddenCircles = circles.Where(e => LineTypeName(layerLinetypes, e) == "HIDDEN").ToHashSet();
-        HashSet<Line> hiddenLines = lines.Where(e => LineTypeName(layerLinetypes, e) == "HIDDEN").ToHashSet();
-        HashSet<Arc> hiddenArcs = arcs.Where(e => LineTypeName(layerLinetypes, e) == "HIDDEN").ToHashSet();
+        HashSet<Circle> nonTextCircles = circles.Where(e => IsLineTypeHidden(e) || IsEndMarker(e) || IsTurnMarker(e)).ToHashSet();
+        HashSet<Line> nonTextLines = lines.Where(IsLineTypeHidden).ToHashSet();
+        HashSet<Arc> nonTextArcs = arcs.Where(IsLineTypeHidden).ToHashSet();
 
         // 2. Connect texts with objects -> Dictionary<EntityObject, string>
         foreach ((Circle2? TextCircle, string Text, EntityObject TextObject, Vector2 Position) in
@@ -139,9 +146,9 @@ public class PathModel {
             ).Where(bs => bs.TextCircle != null)) {
             EntityObject? overlappingObject =
                    // Order is important: Circles in pole position, then arcs, then lines.
-                   NearestOverlappingCircle(circles.Except(texts.Keys.OfType<Circle>()).Except(hiddenCircles), TextCircle!, Text)
-                ?? NearestOverlappingArc(arcs.Except(texts.Keys.OfType<Arc>()).Except(hiddenArcs), TextCircle!, Text)
-                ?? NearestOverlappingLine(lines.Except(texts.Keys.OfType<Line>()).Except(hiddenLines), TextCircle!, Text);
+                   NearestOverlappingCircle(circles.Except(texts.Keys.OfType<Circle>()).Except(nonTextCircles), TextCircle!, Text)
+                ?? NearestOverlappingArc(arcs.Except(texts.Keys.OfType<Arc>()).Except(nonTextArcs), TextCircle!, Text)
+                ?? NearestOverlappingLine(lines.Except(texts.Keys.OfType<Line>()).Except(nonTextLines), TextCircle!, Text);
             if (overlappingObject == null) {
                 messages.AddError(TextObject, Position, dxfFilePath, Messages.PathModel_NoObjectFound_Text_Center_Diameter, Text, TextCircle!.Center.F3(), (TextCircle!.Radius * 2).F3());
             } else {
@@ -162,17 +169,15 @@ public class PathModel {
             messages.WriteLine();
         }
 
-        bool IsPhantomCircle(Circle c) => GeometryHelpers.GetLinetype(c, layerLinetypes)?.Name == "PHANTOM";
-
         // 3. Handle special circles
-        foreach (var circle in circles.Where(c => IsPhantomCircle(c))) {
+        foreach (var circle in circles.Where(IsLineTypePhantomCircle)) {
             ParamsText circleText = GetText(circle);
             RawPathModel rawModel = GetOrCreateRawModel(circle);
             Vector2 center = circle.Center.AsVector2();
 
-            if (circle.Radius.Near(0.75)) { // Turn
+            if (IsTurnMarker(circle)) { 
                 rawModel.Turns.Add(center);
-            } else if (circle.Radius.Near(0.5)) { // Start
+            } else if (IsStartMarker(circle)) {
                 if (rawModel.Start != null) {
                     messages.AddError(circle, center, dxfFilePath, Messages.PathModel_TwoStarts_S1_S2, rawModel.Start.Value().F3(), center.F3());
                 } else {
@@ -180,14 +185,14 @@ public class PathModel {
                     rawModel.StartObject = circle;
                     rawModel.ParamsText = circleText;
                 }
-            } else if (circle.Radius.Near(1)) { // End
+            } else if (IsEndMarker(circle)) { // End
                 if (rawModel.End != null) {
                     messages.AddError(circle, center, dxfFilePath,
                         Messages.PathModel_TwoEnds_E1_E2, rawModel.End.Value().F3(), center.F3());
                 } else {
                     rawModel.End = center;
                 }
-            } else if (circle.Radius.Near(3)) { // ZProbe
+            } else if (IsZProbe(circle)) { // ZProbe
                 rawModel.ZProbes.Add(new ZProbe(circle, circleText, center));
             } else {
                 messages.AddError(circle, center, dxfFilePath, Messages.PathModel_NotSpecialCircle_D, (2 * circle.Radius).F3());
@@ -196,7 +201,7 @@ public class PathModel {
 
         // 4. Handle geometry - non-special circles, lines and arcs
         // 4a. Circles
-        foreach (var circle in circles.Where(c => !IsPhantomCircle(c))) {
+        foreach (var circle in circles.Where(c => !IsLineTypePhantomCircle(c))) {
             ParamsText circleText = GetText(circle);
             RawPathModel rawModel = GetRawModel(circle, circle.Center.AsVector2());
             double? bitRadius_mm = rawModel.ParamsText?.GetDouble('O') / 2;
@@ -306,7 +311,7 @@ public class PathModel {
         Vector2 dir = Vector2.Normalize(line.Direction.AsVector2());
         double t = Vector2.DotProduct(dir, textCircle.Center - origin);
         Vector2 basePoint = origin + t * dir;
-        double distance = (textCircle.Center - basePoint).Modulus(); // Länge
+        double distance = (textCircle.Center - basePoint).Modulus();
         return distance < textCircle.Radius
             && MathHelper.PointInSegment(basePoint, origin, line.EndPoint.AsVector2()) == 0;
     }
@@ -349,13 +354,13 @@ public class PathModel {
             || text.IsUpsideDown
             || !text.Rotation.Near(0)
             || text.Alignment != TextAlignment.BaselineLeft && text.Alignment != TextAlignment.TopLeft) {
-            messages.AddError(text, text.Position.AsVector2(), dxfFilePath, $"Text {text.Value} muss unrotiert mit Anker unten links oder oben links sein");
+            messages.AddError(text, text.Position.AsVector2(), dxfFilePath, Messages.PathModel_TextLayout_Text, text.Value);
             return null;
         } else {
             double guessedWidth = text.Height * text.Value.Length * 0.6;
             Vector2 half = new Vector2(guessedWidth,
                 text.Alignment == TextAlignment.BaselineLeft ? text.Height : -text.Height) / 2;
-            return new Circle2(text.Position.AsVector2() + half, half.Modulus()); // Länge
+            return new Circle2(text.Position.AsVector2() + half, half.Modulus());
         }
     }
 
@@ -440,8 +445,18 @@ public class PathModel {
                 } else if (!candidates.Skip(1).Any()) { // Genau einer
                     candidates.Single().AddTo(orderedRawSegments, traversed, backtrackForTurns, ref currEnd);
                 } else {
-                    candidates.OrderBy(s => s.Order).ThenBy(s => s.Length).First().AddTo(orderedRawSegments, traversed, backtrackForTurns, ref currEnd);
+                    candidates.OrderBy(s => s.Order)
+                        .ThenBy(s => s.Preference)
+                        .ThenBy(s => s.Length)
+                        .First()
+                        .AddTo(orderedRawSegments, traversed, backtrackForTurns, ref currEnd);
                 }
+            }
+        }
+        {
+            IRawSegment? last = orderedRawSegments.LastOrDefault();
+            if (last != null && !last.End.Near(rawModel.End.Value)) {
+                messages.AddError(last.Source, last.End, dxfFilePath, Messages.PathModel_LostEnd_End, rawModel.End.Value);
             }
         }
 

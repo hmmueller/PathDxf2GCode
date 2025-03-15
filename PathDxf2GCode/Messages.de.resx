@@ -201,6 +201,9 @@ Optionen:
   <data name="PathModel_LineTypeNotSupported_LineType" xml:space="preserve">
     <value>Linienart {0} nicht unterstützt</value>
   </data>
+  <data name="PathModel_LostEnd_End" xml:space="preserve">
+    <value>Ende-Markierung ist nicht am Ende des letztes erreichten Segments, sondern an Position {0}; Leerfahrt ergänzen</value>
+  </data>
   <data name="PathModel_MissingEnd" xml:space="preserve">
     <value>Ende-Markierung fehlt</value>
   </data>

@@ -11,7 +11,7 @@ public class ParamsText {
     public string Context { get; }
     public string? LayerName { get; }
     public Vector2 Position { get; }
-    public Vector2 TextCenter{ get; }
+    public Vector2 TextCenter { get; }
     public double TextRadius { get; }
     private readonly HashSet<string> _uniqueErrors = new();
 
@@ -35,13 +35,14 @@ public class ParamsText {
         LayerName = layer;
         Position = position;
         _strings = strings;
-        _values = strings.Select(kvp => new {
-            kvp.Key,
-            Value = double.TryParse(kvp.Value.Replace(',', '.').TrimStart('=').Trim(),
-                                                CultureInfo.InvariantCulture, out double d) ? d : (double?)null
-        })
-        .Where(kvp => kvp.Value != null)
-        .ToDictionary(kvp => kvp.Key, kvp => (double)kvp.Value!);
+        _values = strings
+            .Select(kvp => new {
+                kvp.Key,
+                Value = double.TryParse(kvp.Value.Replace(',', '.').TrimStart('=').Trim(),
+                                                        CultureInfo.InvariantCulture, out double d) ? d : (double?)null
+            })
+            .Where(kvp => kvp.Value != null)
+            .ToDictionary(kvp => kvp.Key, kvp => (double)kvp.Value!);
         TextCenter = textCenter;
         TextRadius = textRadius;
     }

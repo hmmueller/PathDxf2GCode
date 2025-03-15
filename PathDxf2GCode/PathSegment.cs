@@ -13,6 +13,7 @@ public interface IRawSegment {
     Vector2 End { get; }
     void Reverse();
     double Order { get; }
+    int Preference { get; }
     double Length
         => Vector2.Distance(Start, End);
 
@@ -100,7 +101,7 @@ public class MillChain : PathSegment {
         for (double millingLayer_mm = _params!.T_mm - _params!.I_mm; millingLayer_mm >= bottomLayer_mm; millingLayer_mm -= _params!.I_mm) {
             currPos = GCodeHelpers.SweepAndDrillSafelyFromTo(from: currPos,
                 to: start.AsVector3(Math.Max(firstB_mm, millingLayer_mm)), // Not deeper than first segment
-                t_mm: _params!.T_mm, s_mm: _params!.RawK_mm ?? _params!.S_mm, _params!.F_mmpmin, backtracking: false,
+                t_mm: _params!.T_mm, sk_mm: _params!.RawK_mm ?? _params!.S_mm, _params!.F_mmpmin, backtracking: false,
                 t, sw, stats);
             foreach (var s in _segments) {
                 currPos = s.EmitGCode(currPos, millingLayer_mm, true, t, sw, stats, dxfFileName);
@@ -185,19 +186,19 @@ public class MillChain : PathSegment {
         }
 
         // Create code
-        double s_mm = _params!.RawK_mm ?? _params!.S_mm;
+        double sk_mm = _params!.RawK_mm ?? _params!.S_mm;
         foreach (var e in sortedEdges) {
             currPos = GCodeHelpers.SweepAndDrillSafelyFromTo(from: currPos, 
                 to: e.Milled == EdgeMilled.Start2End ? e.Start(t) : e.End(t), 
-                t_mm: _params!.T_mm, s_mm: s_mm, _params!.F_mmpmin, 
+                t_mm: _params!.T_mm, sk_mm: sk_mm, _params!.F_mmpmin, 
                 backtracking: false, t, sw, stats);
 
             currPos = e.Segment.EmitGCode(currPos, e.MillingBottom_mm, e.Milled == EdgeMilled.Start2End, t, sw, stats, dxfFileName);
         }
 
         Vector2 end = t.Transform(_segments.Last().End);
-        currPos = GCodeHelpers.SweepAndDrillSafelyFromTo(from: currPos, to: end.AsVector3(s_mm),
-            t_mm: _params!.T_mm, s_mm: s_mm, _params!.F_mmpmin, backtracking: false, t, sw, stats);
+        currPos = GCodeHelpers.SweepAndDrillSafelyFromTo(from: currPos, to: end.AsVector3(sk_mm),
+            t_mm: _params!.T_mm, sk_mm: sk_mm, _params!.F_mmpmin, backtracking: false, t, sw, stats);
         AssertNear(currPos.XY(), end, MessageHandlerForEntities.Context(_segments.Last().Source, _segments.First().Start, dxfFileName));
         return currPos;
     }
@@ -209,6 +210,8 @@ public interface IMarkOrMillSegment {
 }
 
 public class ChainSegment : IRawSegment, IMarkOrMillSegment {
+    public int Preference => 4;
+
     public EntityObject Source { get; }
     public ParamsText ParamsText { get; }
     public bool IsMark { get; }
@@ -259,6 +262,8 @@ public class ChainSegment : IRawSegment, IMarkOrMillSegment {
 }
 
 public abstract class AbstractSweepSegment : PathSegmentWithParamsText, IRawSegment {
+    public int Preference => 5;
+
     private Vector2 _start;
     private Vector2 _end;
 
@@ -286,7 +291,7 @@ public abstract class AbstractSweepSegment : PathSegmentWithParamsText, IRawSegm
         Vector2 target = t.Transform(End);
         double s_mm = _params!.S_mm;
         GCodeHelpers.SweepAndDrillSafelyFromTo(currPos, target.AsVector3(s_mm), t_mm: _params!.T_mm,
-                                               s_mm: s_mm, f_mmpmin: _params!.F_mmpmin,
+                                               sk_mm: s_mm, f_mmpmin: _params!.F_mmpmin,
                                                backtracking: Order == PathModel.BACKTRACK_ORDER, t, sw, stats);
         return target.AsVector3(_params!.S_mm);
     }
@@ -328,6 +333,7 @@ public abstract class PathMarkOrMillSegment : PathSegmentWithParamsText, IMarkOr
 }
 
 public class HelixSegment : PathMarkOrMillSegment, IRawSegment {
+    public int Preference => 2;
     public Vector2 Center { get; }
     public double Radius_mm { get; }
 
@@ -412,6 +418,7 @@ public class DrillSegment : PathMarkOrMillSegment, IRawSegment {
     public Vector2 Center { get; }
     // See HelixSegment
     public double Order => -1000000;
+    public int Preference => 1;
 
     public DrillSegment(EntityObject source, ParamsText pars, Vector2 center, bool isMark) : base(source, pars, isMark) {
         Center = center;
@@ -442,6 +449,8 @@ public class DrillSegment : PathMarkOrMillSegment, IRawSegment {
 }
 
 public class SubPathSegment : PathSegmentWithParamsText, IRawSegment {
+    public int Preference => 3;
+
     private readonly string _overlayTextForErrors;
     private readonly PathName _name;
     private readonly bool _backward;

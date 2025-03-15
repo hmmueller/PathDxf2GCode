@@ -278,6 +278,15 @@ namespace de.hmmueller.PathDxf2GCode {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die End marker not near end of last traversed segment, but at {0} - add sweep ähnelt.
+        /// </summary>
+        internal static string PathModel_LostEnd_End {
+            get {
+                return ResourceManager.GetString("PathModel_LostEnd_End", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die End marker missing ähnelt.
         /// </summary>
         internal static string PathModel_MissingEnd {

@@ -201,6 +201,9 @@ Options:
   <data name="PathModel_LineTypeNotSupported_LineType" xml:space="preserve">
     <value>Line type {0} not supported</value>
   </data>
+  <data name="PathModel_LostEnd_End" xml:space="preserve">
+    <value>End marker not near end of last traversed segment, but at {0} - add sweep</value>
+  </data>
   <data name="PathModel_MissingEnd" xml:space="preserve">
     <value>End marker missing</value>
   </data>

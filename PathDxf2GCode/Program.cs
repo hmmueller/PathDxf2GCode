@@ -4,7 +4,7 @@ using de.hmmueller.PathGCodeLibrary;
 using netDxf;
 
 public class Program {
-    public const string VERSION = "2025-03-11";
+    public const string VERSION = "2025-03-14";
 
     public static int Main(string[] args) {
         var messages = new MessageHandlerForEntities(Console.Error);
@@ -15,11 +15,11 @@ public class Program {
         Options? options = Options.Create(args, messages);
 
         if (options == null) {
-            WriteErrors(messages);
+            messages.WriteErrors();
             Options.Usage(messages);
             return 2;
         } else if (!options.DxfFilePaths.Any()) {
-            WriteErrors(messages);
+            messages.WriteErrors();
             messages.WriteLine(MessageHandler.ErrorPrefix + Messages.Program_NoDxfFiles);
             return 3;
         } else {
@@ -35,18 +35,7 @@ public class Program {
                 }
             }
 
-            return WriteErrors(messages) ? 1 : 0;
-        }
-    }
-
-    private static bool WriteErrors(MessageHandlerForEntities messages) {
-        if (messages.Errors.Any()) {
-            foreach (var e in messages.Errors) {
-                messages.WriteLine(e);
-            }
-            return true;
-        } else {
-            return false;
+            return messages.WriteErrors() ? 1 : 0;
         }
     }
 

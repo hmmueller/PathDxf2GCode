@@ -33,17 +33,17 @@ public static class GCodeHelpers {
         return target;
     }
 
-    public static Vector3 SweepAndDrillSafelyFromTo(Vector3 from, Vector3 to, double t_mm, double s_mm, double f_mmpmin, 
+    public static Vector3 SweepAndDrillSafelyFromTo(Vector3 from, Vector3 to, double t_mm, double sk_mm, double f_mmpmin, 
                                                     bool backtracking, Transformation3 zCorr, StreamWriter sw, Statistics stats) {
-        sw.WriteLine($"SweepAndDrillSafelyFromTo {from.F3()} {to.F3()} s={s_mm.F3()} bt={backtracking}".AsComment(2));
+        sw.WriteLine($"SweepAndDrillSafelyFromTo {from.F3()} {to.F3()} s={sk_mm.F3()} bt={backtracking}".AsComment(2));
         Vector2 fromXY = from.XY();
         Vector2 toXY = to.XY();
         if (fromXY.Near(toXY)) {
             DrillOrPullZFromTo(fromXY, from.Z, to.Z, t_mm, f_mmpmin, zCorr, sw, stats);
         } else {
-            DrillOrPullZFromTo(fromXY, from.Z, s_mm, t_mm, f_mmpmin, zCorr, sw, stats);
+            DrillOrPullZFromTo(fromXY, from.Z, sk_mm, t_mm, f_mmpmin, zCorr, sw, stats);
             to = SweepFromTo(from, to, sw, stats);
-            DrillOrPullZFromTo(toXY, s_mm, to.Z, t_mm, f_mmpmin, zCorr, sw, stats);
+            DrillOrPullZFromTo(toXY, sk_mm, to.Z, t_mm, f_mmpmin, zCorr, sw, stats);
         }
         return to;
     }
