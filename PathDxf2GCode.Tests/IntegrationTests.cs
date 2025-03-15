@@ -75,7 +75,6 @@ M30
     [TestMethod]
     public void TestMethod02() {
         Assert.AreEqual(0, Program.Main(["/f150", "/v500", "8999.2P.dxf"]));
-        
         Compare("8999.2P_Milling.gcode", $@"%
 (PathDxf2GCode - HMMüller 2024-2025 V.{Program.VERSION})
 (8999.2P.dxf)
@@ -87,6 +86,8 @@ G00 Z20.000
 G00 X0.000 Y0.000
   (Model 8999.2P[8999.2P.dxf])
   (SweepAndDrillSafelyFromTo [0.000|0.000|20.000] [5.948|5.963|20.000] s=20.000 bt=False)
+    (DrillOrPullZFromTo 20.000 20.000)
+G00 Z20.000
 G00 X5.948 Y5.963
   (SweepAndDrillSafelyFromTo [5.948|5.963|20.000] [5.948|5.963|0.400] s=20.000 bt=False)
     (DrillOrPullZFromTo 20.000 0.400)
@@ -110,25 +111,15 @@ G00 Z20.000
   (Bohrungen:       2 mm   ca.  1 min)
   (Leerfahrten:   124 mm   ca.  1 min)
   (Summe:         241 mm   ca.  2 min)
-  (Befehlszahl: 10)
+  (Befehlszahl: 11)
 M30
 %");
     }
-
-    //[TestMethod]
-    //public void TestMethod03() {
-    //    Assert.AreEqual(0, Program.Main(["8999.3P.dxf"]));
-    //    Compare("8999.3P_Milling.gcode", @"");
-    //}
 
     [TestMethod]
     public void TestMethod05() {
         Assert.AreNotEqual(0, Program.Main(["/f150", "/v500", "8999.5P.dxf"]));
     }
-
-
-
-
 
     [TestMethod]
     public void TestMethod08() {
@@ -144,6 +135,8 @@ G00 Z5.000
 G00 X0.000 Y0.000
   (Model 8999.8P[8999.8P.dxf])
   (SweepAndDrillSafelyFromTo [0.000|0.000|5.000] [11.090|27.077|5.000] s=5.000 bt=False)
+    (DrillOrPullZFromTo 5.000 5.000)
+G00 Z5.000
 G00 X11.090 Y27.077
   (SweepAndDrillSafelyFromTo [11.090|27.077|5.000] [11.090|27.077|-0.100] s=5.000 bt=False)
     (DrillOrPullZFromTo 5.000 -0.100)
@@ -194,13 +187,11 @@ G00 Z5.000
   (Bohrungen:       1 mm   ca.  1 min)
   (Leerfahrten:    59 mm   ca.  1 min)
   (Summe:         355 mm   ca.  3 min)
-  (Befehlszahl: 18)
+  (Befehlszahl: 19)
 M30
 %");
     }
-
-
-
+ 
     [TestMethod]
     public void TestMethod09() {
         Assert.AreEqual(0, Program.Main(["/f150", "/v500", "8999.9P.dxf"]));
@@ -215,6 +206,8 @@ G00 Z5.000
 G00 X0.000 Y0.000
   (Model 8999.9P[8999.9P.dxf])
   (SweepAndDrillSafelyFromTo [0.000|0.000|5.000] [20.962|29.147|5.000] s=5.000 bt=False)
+    (DrillOrPullZFromTo 5.000 5.000)
+G00 Z5.000
 G00 X20.962 Y29.147
   (SweepAndDrillSafelyFromTo [20.962|29.147|5.000] [20.962|29.147|0.800] s=5.000 bt=False)
     (DrillOrPullZFromTo 5.000 0.800)
@@ -303,11 +296,10 @@ G00 Z5.000
   (Bohrungen:       3 mm   ca.  1 min)
   (Leerfahrten:    72 mm   ca.  1 min)
   (Summe:         825 mm   ca.  8 min)
-  (Befehlszahl: 31)
+  (Befehlszahl: 32)
 M30
 %");
     }
-
 
     [TestMethod]
     public void TestMethod10() {
@@ -347,7 +339,6 @@ M30
 %");
     }
 
-
     [TestMethod]
     public void TestMethod11() {
         Assert.AreEqual(0, Program.Main(["/f150", "/v500", "8999.11P.dxf"]));
@@ -362,6 +353,8 @@ G00 Z5.000
 G00 X0.000 Y0.000
   (Model 8999.11P[8999.11P.dxf])
   (SweepAndDrillSafelyFromTo [0.000|0.000|5.000] [20.000|0.000|5.000] s=5.000 bt=False)
+    (DrillOrPullZFromTo 5.000 5.000)
+G00 Z5.000
 G00 X20.000 Y0.000
   (START Subpath 8998.2P[8999.11P.dxf] t=[ [120.000|170.000]=>[20.000|0.000] / [120.000|100.000]=>[20.000|70.000] ])
   (SweepAndDrillSafelyFromTo [20.000|0.000|5.000] [20.000|0.000|-0.200] s=5.000 bt=False)
@@ -399,19 +392,14 @@ G00 Z5.000
   (Bohrungen:       2 mm   ca.  1 min)
   (Leerfahrten:   120 mm   ca.  1 min)
   (Summe:         295 mm   ca.  2 min)
-  (Befehlszahl: 14)
+  (Befehlszahl: 15)
 M30
 %");
     }
 
-
-
-
-
-
     [TestMethod]
     public void TestMethod12() {
-        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "8999.12P.dxf"]));
+        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "8999.12P.dxf"]));       
         Compare("8999.12P_Milling.gcode", $@"%
 (PathDxf2GCode - HMMüller 2024-2025 V.{Program.VERSION})
 (8999.12P.dxf)
@@ -423,6 +411,8 @@ G00 Z2.000
 G00 X0.000 Y0.000
   (Model 8999.12P[8999.12P.dxf])
   (SweepAndDrillSafelyFromTo [0.000|0.000|2.000] [20.000|0.000|2.000] s=2.000 bt=False)
+    (DrillOrPullZFromTo 2.000 2.000)
+G00 Z2.000
 G00 X20.000 Y0.000
   (SweepAndDrillSafelyFromTo [20.000|0.000|2.000] [20.000|-0.000|-0.100] s=2.000 bt=False)
     (DrillOrPullZFromTo 2.000 -0.100)
@@ -445,14 +435,14 @@ G00 Z2.000
   (Bohrungen:       0 mm   ca.  1 min)
   (Leerfahrten:    84 mm   ca.  1 min)
   (Summe:         193 mm   ca.  2 min)
-  (Befehlszahl: 9)
+  (Befehlszahl: 10)
 M30
 %");
     }
 
     [TestMethod]
     public void TestMethod13() {
-        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "8999.13P.dxf"]));
+        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "8999.13P.dxf"]));       
         Compare("8999.13P_Milling.gcode", $@"%
 (PathDxf2GCode - HMMüller 2024-2025 V.{Program.VERSION})
 (8999.13P.dxf)
@@ -464,6 +454,8 @@ G00 Z25.000
 G00 X0.000 Y0.000
   (Model 8999.13P[8999.13P.dxf])
   (SweepAndDrillSafelyFromTo [0.000|0.000|25.000] [10.681|-13.420|25.000] s=25.000 bt=False)
+    (DrillOrPullZFromTo 25.000 25.000)
+G00 Z25.000
 G00 X10.681 Y-13.420
   (SweepAndDrillSafelyFromTo [10.681|-13.420|25.000] [10.681|-13.420|18.800] s=25.000 bt=False)
     (DrillOrPullZFromTo 25.000 18.800)
@@ -786,9 +778,10 @@ G00 Z25.000
   (Bohrungen:      11 mm   ca.  1 min)
   (Leerfahrten:   179 mm   ca.  1 min)
   (Summe:        2102 mm   ca. 19 min)
-  (Befehlszahl: 114)
+  (Befehlszahl: 115)
 M30
 %"); }
+ 
     [TestMethod]
     public void TestMethod14() { // Löcher
         Assert.AreEqual(0, Program.Main(["/f150", "/v500", "8999.14P.dxf"]));
@@ -803,6 +796,8 @@ G00 Z5.000
 G00 X0.000 Y0.000
   (Model 8999.14P[8999.14P.dxf])
   (SweepAndDrillSafelyFromTo [0.000|0.000|5.000] [1.950|-3.302|5.000] s=5.000 bt=False)
+    (DrillOrPullZFromTo 5.000 5.000)
+G00 Z5.000
 G00 X1.950 Y-3.302
   (SweepAndDrillSafelyFromTo [1.950|-3.302|5.000] [1.950|-3.302|1.600] s=5.000 bt=False)
     (DrillOrPullZFromTo 5.000 1.600)
@@ -1240,11 +1235,10 @@ G00 Z5.000
   (Bohrungen:       5 mm   ca.  1 min)
   (Leerfahrten:   440 mm   ca.  2 min)
   (Summe:         761 mm   ca.  5 min)
-  (Befehlszahl: 244)
+  (Befehlszahl: 245)
 M30
 %");
     }
-
 
     [TestMethod]
     public void TestMethod15() {

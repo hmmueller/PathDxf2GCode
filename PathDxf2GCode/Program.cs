@@ -4,7 +4,7 @@ using de.hmmueller.PathGCodeLibrary;
 using netDxf;
 
 public class Program {
-    public const string VERSION = "2025-03-14";
+    public const string VERSION = "2025-03-15";
 
     public static int Main(string[] args) {
         var messages = new MessageHandlerForEntities(Console.Error);
@@ -90,7 +90,10 @@ public class Program {
                 // See http://www.linuxcnc.org/docs/html/gcode/overview.html#_g_code_best_practices
                 Statistics stats = new(m.Params.V_mmpmin);
 
-                Vector3 init = new(0, 0, m.Params.S_mm);
+                // Z is a little bit different from S so that the first segment will definitely
+                // emit a Z sweep - which is important because that Z sweep may include a Z adjustment
+                // that would be missed otherwise.
+                Vector3 init = new(0, 0, m.Params.S_mm * (1 + 2 * GeometryHelpers.RELATIVE_EPS));
                 WritePrologue(init, sw, dxfFilePath);
                 sw.WriteLine($"Model {m.Name}".AsComment(2));
                 Vector3 currpos = m.EmitMillingGCode(init, m.CreateTransformation(), sw, stats, dxfFilePath, messages);
@@ -104,7 +107,7 @@ public class Program {
                     messages.Write(m + ";");
                     sw.WriteLine(m.AsComment(2));
                 }
-                
+
                 WriteStat($"  {{0,-12}} {stats.MillLength_mm,5:F0} mm   {AsMin(stats.RoughMillTime)} min", Messages.Program_MillingLength);
                 WriteStat($"  {{0,-12}} {stats.DrillLength_mm,5:F0} mm   {AsMin(stats.RoughDrillTime)} min", Messages.Program_DrillingLength);
                 messages.WriteLine();

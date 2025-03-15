@@ -7,13 +7,13 @@ using netDxf.Entities;
 using netDxf.Tables;
 
 public static class GeometryHelpers {
-    private const double EPS = 1e-7;
+    public const double RELATIVE_EPS = 1e-6;
 
-    public static bool Near(this double d, double e, double eps)
-        => Math.Abs(d - e) / (Math.Abs(d) + Math.Abs(e) + eps) < eps;
+    public static bool Near(this double d, double e, double relative_eps)
+        => Math.Abs(d - e) <= relative_eps * (Math.Max(Math.Abs(d), Math.Abs(e)) + 0.001);
 
     public static bool Near(this double d, double e)
-        => Near(d, e, EPS);
+        => Near(d, e, RELATIVE_EPS);
 
     public static bool Near(this Vector2 d, Vector2 e)
         => Vector2.SquareDistance(d, e).Near(0);
