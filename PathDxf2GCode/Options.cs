@@ -54,9 +54,9 @@ public class Options : AbstractOptions {
 
     /// <summary>
     /// /p: Refexp for paths in DXF filenames and DXF texts. 
-    /// Underscores (_) in path names read from the DXF file are replaced with .
-    /// Groups are used for sorting.
+    /// Underscores (_) in path names read from the DXF file are replaced with dots
     /// (which I usually use in path names).
+    /// Groups are used for sorting.
     /// </summary>
     public string PathNamePattern { get; private set; } = "([0-9]{4})(?:[.]([0-9]+[A-Z]))?";
 

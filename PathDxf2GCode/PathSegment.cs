@@ -89,30 +89,6 @@ public class MillChain : PathSegment {
         }
     }
 
-    // No longer used - just as a fallback and for documentation of a simple algorithm
-    public Vector3 EmitGCodeSIMPLE(Vector3 currPos, Transformation3 t,
-                                      StreamWriter sw, Statistics stats, string dxfFileName, MessageHandlerForEntities messages) {
-        Vector2 segmentStart = _segments.First().Start;
-        Vector2 start = t.Transform(segmentStart);
-        AssertNear(currPos.XY(), start, MessageHandlerForEntities.Context(_segments.First().Source, segmentStart, dxfFileName));
-
-        double bottomLayer_mm = _segments.Min(s => s.Bottom_mm) - _params!.I_mm;
-        double firstB_mm = _segments.First().Bottom_mm;
-        for (double millingLayer_mm = _params!.T_mm - _params!.I_mm; millingLayer_mm >= bottomLayer_mm; millingLayer_mm -= _params!.I_mm) {
-            currPos = GCodeHelpers.SweepAndDrillSafelyFromTo(from: currPos,
-                to: start.AsVector3(Math.Max(firstB_mm, millingLayer_mm)), // Not deeper than first segment
-                t_mm: _params!.T_mm, sk_mm: _params!.RawK_mm ?? _params!.S_mm, _params!.F_mmpmin, backtracking: false,
-                t, sw, stats);
-            foreach (var s in _segments) {
-                currPos = s.EmitGCode(currPos, millingLayer_mm, true, t, sw, stats, dxfFileName);
-            }
-        }
-
-        Vector2 end = t.Transform(_segments.Last().End);
-        AssertNear(currPos.XY(), end, MessageHandlerForEntities.Context(_segments.Last().Source, segmentStart, dxfFileName));
-        return currPos;
-    }
-
     private enum EdgeMilled { Unknown, Start2End, End2Start }
 
     private class Edge {

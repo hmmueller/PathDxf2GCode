@@ -19,7 +19,7 @@ public static class GCodeHelpers {
                     stats.AddSweepLength(currZ, t_mm);
                 }
                 if (!targetZ.Near(t_mm)) {
-                    // Ab t_mm wird gebohrt; TODO: Wenn tiefes Loch (> C*O), dann G81-Bohren
+                    // From t_mm downwards, we drill; TODO: deep holes could be drilled with G81
                     sw.WriteLine($"G01 Z{zCorr.Expr(targetZ, pos)}");
                     stats.AddDrillLength(t_mm, targetZ, f_mmpmin);
                 }

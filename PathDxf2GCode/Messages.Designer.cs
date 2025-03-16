@@ -61,6 +61,15 @@ namespace de.hmmueller.PathDxf2GCode {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Cannot load DXF file {0} ähnelt.
+        /// </summary>
+        internal static string DxfHelper_CannotLoadFile_Path {
+            get {
+                return ResourceManager.GetString("DxfHelper_CannotLoadFile_Path", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Reading {0} ähnelt.
         /// </summary>
         internal static string DxfHelper_ReadingFile__FileName {

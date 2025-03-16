@@ -19,7 +19,7 @@ public static class DxfHelper {
         string x = "a" + v + " c";
 
         if (d == null) {
-            messages.AddError("Input", "DXF-Datei {0} kann nicht geladen werden", dxfFilePath);
+            messages.AddError("Input", Messages.DxfHelper_CannotLoadFile_Path, dxfFilePath);
             layerLinetypes = new();
         } else {
             layerLinetypes = d.Layers.ToDictionary(layer => layer.Name, layer => layer.Linetype);
@@ -32,7 +32,7 @@ public static class DxfHelper {
     }
 
     private static void Dump(string dxfFilePath, DrawingEntities d, Dictionary<string, Linetype> layerLinetypes, string pathNamePattern) {
-        Console.WriteLine("---- DUMP {dxfFilePath}");
+        Console.WriteLine(MessageHandler.InfoPrefix + $"DUMP {dxfFilePath}");
         foreach (var e in d.All.Where(e => e.IsOnPathLayer(pathNamePattern, dxfFilePath))) {
             Console.WriteLine(e.ToLongString(layerLinetypes));
         }
