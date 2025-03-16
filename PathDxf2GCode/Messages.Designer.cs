@@ -305,6 +305,15 @@ namespace de.hmmueller.PathDxf2GCode {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die No parameters found for path {0}; maybe path text center is not near enough to start marker ähnelt.
+        /// </summary>
+        internal static string PathModel_MissingParams_Path {
+            get {
+                return ResourceManager.GetString("PathModel_MissingParams_Path", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Path definition {0} not found ähnelt.
         /// </summary>
         internal static string PathModel_MissingPathDefinition_PathName {
@@ -343,14 +352,14 @@ namespace de.hmmueller.PathDxf2GCode {
         /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Circle with line type PHANTOM (__ _ _ __) and diameter {0} has no special meaning ähnelt.
         /// </summary>
-        internal static string PathModel_NotSpecialCircle_D {
+        internal static string PathModel_NotSpecialCircle_Diameter {
             get {
-                return ResourceManager.GetString("PathModel_NotSpecialCircle_D", resourceCulture);
+                return ResourceManager.GetString("PathModel_NotSpecialCircle_Diameter", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Object ...\n{0}\n...das assigned text &apos;{1}&apos; ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Object ...\n{0}\n...has assigned text &apos;{1}&apos; ähnelt.
         /// </summary>
         internal static string PathModel_TextAssignment_Obj_Text {
             get {
@@ -361,9 +370,9 @@ namespace de.hmmueller.PathDxf2GCode {
         /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Text layer name &apos;{0}&apos; different from element layer name &apos;{1}&apos; ähnelt.
         /// </summary>
-        internal static string PathModel_TextLayerDifferentFromElementLayer {
+        internal static string PathModel_TextLayerDifferentFromElementLayer_TextLayer_ElementLayer {
             get {
-                return ResourceManager.GetString("PathModel_TextLayerDifferentFromElementLayer", resourceCulture);
+                return ResourceManager.GetString("PathModel_TextLayerDifferentFromElementLayer_TextLayer_ElementLayer", resourceCulture);
             }
         }
         

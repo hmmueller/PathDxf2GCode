@@ -92,7 +92,7 @@ public class PathModel {
         ParamsText GetText(EntityObject e) {
             if (texts.TryGetValue(e, out ParamsText? t)) {
                 if (e.Layer.Name != t.LayerName) {
-                    messages.AddError(e, t.Position, dxfFilePath, Messages.PathModel_TextLayerDifferentFromElementLayer, t.LayerName ?? "", e.Layer.Name);
+                    messages.AddError(e, t.Position, dxfFilePath, Messages.PathModel_TextLayerDifferentFromElementLayer_TextLayer_ElementLayer, t.LayerName ?? "", e.Layer.Name);
                 }
                 return t;
             } else {
@@ -195,7 +195,7 @@ public class PathModel {
             } else if (IsZProbe(circle)) { // ZProbe
                 rawModel.ZProbes.Add(new ZProbe(circle, circleText, center));
             } else {
-                messages.AddError(circle, center, dxfFilePath, Messages.PathModel_NotSpecialCircle_D, (2 * circle.Radius).F3());
+                messages.AddError(circle, center, dxfFilePath, Messages.PathModel_NotSpecialCircle_Diameter, (2 * circle.Radius).F3());
             }
         }
 
@@ -204,27 +204,33 @@ public class PathModel {
         foreach (var circle in circles.Where(c => !IsLineTypePhantomCircle(c))) {
             ParamsText circleText = GetText(circle);
             RawPathModel rawModel = GetRawModel(circle, circle.Center.AsVector2());
-            double? bitRadius_mm = rawModel.ParamsText?.GetDouble('O') / 2;
-            Vector2 center = circle.Center.AsVector2();
-            if (bitRadius_mm == null) {
-                messages.AddError(MessageHandlerForEntities.Context(circle, center, dxfFilePath),
-                    Messages.PathModel_MissingKey_Key, 'O');
-            } else if (circle.Radius.Near(bitRadius_mm.Value)) {
-                bool isMark = IsLineType(layerLinetypes, circle, "DIVIDE");
-                if (isMark || IsLineType(layerLinetypes, circle, "CONTINUOUS")) {
-                    rawModel.RawSegments.Add(new DrillSegment(circle, circleText, center, isMark));
-                } else {
-                    messages.AddError(circle, center, dxfFilePath, Messages.PathModel_LineTypeNotSupported_LineType, LineTypeName(layerLinetypes, circle));
-                }
-            } else if (circle.Radius > bitRadius_mm.Value) {
-                bool isMark = IsLineType(layerLinetypes, circle, "DIVIDE");
-                if (isMark || IsLineType(layerLinetypes, circle, "CONTINUOUS")) {
-                    rawModel.RawSegments.Add(new HelixSegment(circle, circleText, center, circle.Radius, isMark));
-                } else {
-                    messages.AddError(circle, center, dxfFilePath, Messages.PathModel_LineTypeNotSupported_LineType, LineTypeName(layerLinetypes, circle));
-                }
+            if (ParamsText.IsNullOrEmpty(rawModel.ParamsText)) {
+                messages.AddError(MessageHandlerForEntities.Context(rawModel.StartObject ?? circle,
+                    rawModel.Start ?? circle.Center.AsVector2(), dxfFilePath),
+                    Messages.PathModel_MissingParams_Path, rawModel.Name.AsString());
             } else {
-                messages.AddError(circle, center, dxfFilePath, Messages.PathModel_CircleTooSmall_D_O, (2 * circle.Radius).F3(), (2 * bitRadius_mm.Value).F3());
+                double? bitRadius_mm = rawModel.ParamsText!.GetDouble('O') / 2;
+                Vector2 center = circle.Center.AsVector2();
+                if (bitRadius_mm == null) {
+                    messages.AddError(MessageHandlerForEntities.Context(circle, center, dxfFilePath),
+                        Messages.PathModel_MissingKey_Key, 'O');
+                } else if (circle.Radius.Near(bitRadius_mm.Value)) {
+                    bool isMark = IsLineType(layerLinetypes, circle, "DIVIDE");
+                    if (isMark || IsLineType(layerLinetypes, circle, "CONTINUOUS")) {
+                        rawModel.RawSegments.Add(new DrillSegment(circle, circleText, center, isMark));
+                    } else {
+                        messages.AddError(circle, center, dxfFilePath, Messages.PathModel_LineTypeNotSupported_LineType, LineTypeName(layerLinetypes, circle));
+                    }
+                } else if (circle.Radius > bitRadius_mm.Value) {
+                    bool isMark = IsLineType(layerLinetypes, circle, "DIVIDE");
+                    if (isMark || IsLineType(layerLinetypes, circle, "CONTINUOUS")) {
+                        rawModel.RawSegments.Add(new HelixSegment(circle, circleText, center, circle.Radius, isMark));
+                    } else {
+                        messages.AddError(circle, center, dxfFilePath, Messages.PathModel_LineTypeNotSupported_LineType, LineTypeName(layerLinetypes, circle));
+                    }
+                } else {
+                    messages.AddError(circle, center, dxfFilePath, Messages.PathModel_CircleTooSmall_D_O, (2 * circle.Radius).F3(), (2 * bitRadius_mm.Value).F3());
+                }
             }
         }
 

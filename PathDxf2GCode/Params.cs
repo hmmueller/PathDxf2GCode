@@ -47,6 +47,8 @@ public class ParamsText {
         TextRadius = textRadius;
     }
 
+    public static bool IsNullOrEmpty(ParamsText? p) => p == null || !p.Keys.Any();
+
     public ParamsText LimitedTo(string keys) {
         return new ParamsText(Text, Context, LayerName, Position,
             _strings.Where(kvp => keys.Contains(kvp.Key)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value),

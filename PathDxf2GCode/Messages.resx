@@ -210,6 +210,9 @@ Options:
   <data name="PathModel_MissingKey_Key" xml:space="preserve">
     <value>{0} value missing</value>
   </data>
+  <data name="PathModel_MissingParams_Path" xml:space="preserve">
+    <value>No parameters found for path {0}; maybe path text center is not near enough to start marker</value>
+  </data>
   <data name="PathModel_MissingPathDefinition_PathName" xml:space="preserve">
     <value>Path definition {0} not found</value>
   </data>
@@ -222,13 +225,13 @@ Options:
   <data name="PathModel_NoObjectFound_Text_Center_Diameter" xml:space="preserve">
     <value>No overlapping circle, arc or line found for '{0}'; maybe text center is not near enough to element (text circle: {1}, diam. {2}), or there is another overlapping text</value>
   </data>
-  <data name="PathModel_NotSpecialCircle_D" xml:space="preserve">
+  <data name="PathModel_NotSpecialCircle_Diameter" xml:space="preserve">
     <value>Circle with line type PHANTOM (__ _ _ __) and diameter {0} has no special meaning</value>
   </data>
   <data name="PathModel_TextAssignment_Obj_Text" xml:space="preserve">
-    <value>Object ...\n{0}\n...das assigned text '{1}'</value>
+    <value>Object ...\n{0}\n...has assigned text '{1}'</value>
   </data>
-  <data name="PathModel_TextLayerDifferentFromElementLayer" xml:space="preserve">
+  <data name="PathModel_TextLayerDifferentFromElementLayer_TextLayer_ElementLayer" xml:space="preserve">
     <value>Text layer name '{0}' different from element layer name '{1}'</value>
   </data>
   <data name="PathModel_TextLayout_Text" xml:space="preserve">

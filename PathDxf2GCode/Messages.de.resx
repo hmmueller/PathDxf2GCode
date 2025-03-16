@@ -210,6 +210,9 @@ Optionen:
   <data name="PathModel_MissingKey_Key" xml:space="preserve">
     <value>{0}-Wert fehlt</value>
   </data>
+  <data name="PathModel_MissingParams_Path" xml:space="preserve">
+    <value>Keine Parameter für Pfad {0} gefunden; vielleicht ist Pfadtext nicht nahe genug an Start-Merkierung</value>
+  </data>
   <data name="PathModel_MissingPathDefinition_PathName" xml:space="preserve">
     <value>Pfaddefinition {0} nicht gefunden</value>
   </data>
@@ -222,13 +225,13 @@ Optionen:
   <data name="PathModel_NoObjectFound_Text_Center_Diameter" xml:space="preserve">
     <value>Kein überlappender Kreis, Bogen und keine überlappende Linie für '{0}' gefunden; evtl. Textmitte nicht nahe genug (Textkreis: {1}, Durchm. {2}) oder überlappender weiterer Text</value>
   </data>
-  <data name="PathModel_NotSpecialCircle_D" xml:space="preserve">
+  <data name="PathModel_NotSpecialCircle_Diameter" xml:space="preserve">
     <value>Kreis mit Linientyp PHANTOM (__ _ _ __) mit Durchmesser {0} hat keine spezielle Bedeutung</value>
   </data>
   <data name="PathModel_TextAssignment_Obj_Text" xml:space="preserve">
     <value>Objekt ...\n{0}\n...hat zugeordneten Text '{1}'</value>
   </data>
-  <data name="PathModel_TextLayerDifferentFromElementLayer" xml:space="preserve">
+  <data name="PathModel_TextLayerDifferentFromElementLayer_TextLayer_ElementLayer" xml:space="preserve">
     <value>Text-Layername '{0}' weicht von Element-Layername '{1}' ab</value>
   </data>
   <data name="PathModel_TextLayout_Text" xml:space="preserve">
