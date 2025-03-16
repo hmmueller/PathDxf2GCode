@@ -7,39 +7,39 @@ using System.Text.RegularExpressions;
 
 public class Options : AbstractOptions {
     /// <summary>
-    /// /d: Suchverzeichnisse für referenzierte DXF-Dateien
+    /// /d: search directories for DXF files
     /// </summary>
     private readonly List<string> _searchDirectories = new();
 
     /// <summary>
-    /// Zu verarbeitende DXF-Dateien
+    /// Input DXF files
     /// </summary>    
     private readonly List<string> _dxfFilePaths = new();
 
     /// <summary>
-    /// /f: Fräsgeschwindigkeit für G01, G02, G03
+    /// /f: Milling speed für G01, G02, G03
     /// TODO: https://diymachining.com/grbl-feed-rate/ 
     /// </summary>
     public double GlobalFeedRate_mmpmin { get; private set; } = -1;
 
     /// <summary>
-    /// /v: Leerfahrtengeschwindigkeit für G00
+    /// /v: Sweep speed for G00 (only necessary for statistics computations)
     /// TODO: https://diymachining.com/grbl-feed-rate/ 
     /// </summary>
     public double GlobalSweepRate_mmpmin { get; private set; } = -1;
 
     /// <summary>
-    /// /c: Prüflauf für alle Modelle in einer DXF-Datei, keine G-Code-Ausgabe
+    /// /c: Dry run for all paths of a DXF file, no gcode output
     /// </summary>
     public bool CheckModels { get; private set; } = false;
 
     /// <summary>
-    /// /t: Gibt für alle auf diese Regex passenden Texte aus, welchem DXF-Objekt sie zugeordnet sind
+    /// /t: Write all texts matching this regexp; and the DXF objects to which they are assigned
     /// </summary>
     public Regex? ShowTextAssignments { get; private set; } = null;
 
     /// <summary>
-    /// Verzeichnis einer Inputdatei und dann alle Suchverzeichnisse für DXF-Dateien
+    /// Directory of input file, and then all search directories for DXF files
     /// </summary>
     /// <param name="dir"></param>
     /// <returns></returns>
@@ -53,15 +53,15 @@ public class Options : AbstractOptions {
     }
 
     /// <summary>
-    /// /p: Pattern für Pfade in DXF-Dateinamen und DXF-Texten. 
-    /// Die einzelnen Gruppen werden für Vergleiche (sowohl von-bis wie auch
-    /// Gleichheit) als Stringwert verglichen.
-    /// Underscore (_) in Pfadnamen aus der DXF-Datei werden vorher durch . ersetzt.
+    /// /p: Refexp for paths in DXF filenames and DXF texts. 
+    /// Underscores (_) in path names read from the DXF file are replaced with .
+    /// Groups are used for sorting.
+    /// (which I usually use in path names).
     /// </summary>
     public string PathNamePattern { get; private set; } = "([0-9]{4})(?:[.]([0-9]+[A-Z]))?";
 
     /// <summary>
-    /// /dump: Flag für Entwicklerausgaben
+    /// /dump: Flag for developer dumps
     /// </summary>
     public bool Dump { get; private set; }
 

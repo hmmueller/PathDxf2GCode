@@ -70,8 +70,8 @@ public class Program {
                         Match m = Regex.Match(line, GCodeConstants.ZAdjustmentExpressionRegex);
                         if (m.Success) {
                             string expr = m.Groups[1].Value;
-                            string replacement = Invariant($"{new ExprEval(vars, expr).Value:F3}");
-                            sw.WriteLine(line[0..m.Index] + replacement + line[(m.Index + m.Length)..] + " (==" + expr + ")");
+                            string replacement = Invariant($"{new ExprEval(vars, expr).Value:F3}(=={expr})");
+                            sw.WriteLine(line[0..m.Index] + replacement + line[(m.Index + m.Length)..]);
                         } else {
                             sw.WriteLine(line);
                         }

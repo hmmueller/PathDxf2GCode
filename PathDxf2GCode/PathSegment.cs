@@ -385,25 +385,25 @@ public class HelixSegment : PathMarkOrMillSegment, IRawSegment {
             sw.WriteLine($"MillSemiCircle l={d_mm.F3()}".AsComment(4));
 
             double b1_mm = Math.Max(d_mm - i_mm / 2, bottom_mm);
-            sw.WriteLine($"G02 X{c.X.F3()} Y{y1.F3()} Z{b1_mm.F3()} I0 J{millingRadius_mm.F3()} F{f_mmpmin.F3()}");
+            sw.WriteLine($"G02 X{c.X.F3()} Y{y1.F3()} Z{t.Expr(b1_mm, c)} I0 J{millingRadius_mm.F3()} F{f_mmpmin.F3()}");
             stats.AddMillLength(millingRadius_mm * Math.PI, f_mmpmin);
 
             double b0_mm = Math.Max(b1_mm - i_mm / 2, bottom_mm);
-            sw.WriteLine($"G02 X{c.X.F3()} Y{y0.F3()} Z{b0_mm.F3()} I0 J{(-millingRadius_mm).F3()} F{f_mmpmin.F3()}");
+            sw.WriteLine($"G02 X{c.X.F3()} Y{y0.F3()} Z{t.Expr(b0_mm, c)} I0 J{(-millingRadius_mm).F3()} F{f_mmpmin.F3()}");
             stats.AddMillLength(millingRadius_mm * Math.PI, f_mmpmin);
 
             done_mm = d_mm; // Spirale von millingLayer_mm nach b0_mm gefräst = nur bis millingLayer_mm ist Loch fertig!
         }
-        // Wenn der Radius <= O ist, dann steht in der Mitte nichts --> direkt in die Mitte fahren
         if (Radius_mm <= _params!.O_mm) {
+            // If radius <= 0, then there is no core in the center --> we can sweep straight to the center
             sw.WriteLine($"G00 X{c.X.F3()} Y{c.Y.F3()}");
             stats.AddSweepLength(millingRadius_mm);
 
             return c.AsVector3(bottom_mm);
         } else {
-            // Andernfalls vorher auf Höhe S fahren
+            // Otherwise, first pull up to S (to avoid core), then sweep to center.
             double s_mm = _params!.S_mm;
-            sw.WriteLine($"G00 Z{s_mm.F3()}");
+            sw.WriteLine($"G00 Z{t.Expr(s_mm, c)}");
             stats.AddSweepLength(bottom_mm, s_mm);
 
             sw.WriteLine($"G00 X{c.X.F3()} Y{c.Y.F3()}");
@@ -553,7 +553,7 @@ public class SubPathSegment : PathSegmentWithParamsText, IRawSegment {
         Transformation3 compound = t.Transform3(new Transformation2(_model!.Start, _model.End, _start, _end));
         sw.WriteLine($"START Subpath {_name} t={compound}".AsComment(2));
         currPos = _model.EmitMillingGCode(currPos, compound, sw, stats, _model.DxfFilePath, messages);
-        sw.WriteLine($"ENDE Subpath {_name} t={compound}".AsComment(2));
+        sw.WriteLine($"END Subpath {_name} t={compound}".AsComment(2));
         return currPos;
     }
 }
