@@ -143,6 +143,9 @@ Options:
   <data name="Program_NoGCodeFiles" xml:space="preserve">
     <value>No GCode files specified</value>
   </data>
+  <data name="Program_RBrcktExpected_Pos" xml:space="preserve">
+    <value>']' expected at column {0}</value>
+  </data>
   <data name="Program_Reading_File" xml:space="preserve">
     <value>Reading {0}</value>
   </data>

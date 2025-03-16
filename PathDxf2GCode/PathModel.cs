@@ -513,6 +513,10 @@ public class PathModel {
                 orderedZProbes.Add(nearestZ);
                 currZEnd = nearestZ.Center;
             }
+            int i = 51;
+            foreach (var zProbe in orderedZProbes) {
+                zProbe.SetName("#" + i++);
+            }
         }
 
         // Z. Finally, create PathModel
@@ -539,9 +543,8 @@ public class PathModel {
     }
 
     public void WriteEmptyZ(StreamWriter sw) {
-        int i = 2001;
         foreach (var z in _zProbes) {
-            sw.WriteLine((z.Center.F3() + (z.L == null ? "" : "/L:" + z.L) + "/T:" + z.T_mm.F3()).AsComment(0) + $" #{i++}=");
+            sw.WriteLine((z.Center.F3() + (z.L == null ? "" : "/L:" + z.L) + "/T:" + z.T_mm.F3()).AsComment(0) + " " + z.Name + "=");
         }
     }
 

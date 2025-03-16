@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 using static System.FormattableString;
 
 public class Program {
-    private const string VERSION = "2025-03-11";
+    private const string VERSION = "2025-03-16";
 
     private static int Main(string[] args) {
         MessageHandler messages = new(Console.Error);
@@ -25,19 +25,19 @@ public class Program {
             foreach (var f in options.GCodeFilePaths) {
                 Process(f, messages);
             }
-            return 0; // TODO: Bei Fehlern 
+            return messages.WriteErrors() ? 1 : 0;
         }
     }
 
     private static void Process(string f, MessageHandler messages) {
         string basePath =
-            f.EndsWith("_Z.txt", StringComparison.InvariantCultureIgnoreCase) ? f[..^6] :
-            f.EndsWith("_Clean.gcode", StringComparison.InvariantCultureIgnoreCase) ? f[..^12] :
             f.EndsWith(".dxf", StringComparison.InvariantCultureIgnoreCase) ? f[..^4] :
+            f.EndsWith("_Clean.gcode", StringComparison.InvariantCultureIgnoreCase) ? f[..^12] :
+            f.EndsWith("_Z.txt", StringComparison.InvariantCultureIgnoreCase) ? f[..^6] :
             f.EndsWith(".gcode", StringComparison.InvariantCultureIgnoreCase) ? f[..^6] : f;
         var vars = new Dictionary<string, double>();
         string zFile = basePath + "_Z.txt";
-        messages.WriteLine(Messages.Program_Reading_File, zFile);
+        messages.WriteLine(MessageHandler.InfoPrefix + Messages.Program_Reading_File, zFile);
         using (var sr = new StreamReader(zFile)) {
             int lineNo = 1;
             for (string? line = null; (line = sr.ReadLine()) != null; lineNo++) {
@@ -141,6 +141,13 @@ internal class ExprEval {
             d = Expr();
             if (C != ')') {
                 throw new Exception(string.Format(Messages.Program_RParExpected_Pos, _pos - 1));
+            }
+            Next();
+        } else if (C == '[') {
+            Next();
+            d = Expr();
+            if (C != ']') {
+                throw new Exception(string.Format(Messages.Program_RBrcktExpected_Pos, _pos - 1));
             }
             Next();
         } else if (C == '-') {

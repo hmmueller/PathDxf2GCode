@@ -129,6 +129,15 @@ namespace de.hmmueller.PathGCodeAdjustZ {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die &apos;]&apos; expected at column {0} ähnelt.
+        /// </summary>
+        internal static string Program_RBrcktExpected_Pos {
+            get {
+                return ResourceManager.GetString("Program_RBrcktExpected_Pos", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Reading {0} ähnelt.
         /// </summary>
         internal static string Program_Reading_File {

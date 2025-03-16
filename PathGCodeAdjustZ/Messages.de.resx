@@ -143,6 +143,9 @@ Parameter:
   <data name="Program_NoGCodeFiles" xml:space="preserve">
     <value>Keine G-Code-Dateien angegeben</value>
   </data>
+  <data name="Program_RBrcktExpected_Pos" xml:space="preserve">
+    <value>']' in Spalte {0} erwartet</value>
+  </data>
   <data name="Program_Reading_File" xml:space="preserve">
     <value>Einlesen von {0}</value>
   </data>
