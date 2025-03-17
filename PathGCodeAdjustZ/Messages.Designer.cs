@@ -61,6 +61,42 @@ namespace de.hmmueller.PathGCodeAdjustZ {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die End of expression expected at column {0} ähnelt.
+        /// </summary>
+        internal static string ExprEval_EndOfExprExpected_Pos {
+            get {
+                return ResourceManager.GetString("ExprEval_EndOfExprExpected_Pos", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die &apos;]&apos; expected at column {0} ähnelt.
+        /// </summary>
+        internal static string ExprEval_RBrcktExpected_Pos {
+            get {
+                return ResourceManager.GetString("ExprEval_RBrcktExpected_Pos", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die &apos;)&apos; expected at column {0} ähnelt.
+        /// </summary>
+        internal static string ExprEval_RParExpected_Pos {
+            get {
+                return ResourceManager.GetString("ExprEval_RParExpected_Pos", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Unexpected symbol &apos;{0}&apos; at column {1} ähnelt.
+        /// </summary>
+        internal static string ExprEval_Unexpected_Char_Pos {
+            get {
+                return ResourceManager.GetString("ExprEval_Unexpected_Char_Pos", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Call: PathGCodeAdjustZ [Options] [GCode files]
         ///
         ///Options:
@@ -93,15 +129,6 @@ namespace de.hmmueller.PathGCodeAdjustZ {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die End of expression expected at column {0} ähnelt.
-        /// </summary>
-        internal static string Program_EndOfExprExpected_Pos {
-            get {
-                return ResourceManager.GetString("Program_EndOfExprExpected_Pos", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Line does not have format &apos;(comment) #...=value&apos; ähnelt.
         /// </summary>
         internal static string Program_InvalidLineFormat {
@@ -129,38 +156,11 @@ namespace de.hmmueller.PathGCodeAdjustZ {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die &apos;]&apos; expected at column {0} ähnelt.
-        /// </summary>
-        internal static string Program_RBrcktExpected_Pos {
-            get {
-                return ResourceManager.GetString("Program_RBrcktExpected_Pos", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Reading {0} ähnelt.
         /// </summary>
         internal static string Program_Reading_File {
             get {
                 return ResourceManager.GetString("Program_Reading_File", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die &apos;)&apos; expected at column {0} ähnelt.
-        /// </summary>
-        internal static string Program_RParExpected_Pos {
-            get {
-                return ResourceManager.GetString("Program_RParExpected_Pos", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Unexpected symbol &apos;{0}&apos; at column {1} ähnelt.
-        /// </summary>
-        internal static string Program_Unexpected_Char_Pos {
-            get {
-                return ResourceManager.GetString("Program_Unexpected_Char_Pos", resourceCulture);
             }
         }
         

@@ -131,7 +131,7 @@ Options:
   <data name="Options_NotSupported_Name" xml:space="preserve">
     <value>Option {0} not supported</value>
   </data>
-  <data name="Program_EndOfExprExpected_Pos" xml:space="preserve">
+  <data name="ExprEval_EndOfExprExpected_Pos" xml:space="preserve">
     <value>End of expression expected at column {0}</value>
   </data>
   <data name="Program_InvalidLineFormat" xml:space="preserve">
@@ -143,16 +143,16 @@ Options:
   <data name="Program_NoGCodeFiles" xml:space="preserve">
     <value>No GCode files specified</value>
   </data>
-  <data name="Program_RBrcktExpected_Pos" xml:space="preserve">
+  <data name="ExprEval_RBrcktExpected_Pos" xml:space="preserve">
     <value>']' expected at column {0}</value>
   </data>
   <data name="Program_Reading_File" xml:space="preserve">
     <value>Reading {0}</value>
   </data>
-  <data name="Program_RParExpected_Pos" xml:space="preserve">
+  <data name="ExprEval_RParExpected_Pos" xml:space="preserve">
     <value>')' expected at column {0}</value>
   </data>
-  <data name="Program_Unexpected_Char_Pos" xml:space="preserve">
+  <data name="ExprEval_Unexpected_Char_Pos" xml:space="preserve">
     <value>Unexpected symbol '{0}' at column {1}</value>
   </data>
   <data name="Program_Writing_File" xml:space="preserve">

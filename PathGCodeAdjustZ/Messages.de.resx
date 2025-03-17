@@ -131,7 +131,7 @@ Parameter:
   <data name="Options_NotSupported_Name" xml:space="preserve">
     <value>Option {0} nicht unterstützt</value>
   </data>
-  <data name="Program_EndOfExprExpected_Pos" xml:space="preserve">
+  <data name="ExprEval_EndOfExprExpected_Pos" xml:space="preserve">
     <value>Ende der Formel in Spalte {0} erwartet</value>
   </data>
   <data name="Program_InvalidLineFormat" xml:space="preserve">
@@ -143,16 +143,16 @@ Parameter:
   <data name="Program_NoGCodeFiles" xml:space="preserve">
     <value>Keine G-Code-Dateien angegeben</value>
   </data>
-  <data name="Program_RBrcktExpected_Pos" xml:space="preserve">
+  <data name="ExprEval_RBrcktExpected_Pos" xml:space="preserve">
     <value>']' in Spalte {0} erwartet</value>
   </data>
   <data name="Program_Reading_File" xml:space="preserve">
     <value>Einlesen von {0}</value>
   </data>
-  <data name="Program_RParExpected_Pos" xml:space="preserve">
+  <data name="ExprEval_RParExpected_Pos" xml:space="preserve">
     <value>')' in Spalte {0} erwartet</value>
   </data>
-  <data name="Program_Unexpected_Char_Pos" xml:space="preserve">
+  <data name="ExprEval_Unexpected_Char_Pos" xml:space="preserve">
     <value>Unerwartetes Zeichen '{0}' in Spalte{1}</value>
   </data>
   <data name="Program_Writing_File" xml:space="preserve">
