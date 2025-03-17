@@ -39,7 +39,7 @@ public class LineGeometry : MillGeometry {
         currPos = GCodeHelpers.DrillOrPullZFromTo(currPos, l.Start.AsVector3(millingTarget_mm), t_mm, f_mmpmin, t, sw, stats);
         sw.WriteLine($"MillLine s={l.Start.F3()} e={l.End.F3()} h={millingTarget_mm.F3()} bt={backtracking}".AsComment(2));
 
-        sw.WriteLine($"G01 X{l.End.X.F3()} Y{l.End.Y.F3()} F{f_mmpmin.F3()}");
+        sw.WriteLine($"G01 X{l.End.X.F3()} Y{l.End.Y.F3()} Z{t.Expr(millingTarget_mm, l.Start)} F{f_mmpmin.F3()}");
         stats.AddMillLength((l.End - l.Start).Modulus(), f_mmpmin);
 
         return l.End.AsVector3(millingTarget_mm);
@@ -89,7 +89,7 @@ public class ArcGeometry : MillGeometry {
         sw.WriteLine($"MillArc l={a.Center.F3()} r={Radius_mm.F3()} a0={a.StartAngle_deg.F3()} a1={a.EndAngle_deg.F3()} h={millingTarget_mm.F3()} p0={a.Start.F3()} p1={a.End.F3()} bt={backtracking}".AsComment(2));
         string g = Counterclockwise ? "G03" : "G02";
 
-        sw.WriteLine($"{g} X{a.End.X.F3()} Y{a.End.Y.F3()} I{(a.Center.X - a.Start.X).F3()} J{(a.Center.Y - a.Start.Y).F3()} F{f_mmpmin.F3()}");
+        sw.WriteLine($"{g} X{a.End.X.F3()} Y{a.End.Y.F3()} Z{t.Expr(millingTarget_mm, a.Start)} I{(a.Center.X - a.Start.X).F3()} J{(a.Center.Y - a.Start.Y).F3()} F{f_mmpmin.F3()}");
         stats.AddMillLength(Radius_mm * MathHelper.NormalizeAngle(Counterclockwise ? EndAngle_deg - StartAngle_deg : StartAngle_deg - EndAngle_deg) * MathHelper.DegToRad, f_mmpmin);
 
         return a.End.AsVector3(millingTarget_mm);
