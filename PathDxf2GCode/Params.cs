@@ -67,12 +67,6 @@ public class ParamsText {
     public double GetDouble(char key, Func<string, double> errorAndNull)
         => _values.TryGetValue(key, out double d) ? d : errorAndNull($"{key}-Wert fehlt");
 
-    public string? GetString(char key1, char key2, out bool foundKey2) {
-        string? value1 = GetString(key1);
-        foundKey2 = value1 == null;
-        return foundKey2 ? GetString(key2) : value1;
-    }
-
     public void AddError(MessageHandlerForEntities mh, string errorContext, string message) {
         if (_uniqueErrors.Add(message)) { // Each error should be output only once ausgeben
             mh.AddError(errorContext, message);

@@ -429,7 +429,6 @@ public class SubPathSegment : PathSegmentWithParamsText, IRawSegment {
 
     private readonly string _overlayTextForErrors;
     private readonly PathName _name;
-    private readonly bool _backward;
     private PathModel? _model;
     private Vector2 _start;
     private Vector2 _end;
@@ -440,13 +439,13 @@ public class SubPathSegment : PathSegmentWithParamsText, IRawSegment {
         _end = end;
         _overlayTextForErrors = $"{text.Text} ({text.Context})";
         Order = order;
-        string? path = text.GetString('>', '<', out _backward);
+        string? path = text.GetString('>');
         if (path == null) {
-            throw new ArgumentException(MessageHandlerForEntities.Context(source, start, dxfFilePath) + ": " + Messages.PathSegment_GtLtMissing);
+            throw new ArgumentException(MessageHandlerForEntities.Context(source, start, dxfFilePath) + ": " + Messages.PathSegment_GtMissing);
         } else {
             _name = path.AsPathReference(pathNamePattern, dxfFilePath)
                 ?? throw new ArgumentException(string.Format(MessageHandlerForEntities.Context(source, start, dxfFilePath) +
-                    ": " + Messages.PathSegment_InvalidPathName_Dir_Path, _backward ? '<' : '>', path));
+                    ": " + Messages.PathSegment_InvalidPathName_Dir_Path, '>', path));
         }
     }
 
@@ -522,10 +521,6 @@ public class SubPathSegment : PathSegmentWithParamsText, IRawSegment {
 
     public override Vector3 EmitGCode(Vector3 currPos, Transformation3 t,
         StreamWriter sw, Statistics stats, string dxfFileName, MessageHandlerForEntities messages) {
-        if (_backward) {
-            messages.AddError(Source, Start, dxfFileName, Messages.PathSegment_LtNotImplemented);
-            throw new NotImplementedException(Messages.PathSegment_LtNotImplemented);
-        }
         Transformation3 compound = t.Transform3(new Transformation2(_model!.Start, _model.End, _start, _end));
         sw.WriteLine($"START Subpath {_name} t={compound}".AsComment(2));
         currPos = _model.EmitMillingGCode(currPos, compound, sw, stats, _model.DxfFilePath, messages);

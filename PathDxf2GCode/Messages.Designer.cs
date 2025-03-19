@@ -458,11 +458,11 @@ namespace de.hmmueller.PathDxf2GCode {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die &gt;... or &lt;... missing ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die &gt;... missing ähnelt.
         /// </summary>
-        internal static string PathSegment_GtLtMissing {
+        internal static string PathSegment_GtMissing {
             get {
-                return ResourceManager.GetString("PathSegment_GtLtMissing", resourceCulture);
+                return ResourceManager.GetString("PathSegment_GtMissing", resourceCulture);
             }
         }
         
@@ -472,15 +472,6 @@ namespace de.hmmueller.PathDxf2GCode {
         internal static string PathSegment_InvalidPathName_Dir_Path {
             get {
                 return ResourceManager.GetString("PathSegment_InvalidPathName_Dir_Path", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die &lt; is not yet implemented ähnelt.
-        /// </summary>
-        internal static string PathSegment_LtNotImplemented {
-            get {
-                return ResourceManager.GetString("PathSegment_LtNotImplemented", resourceCulture);
             }
         }
         

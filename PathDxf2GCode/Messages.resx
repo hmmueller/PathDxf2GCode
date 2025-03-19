@@ -258,14 +258,11 @@ Options:
   <data name="PathSegment_DistanceDiffers_CallerDist_CalledDist" xml:space="preserve">
     <value>Distance {0} is not equal to distance {1} in referenced path</value>
   </data>
-  <data name="PathSegment_GtLtMissing" xml:space="preserve">
-    <value>&gt;... or &lt;... missing</value>
+  <data name="PathSegment_GtMissing" xml:space="preserve">
+    <value>&gt;... missing</value>
   </data>
   <data name="PathSegment_InvalidPathName_Dir_Path" xml:space="preserve">
     <value>'{0}{1}' is not a valid path name</value>
-  </data>
-  <data name="PathSegment_LtNotImplemented" xml:space="preserve">
-    <value>&lt; is not yet implemented</value>
   </data>
   <data name="PathSegment_PathNotFound_Name_Files" xml:space="preserve">
     <value>Could not find path {0} in file(s) {1}</value>

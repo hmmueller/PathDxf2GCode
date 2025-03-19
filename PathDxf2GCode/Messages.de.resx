@@ -258,14 +258,11 @@ Optionen:
   <data name="PathSegment_DistanceDiffers_CallerDist_CalledDist" xml:space="preserve">
     <value>Distanz {0} ist nicht gleich Distanz {1} in referenziertem Subpfad</value>
   </data>
-  <data name="PathSegment_GtLtMissing" xml:space="preserve">
-    <value>&gt;... oder &lt;... fehlt</value>
+  <data name="PathSegment_GtMissing" xml:space="preserve">
+    <value>&gt;... fehlt</value>
   </data>
   <data name="PathSegment_InvalidPathName_Dir_Path" xml:space="preserve">
     <value>'{0}{1}' ist kein gültiger Pfadname</value>
-  </data>
-  <data name="PathSegment_LtNotImplemented" xml:space="preserve">
-    <value>&lt; noch nicht implementiert</value>
   </data>
   <data name="PathSegment_PathNotFound_Name_Files" xml:space="preserve">
     <value>Pfad {0} nicht in Datei(en) {1} gefunden</value>
