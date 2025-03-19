@@ -6,6 +6,7 @@ using netDxf.Entities;
 using netDxf.Tables;
 using netDxf.Header;
 using de.hmmueller.PathGCodeLibrary;
+using System.Diagnostics.CodeAnalysis;
 
 public static class DxfHelper {
     public static DxfDocument? LoadDxfDocument(string dxfFilePath, bool dump, string pathNamePattern,
@@ -31,6 +32,7 @@ public static class DxfHelper {
         return d;
     }
 
+    [ExcludeFromCodeCoverage]
     private static void Dump(string dxfFilePath, DrawingEntities d, Dictionary<string, Linetype> layerLinetypes, string pathNamePattern) {
         Console.WriteLine(MessageHandler.InfoPrefix + $"DUMP {dxfFilePath}");
         foreach (var e in d.All.Where(e => e.IsOnPathLayer(pathNamePattern, dxfFilePath))) {
@@ -39,6 +41,7 @@ public static class DxfHelper {
         Console.WriteLine("----------------------------");
     }
 
+    [ExcludeFromCodeCoverage]
     public static string ToLongString(this EntityObject e, Dictionary<string, Linetype> layerLinetypes)
         => $"{e.GetType().Name} LAYER={e.Layer.Name} CODENAME={e.CodeName} " +
            //$"TYPE={e.Type} COLOR={e.GetColor(layerColors)} LINETYPE={e.GetLinetype(layerLinetypes)}%{e.LinetypeScale} "
