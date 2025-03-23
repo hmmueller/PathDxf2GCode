@@ -23,7 +23,7 @@ public class ParamsText {
 
     private ParamsText(string text, string context, string? layer, Vector2 position, Vector2 textCenter, double textRadius)
         : this(text, context, layer, position,
-        text.Split(new[] { '\n', ' ' })
+        text.Split(['\n', ' '])
             .Select(s => s.Trim())
             .Where(s => !string.IsNullOrEmpty(s))
             .ToDictionary(s => s[0], s => s[1..]), textCenter, textRadius) {

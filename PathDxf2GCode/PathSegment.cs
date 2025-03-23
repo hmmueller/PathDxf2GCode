@@ -361,11 +361,11 @@ public class HelixSegment : PathMarkOrMillSegment, IRawSegment {
             sw.WriteLine($"MillSemiCircle l={d_mm.F3()}".AsComment(4));
 
             double b1_mm = Math.Max(d_mm - i_mm / 2, bottom_mm);
-            sw.WriteLine($"G02 X{c.X.F3()} Y{y1.F3()} Z{t.Expr(b1_mm, c)} I0 J{millingRadius_mm.F3()} F{f_mmpmin.F3()}");
+            sw.WriteLine($"G02 F{f_mmpmin.F3()} I0 J{millingRadius_mm.F3()} X{c.X.F3()} Y{y1.F3()} Z{t.Expr(b1_mm, c)}");
             stats.AddMillLength(millingRadius_mm * Math.PI, f_mmpmin);
 
             double b0_mm = Math.Max(b1_mm - i_mm / 2, bottom_mm);
-            sw.WriteLine($"G02 X{c.X.F3()} Y{y0.F3()} Z{t.Expr(b0_mm, c)} I0 J{(-millingRadius_mm).F3()} F{f_mmpmin.F3()}");
+            sw.WriteLine($"G02 F{f_mmpmin.F3()} X{c.X.F3()} Y{y0.F3()} I0 J{(-millingRadius_mm).F3()} Z{t.Expr(b0_mm, c)}");
             stats.AddMillLength(millingRadius_mm * Math.PI, f_mmpmin);
 
             done_mm = d_mm; // Spirale von millingLayer_mm nach b0_mm gefräst = nur bis millingLayer_mm ist Loch fertig!
