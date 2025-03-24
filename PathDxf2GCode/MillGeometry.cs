@@ -10,7 +10,7 @@ public abstract class MillGeometry {
     public abstract MillGeometry CloneReversed();
     public abstract bool Equals(MillGeometry g);
     public abstract Vector3 EmitGCode(Vector3 currPos, Transformation3 t, double globalS_mm, 
-                                      List<GCode> gcodes, Statistics stats, string dxfFileName, double millingTarget_mm, 
+                                      List<GCode> gcodes, string dxfFileName, double millingTarget_mm, 
                                       double t_mm, double f_mmpmin, bool backtracking);
 }
 
@@ -33,14 +33,14 @@ public class LineGeometry : MillGeometry {
         => g is LineGeometry li && li.Start.Near(Start) && li.End.Near(End);
 
     public override Vector3 EmitGCode(Vector3 currPos, Transformation3 t, double globalS_mm, 
-                                      List<GCode> gcodes, Statistics stats, string dxfFileName, double millingTarget_mm, 
+                                      List<GCode> gcodes, string dxfFileName, double millingTarget_mm, 
                                       double t_mm, double f_mmpmin, bool backtracking) {
         LineGeometry l = Transform(t);
-        currPos = GCodeHelpers.DrillOrPullZFromTo(currPos, l.Start.AsVector3(millingTarget_mm), t_mm, f_mmpmin, t, gcodes, stats);
+        currPos = GCodeHelpers.DrillOrPullZFromTo(currPos, l.Start.AsVector3(millingTarget_mm), t_mm, f_mmpmin, t, gcodes);
         gcodes.AddComment($"MillLine s={l.Start.F3()} e={l.End.F3()} h={millingTarget_mm.F3()} bt={backtracking}", 2);
 
-        gcodes.Add($"G01 F{f_mmpmin.F3()} X{l.End.X.F3()} Y{l.End.Y.F3()} Z{t.Expr(millingTarget_mm, l.Start)}");
-        stats.AddMillLength((l.End - l.Start).Modulus(), f_mmpmin);
+        gcodes.AddMill($"G01 F{f_mmpmin.F3()} X{l.End.X.F3()} Y{l.End.Y.F3()} Z{t.Expr(millingTarget_mm, l.Start)}",
+            (l.End - l.Start).Modulus(), f_mmpmin);
 
         return l.End.AsVector3(millingTarget_mm);
     }
@@ -81,16 +81,16 @@ public class ArcGeometry : MillGeometry {
             && Counterclockwise == arc.Counterclockwise;
 
     public override Vector3 EmitGCode(Vector3 currPos, Transformation3 t, double globalS_mm, 
-                                      List<GCode> gcodes, Statistics stats, string dxfFileName, double millingTarget_mm, 
+                                      List<GCode> gcodes, string dxfFileName, double millingTarget_mm, 
                                       double t_mm, double f_mmpmin, bool backtracking) {
         ArcGeometry a = Transform(t);
-        currPos = GCodeHelpers.DrillOrPullZFromTo(currPos, a.Start.AsVector3(millingTarget_mm), t_mm, f_mmpmin, t, gcodes, stats);
+        currPos = GCodeHelpers.DrillOrPullZFromTo(currPos, a.Start.AsVector3(millingTarget_mm), t_mm, f_mmpmin, t, gcodes);
 
         gcodes.AddComment($"MillArc l={a.Center.F3()} r={Radius_mm.F3()} a0={a.StartAngle_deg.F3()} a1={a.EndAngle_deg.F3()} h={millingTarget_mm.F3()} p0={a.Start.F3()} p1={a.End.F3()} bt={backtracking}", 2);
         string g = Counterclockwise ? "G03" : "G02";
 
-        gcodes.Add($"{g} F{f_mmpmin.F3()} I{(a.Center.X - a.Start.X).F3()} J{(a.Center.Y - a.Start.Y).F3()} X{a.End.X.F3()} Y{a.End.Y.F3()} Z{t.Expr(millingTarget_mm, a.Start)}");
-        stats.AddMillLength(Radius_mm * MathHelper.NormalizeAngle(Counterclockwise ? EndAngle_deg - StartAngle_deg : StartAngle_deg - EndAngle_deg) * MathHelper.DegToRad, f_mmpmin);
+        gcodes.AddMill($"{g} F{f_mmpmin.F3()} I{(a.Center.X - a.Start.X).F3()} J{(a.Center.Y - a.Start.Y).F3()} X{a.End.X.F3()} Y{a.End.Y.F3()} Z{t.Expr(millingTarget_mm, a.Start)}",
+            Radius_mm * MathHelper.NormalizeAngle(Counterclockwise ? EndAngle_deg - StartAngle_deg : StartAngle_deg - EndAngle_deg) * MathHelper.DegToRad, f_mmpmin);
 
         return a.End.AsVector3(millingTarget_mm);
     }

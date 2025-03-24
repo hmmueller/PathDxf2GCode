@@ -531,10 +531,10 @@ public class PathModel {
     public bool HasZProbes => _zProbes.Any();
 
     public Vector3 EmitMillingGCode(Vector3 currPos, Transformation3 t, double globalS_mm,
-        List<GCode> gcodes, Statistics stats, string dxfFileName, MessageHandlerForEntities messages) {
+        List<GCode> gcodes, string dxfFileName, MessageHandlerForEntities messages) {
         foreach (var s in _segments) {
             try {
-                currPos = s.EmitGCode(currPos, t, globalS_mm, gcodes, stats, dxfFileName, messages);
+                currPos = s.EmitGCode(currPos, t, globalS_mm, gcodes, dxfFileName, messages);
             } catch (EmitGCodeException ex) {
                 messages.AddError(ex.ErrorContext, ex.Message);
             }
@@ -548,13 +548,13 @@ public class PathModel {
         }
     }
 
-    public Vector3 EmitZProbingGCode(Vector3 currPos, double globalS_mm, List<GCode> gcodes, Statistics stats, string dxfFileName, MessageHandlerForEntities messages) {
+    public Vector3 EmitZProbingGCode(Vector3 currPos, double globalS_mm, List<GCode> gcodes, string dxfFileName, MessageHandlerForEntities messages) {
         double sweepHeight = currPos.Z;
         var t = new Transformation2(Start, Start + Vector2.UnitX, Vector2.Zero, Vector2.UnitX);
         foreach (var z in _zProbes) {
-            currPos = GCodeHelpers.SweepFromTo(currPos, t.Transform(z.Center).AsVector3(sweepHeight), globalS_mm, gcodes, stats);
+            currPos = GCodeHelpers.SweepFromTo(currPos, t.Transform(z.Center).AsVector3(sweepHeight), globalS_mm, gcodes);
             try {
-                currPos = z.EmitGCode(currPos, t, gcodes, stats, dxfFileName, messages);
+                currPos = z.EmitGCode(currPos, t, gcodes, dxfFileName, messages);
                 if (!currPos.Z.Near(sweepHeight)) {
                     throw new Exception($"Internal Error - {currPos.Z} <> {sweepHeight}");
                 }

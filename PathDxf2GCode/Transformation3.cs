@@ -28,13 +28,13 @@ public class ZProbe {
     public string Name => _name ?? throw new NullReferenceException("SetName was not called");
 
     public Vector3 EmitGCode(Vector3 currPos, Transformation2 t,
-                             List<GCode> gcodes, Statistics stats, string dxfFileName, MessageHandlerForEntities messages) {
+                             List<GCode> gcodes, string dxfFileName, MessageHandlerForEntities messages) {
         Vector2 c = t.Transform(Center);
         PathSegment.AssertNear(currPos.XY(), c, MessageHandlerForEntities.Context(Source, Center, dxfFileName));
 
-        gcodes.Add("G38.3 Z0"); // Slow Z probe - I might have to place the probe below!
+        gcodes.Add("G38.3 Z0"); // Slow Z probe - I might have to place the probe below the lowering router bit!
         gcodes.Add("G04 P4"); // Wait 4s to allow reading the value
-        gcodes.Add($"G00 Z{currPos.Z.F3()}"); // Return to previous Z heigth
+        gcodes.AddNonhorizontalG00($"G00 Z{currPos.Z.F3()}", currPos.Z); // Return to previous Z height; distance is estimate
 
         return currPos;
     }

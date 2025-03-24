@@ -94,7 +94,7 @@ namespace de.hmmueller.PathDxf2GCode {
         ///    /h     Hilfe-Anzeige
         ///    /f 000 Fräsgeschwindigkeit in mm/min; Pflichtwert
         ///    /v 000 Maximalgeschwindigkeit für Leerfahrten in mm/min; Pflichtwert
-        ///    /c     Überprüfen aller Pfade in der DXF-Datei ohne G-Code-Ausgabe; wenn /c nicht 
+        ///    /c     Überprüfen aller Pfade in der DXF-Datei ohne _g-Code-Ausgabe; wenn /c nicht 
         ///           angegeben wird, dann darf die DXF-Datei nur einen Pfad enthalten
         ///    /x zzz Gibt für alle auf diese Regex passenden Texte aus, welchem DXF-Objekt 
         ///           sie zugeordnet sind

@@ -87,25 +87,27 @@ public class Program {
         } else {
 
             if (!messages.Errors.Any()) {
-                // See http://www.linuxcnc.org/docs/html/gcode/overview.html#_g_code_best_practices
-                Statistics stats = new(m.Params.V_mmpmin);
-
                 // Z is a little bit different from S so that the first segment will definitely
                 // emit a Z sweep - which is important because that Z sweep may include a Z adjustment
                 // that would be missed otherwise.
                 Vector3 init = new(0, 0, m.Params.S_mm * (1 + 2 * GeometryHelpers.RELATIVE_EPS));
                 List<GCode> gcodes = new();
 
-                Vector3 currpos = m.EmitMillingGCode(init, m.CreateTransformation(), m.Params.S_mm, gcodes, stats, dxfFilePath, messages);
+                Vector3 currpos = m.EmitMillingGCode(init, m.CreateTransformation(), m.Params.S_mm, gcodes, dxfFilePath, messages);
 
-                gcodes.Add($"G00 Z{init.Z.F3()}");
-                stats.AddSweepLength(currpos.Z, init.Z);
+                gcodes.AddNonhorizontalG00($"G00 Z{init.Z.F3()}", Math.Abs(currpos.Z- init.Z));
 
                 gcodes = gcodes.Optimize();
 
                 WritePrologue(init, sw, dxfFilePath);
                 sw.WriteLine($"Model {m.Name}".AsComment(2));
                 WriteGCodes(gcodes, sw);
+
+                // See http://www.linuxcnc.org/docs/html/gcode/overview.html#_g_code_best_practices
+                Statistics stats = new(m.Params.V_mmpmin);
+                foreach (var g in gcodes) {
+                    g.AddToStatistics(stats);
+                }
 
                 static string AsMin(TimeSpan t) => $"ca.{Math.Ceiling(t.TotalMinutes),3:F0}";
                 void WriteStat(string s, string name) {
@@ -142,7 +144,7 @@ public class Program {
         //sw.WriteLine($"O{Path.GetFileNameWithoutExtension(dxfFilePath)} {dxfFilePath.AsComment(0)}");
         sw.WriteLine(dxfFilePath.AsComment(0));
 
-        sw.WriteLine("F150"); // initial feed rate 150 mm/min - GRBL/µCNC will das vor den G-Commands
+        sw.WriteLine("F150"); // initial feed rate 150 mm/min - GRBL/µCNC will das vor den _g-Commands
                               // G17 use XY plane, G21 mm mode, G40 cancel diameter compensation, G49 cancel length offset, G54 use
                               // coordinate system 1, G80 cancel canned cycles, G90 absolute distance mode, G94 feed/ minute mode.
         sw.WriteLine("G17 G21 G40 G49 G54 G80 G90 G94");
@@ -163,13 +165,12 @@ public class Program {
     private static void WriteZProbingGCode(PathModel m, StreamWriter sw, string dxfFilePath, MessageHandlerForEntities messages) {
         if (!messages.Errors.Any()) {
             // See http://www.linuxcnc.org/docs/html/gcode/overview.html#_g_code_best_practices
-            Statistics _ = new(m.Params.V_mmpmin);
             Vector3 init = new(0, 0, m.Params.S_mm);
 
             List<GCode> gcodes = new();
-            Vector3 currpos = m.EmitZProbingGCode(init, m.Params.S_mm, gcodes, _, dxfFilePath, messages);
-            GCodeHelpers.SweepFromTo(currpos, init, m.Params.S_mm, gcodes, _);
-            gcodes.Add($"G00 Z{init.Z.F3()}");
+            Vector3 currpos = m.EmitZProbingGCode(init, m.Params.S_mm, gcodes, dxfFilePath, messages);
+            GCodeHelpers.SweepFromTo(currpos, init, m.Params.S_mm, gcodes);
+            gcodes.AddNonhorizontalG00($"G00 Z{init.Z.F3()}", Math.Abs(m.Params.S_mm - init.Z));
 
             WritePrologue(init, sw, dxfFilePath);
             WriteGCodes(gcodes, sw);

@@ -1,3 +1,5 @@
+using System.Runtime.CompilerServices;
+
 namespace de.hmmueller.PathDxf2GCode.Tests;
 
 [TestClass]
@@ -10,8 +12,8 @@ public class IntegrationTests {
     private static string Max80From(string s, int i)
         => Truncate(s[i..], 80);
 
-    private static void AssertEqual(string expected, string actual) {
-        int n = 1;
+    private static void AssertEqual(string expected, int firstLineNo, string actual) {
+        int n = firstLineNo;
         int k = Math.Min(expected.Length, actual.Length);
         for (int i = 0; i < k; i++) {
             if (expected[i] != actual[i]) {
@@ -27,10 +29,10 @@ public class IntegrationTests {
         }
     }
 
-    private static void Compare(string filename, string expected) {
+    private static void Compare(string filename, string expected, [CallerLineNumber] int firstLineNo = 1) {
         using (StreamReader sr = new(filename)) {
             string actual = sr.ReadToEnd().Trim();
-            AssertEqual(expected.Trim(), actual.Trim());
+            AssertEqual(expected.Trim(), firstLineNo, actual.Trim());
         }
     }
 
@@ -427,15 +429,15 @@ G02 F150.000 I-20.000 J0.000 X20.000 Y0.000 Z-0.100
     (DrillOrPullZFromTo -0.100 2.000)
 G00 Z2.000
   (SweepAndDrillSafelyFromTo [20.000|0.000|2.000] [60.000|0.000|2.000] s=2.000 bt=False)
-G00 X60.000 Y0.000
+; G00 X60.000 Y0.000
   (SweepAndDrillSafelyFromTo [60.000|0.000|2.000] [80.000|0.000|2.000] s=2.000 bt=False)
 G00 X80.000 Y0.000
 G00 Z2.000
   (Fräslänge:     109 mm   ca.  2 min)
   (Bohrungen:       0 mm   ca.  1 min)
-  (Leerfahrten:    84 mm   ca.  1 min)
-  (Summe:         193 mm   ca.  2 min)
-  (Befehlszahl: 10)
+  (Leerfahrten:    44 mm   ca.  1 min)
+  (Summe:         153 mm   ca.  2 min)
+  (Befehlszahl: 9)
 M30
 %");
     }
@@ -1116,7 +1118,7 @@ G02 F150.000 I0 J-1.500 X120.000 Y-15.377 Z-0.100
 G02 F150.000 I0 J1.500 X120.000 Y-12.377 Z-0.100
 G02 F150.000 I0 J-1.500 X120.000 Y-15.377 Z-0.100
 G00 Z5.000
-G00 X120.000 Y-13.877
+; G00 X120.000 Y-13.877
   (SweepAndDrillSafelyFromTo [120.000|-13.877|5.000] [130.000|-13.877|5.000] s=5.000 bt=False)
 G00 X130.000 Y-13.877
     (DrillOrPullZFromTo 5.000 2.000)
@@ -1133,7 +1135,7 @@ G02 F150.000 I0 J-2.000 X130.000 Y-15.877 Z-0.100
 G02 F150.000 I0 J2.000 X130.000 Y-11.877 Z-0.100
 G02 F150.000 I0 J-2.000 X130.000 Y-15.877 Z-0.100
 G00 Z5.000
-G00 X130.000 Y-13.877
+; G00 X130.000 Y-13.877
   (SweepAndDrillSafelyFromTo [130.000|-13.877|5.000] [135.501|-9.000|5.000] s=5.000 bt=False)
 G00 X135.501 Y-9.000
   (SweepAndDrillSafelyFromTo [135.501|-9.000|5.000] [135.501|-9.000|1.600] s=5.000 bt=False)
@@ -1178,7 +1180,7 @@ G02 F150.000 I0 J-2.000 X130.000 Y-6.877 Z1.600
 G02 F150.000 I0 J2.000 X130.000 Y-2.877 Z1.600
 G02 F150.000 I0 J-2.000 X130.000 Y-6.877 Z1.600
 G00 Z5.000
-G00 X130.000 Y-4.877
+; G00 X130.000 Y-4.877
   (SweepAndDrillSafelyFromTo [130.000|-4.877|5.000] [120.000|-4.877|5.000] s=5.000 bt=False)
 G00 X120.000 Y-4.877
     (DrillOrPullZFromTo 5.000 2.000)
@@ -1192,7 +1194,7 @@ G02 F150.000 I0 J-1.500 X120.000 Y-6.377 Z1.500
 G02 F150.000 I0 J1.500 X120.000 Y-3.377 Z1.500
 G02 F150.000 I0 J-1.500 X120.000 Y-6.377 Z1.500
 G00 Z5.000
-G00 X120.000 Y-4.877
+; G00 X120.000 Y-4.877
   (SweepAndDrillSafelyFromTo [120.000|-4.877|5.000] [110.000|-4.877|5.000] s=5.000 bt=False)
 G00 X110.000 Y-4.877
     (DrillOrPullZFromTo 5.000 2.000)
@@ -1234,9 +1236,9 @@ G00 X100.000 Y0.000
 G00 Z5.000
   (Fräslänge:     315 mm   ca.  3 min)
   (Bohrungen:       5 mm   ca.  1 min)
-  (Leerfahrten:   440 mm   ca.  2 min)
-  (Summe:         761 mm   ca.  5 min)
-  (Befehlszahl: 245)
+  (Leerfahrten:   423 mm   ca.  2 min)
+  (Summe:         743 mm   ca.  5 min)
+  (Befehlszahl: 241)
 M30
 %");
     }
@@ -1722,7 +1724,7 @@ G01 F150.000 X75.000 Y5.000 Z-0.100
     (DrillOrPullZFromTo -0.100 5.000)
 G00 Z5.000
   (SweepAndDrillSafelyFromTo [75.000|5.000|5.000] [60.000|15.000|5.000] s=5.000 bt=True)
-G00 X60.000 Y15.000
+; G00 X60.000 Y15.000
   (SweepAndDrillSafelyFromTo [60.000|15.000|5.000] [70.000|20.000|5.000] s=5.000 bt=False)
 G00 X70.000 Y20.000
   (SweepAndDrillSafelyFromTo [70.000|20.000|5.000] [70.000|20.000|0.800] s=5.000 bt=False)
@@ -1763,7 +1765,7 @@ G01 F150.000 X105.000 Y15.000 Z-0.100
     (DrillOrPullZFromTo -0.100 5.000)
 G00 Z5.000
   (SweepAndDrillSafelyFromTo [105.000|15.000|5.000] [85.000|20.000|5.000] s=5.000 bt=True)
-G00 X85.000 Y20.000
+; G00 X85.000 Y20.000
   (SweepAndDrillSafelyFromTo [85.000|20.000|5.000] [105.000|25.000|5.000] s=5.000 bt=False)
 G00 X105.000 Y25.000
   (SweepAndDrillSafelyFromTo [105.000|25.000|5.000] [105.000|25.000|0.800] s=5.000 bt=False)
@@ -1883,11 +1885,11 @@ G00 Z5.000
 G00 X65.000 Y105.000
   (END Subpath 8998.2P[8999.16P.dxf] t=[ [120.000|170.000]=>[65.000|35.000] / [120.000|100.000]=>[65.000|105.000] ])
   (SweepAndDrillSafelyFromTo [65.000|105.000|5.000] [65.000|35.000|5.000] s=5.000 bt=True)
-G00 X65.000 Y35.000
+; G00 X65.000 Y35.000
   (SweepAndDrillSafelyFromTo [65.000|35.000|5.000] [50.000|100.000|5.000] s=5.000 bt=True)
-G00 X50.000 Y100.000
+; G00 X50.000 Y100.000
   (SweepAndDrillSafelyFromTo [50.000|100.000|5.000] [50.000|30.000|5.000] s=5.000 bt=True)
-G00 X50.000 Y30.000
+; G00 X50.000 Y30.000
   (SweepAndDrillSafelyFromTo [50.000|30.000|5.000] [95.000|40.000|5.000] s=5.000 bt=False)
 G00 X95.000 Y40.000
   (START Subpath 8998.2P[8999.16P.dxf] t=[ [120.000|170.000]=>[95.000|40.000] / [120.000|100.000]=>[95.000|110.000] ])
@@ -1920,19 +1922,19 @@ G00 Z5.000
 G00 X95.000 Y110.000
   (END Subpath 8998.2P[8999.16P.dxf] t=[ [120.000|170.000]=>[95.000|40.000] / [120.000|100.000]=>[95.000|110.000] ])
   (SweepAndDrillSafelyFromTo [95.000|110.000|5.000] [95.000|40.000|5.000] s=5.000 bt=True)
-G00 X95.000 Y40.000
+; G00 X95.000 Y40.000
   (SweepAndDrillSafelyFromTo [95.000|40.000|5.000] [50.000|30.000|5.000] s=5.000 bt=True)
-G00 X50.000 Y30.000
+; G00 X50.000 Y30.000
   (SweepAndDrillSafelyFromTo [50.000|30.000|5.000] [20.000|0.000|5.000] s=5.000 bt=True)
-G00 X20.000 Y0.000
+; G00 X20.000 Y0.000
   (SweepAndDrillSafelyFromTo [20.000|0.000|5.000] [20.000|110.000|5.000] s=5.000 bt=False)
 G00 X20.000 Y110.000
 G00 Z5.000
   (Fräslänge:    1957 mm   ca. 19 min)
   (Bohrungen:      61 mm   ca.  1 min)
-  (Leerfahrten:  1458 mm   ca.  5 min)
-  (Summe:        3475 mm   ca. 23 min)
-  (Befehlszahl: 248)
+  (Leerfahrten:  1049 mm   ca.  3 min)
+  (Summe:        3066 mm   ca. 22 min)
+  (Befehlszahl: 240)
 M30
 %");
     }
@@ -1989,15 +1991,15 @@ G02 F150.000 I0 J-9.000 X20.000 Y-9.000 Z1.000
 G02 F150.000 I0 J9.000 X20.000 Y9.000 Z1.000
 G02 F150.000 I0 J-9.000 X20.000 Y-9.000 Z1.000
 G00 Z6.000
-G00 X20.000 Y0.000
+; G00 X20.000 Y0.000
   (SweepAndDrillSafelyFromTo [20.000|0.000|6.000] [45.000|0.000|6.000] s=6.000 bt=False)
 G00 X45.000 Y0.000
 G00 Z6.000
   (Fräslänge:     371 mm   ca.  4 min)
   (Bohrungen:       0 mm   ca.  0 min)
-  (Leerfahrten:    68 mm   ca.  1 min)
-  (Summe:         439 mm   ca.  4 min)
-  (Befehlszahl: 28)
+  (Leerfahrten:    64 mm   ca.  1 min)
+  (Summe:         435 mm   ca.  4 min)
+  (Befehlszahl: 27)
 M30
 %");
     }
