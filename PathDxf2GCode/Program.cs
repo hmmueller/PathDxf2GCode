@@ -4,7 +4,7 @@ using de.hmmueller.PathGCodeLibrary;
 using netDxf;
 
 public class Program {
-    public const string VERSION = "2025-03-16";
+    public const string VERSION = "2025-03-24";
 
     public static int Main(string[] args) {
         var messages = new MessageHandlerForEntities(Console.Error);
