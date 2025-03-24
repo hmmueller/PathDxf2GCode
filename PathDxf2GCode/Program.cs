@@ -94,12 +94,18 @@ public class Program {
                 // emit a Z sweep - which is important because that Z sweep may include a Z adjustment
                 // that would be missed otherwise.
                 Vector3 init = new(0, 0, m.Params.S_mm * (1 + 2 * GeometryHelpers.RELATIVE_EPS));
+                List<GCode> gcodes = new();
+
+                Vector3 currpos = m.EmitMillingGCode(init, m.CreateTransformation(), m.Params.S_mm, gcodes, stats, dxfFilePath, messages);
+
+                gcodes.Add($"G00 Z{init.Z.F3()}");
+                stats.AddSweepLength(currpos.Z, init.Z);
+
+                gcodes = gcodes.Optimize();
+
                 WritePrologue(init, sw, dxfFilePath);
                 sw.WriteLine($"Model {m.Name}".AsComment(2));
-                Vector3 currpos = m.EmitMillingGCode(init, m.CreateTransformation(), sw, stats, dxfFilePath, messages);
-
-                sw.WriteLine($"G00 Z{init.Z.F3()}");
-                stats.AddSweepLength(currpos.Z, init.Z);
+                WriteGCodes(gcodes, sw);
 
                 static string AsMin(TimeSpan t) => $"ca.{Math.Ceiling(t.TotalMinutes),3:F0}";
                 void WriteStat(string s, string name) {
@@ -119,6 +125,12 @@ public class Program {
 
                 WriteEpilogue(sw);
             }
+        }
+    }
+
+    private static void WriteGCodes(List<GCode> gcodes, StreamWriter sw) {
+        foreach (var g in gcodes) {
+            sw.WriteLine(g.AsString());
         }
     }
 
@@ -153,13 +165,14 @@ public class Program {
             // See http://www.linuxcnc.org/docs/html/gcode/overview.html#_g_code_best_practices
             Statistics _ = new(m.Params.V_mmpmin);
             Vector3 init = new(0, 0, m.Params.S_mm);
+
+            List<GCode> gcodes = new();
+            Vector3 currpos = m.EmitZProbingGCode(init, m.Params.S_mm, gcodes, _, dxfFilePath, messages);
+            GCodeHelpers.SweepFromTo(currpos, init, m.Params.S_mm, gcodes, _);
+            gcodes.Add($"G00 Z{init.Z.F3()}");
+
             WritePrologue(init, sw, dxfFilePath);
-
-            Vector3 currpos = m.EmitZProbingGCode(init, sw, _, dxfFilePath, messages);
-            GCodeHelpers.SweepFromTo(currpos, init, sw, _);
-
-            sw.WriteLine($"G00 Z{init.Z.F3()}");
-
+            WriteGCodes(gcodes, sw);
             WriteEpilogue(sw);
         }
     }

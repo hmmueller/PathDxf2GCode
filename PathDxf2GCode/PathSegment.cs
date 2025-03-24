@@ -49,8 +49,8 @@ public abstract class PathSegment {
         Assert(a.Near(b), errorContext, $"!{a.F3()}.Near({b.F3()})");
     }
 
-    public abstract Vector3 EmitGCode(Vector3 currPos, Transformation3 zCorr,
-        StreamWriter sw, Statistics stats, string dxfFileName, MessageHandlerForEntities messages);
+    public abstract Vector3 EmitGCode(Vector3 currPos, Transformation3 zCorr, double globalS_mm,
+        List<GCode> gcodes, Statistics stats, string dxfFileName, MessageHandlerForEntities messages);
 }
 
 public abstract class PathSegmentWithParamsText : PathSegment {
@@ -110,8 +110,8 @@ public class MillChain : PathSegment {
         public bool TopUnmilled => Milled == EdgeMilled.Unknown && (Above == null || Above.Milled != EdgeMilled.Unknown);
     }
 
-    public override Vector3 EmitGCode(Vector3 currPos, Transformation3 t,
-                                      StreamWriter sw, Statistics stats, string dxfFileName, MessageHandlerForEntities messages) {
+    public override Vector3 EmitGCode(Vector3 currPos, Transformation3 t, double globalS_mm,
+                                      List<GCode> gcodes, Statistics stats, string dxfFileName, MessageHandlerForEntities messages) {
         // Create actual edges
         List<Edge> edges = new();
         foreach (var s in _segments) {
@@ -166,15 +166,16 @@ public class MillChain : PathSegment {
         foreach (var e in sortedEdges) {
             currPos = GCodeHelpers.SweepAndDrillSafelyFromTo(from: currPos, 
                 to: e.Milled == EdgeMilled.Start2End ? e.Start(t) : e.End(t), 
-                t_mm: _params!.T_mm, sk_mm: sk_mm, _params!.F_mmpmin, 
-                backtracking: false, t, sw, stats);
+                t_mm: _params!.T_mm, sk_mm: sk_mm, globalS_mm, _params!.F_mmpmin, 
+                backtracking: false, t, gcodes, stats);
 
-            currPos = e.Segment.EmitGCode(currPos, e.MillingBottom_mm, e.Milled == EdgeMilled.Start2End, t, sw, stats, dxfFileName);
+            currPos = e.Segment.EmitGCode(currPos, e.MillingBottom_mm, e.Milled == EdgeMilled.Start2End, 
+                globalS_mm, t, gcodes, stats, dxfFileName);
         }
 
         Vector2 end = t.Transform(_segments.Last().End);
         currPos = GCodeHelpers.SweepAndDrillSafelyFromTo(from: currPos, to: end.AsVector3(sk_mm),
-            t_mm: _params!.T_mm, sk_mm: sk_mm, _params!.F_mmpmin, backtracking: false, t, sw, stats);
+            t_mm: _params!.T_mm, sk_mm: sk_mm, globalS_mm, _params!.F_mmpmin, backtracking: false, t, gcodes, stats);
         AssertNear(currPos.XY(), end, MessageHandlerForEntities.Context(_segments.Last().Source, _segments.First().Start, dxfFileName));
         return currPos;
     }
@@ -228,10 +229,10 @@ public class ChainSegment : IRawSegment, IMarkOrMillSegment {
         _params = new MillParams(ParamsText, IsMark, ErrorContext(dxfFileName), chainParams, onError);
     }
 
-    internal Vector3 EmitGCode(Vector3 currPos, double millingLayer_mm, bool start2End, Transformation3 t,
-                               StreamWriter sw, Statistics stats, string dxfFileName) {
+    internal Vector3 EmitGCode(Vector3 currPos, double millingLayer_mm, bool start2End, double globalS_mm, 
+                                Transformation3 t, List<GCode> gcodes, Statistics stats, string dxfFileName) {
         return 
-            (start2End ? _geometry : _geometry.CloneReversed()).EmitGCode(currPos, t, sw, stats, dxfFileName,
+            (start2End ? _geometry : _geometry.CloneReversed()).EmitGCode(currPos, t, globalS_mm, gcodes, stats, dxfFileName,
             millingTarget_mm: Math.Max(millingLayer_mm, Bottom_mm),
             t_mm: _params!.T_mm, f_mmpmin: _params!.F_mmpmin, backtracking: Order == PathModel.BACKTRACK_ORDER);
     }
@@ -260,15 +261,15 @@ public abstract class AbstractSweepSegment : PathSegmentWithParamsText, IRawSegm
     public IRawSegment ReversedSegmentAfterTurn()
         => new BackSweepSegment(Source, ParamsText, _end, _start);
 
-    public override Vector3 EmitGCode(Vector3 currPos, Transformation3 t,
-                                      StreamWriter sw, Statistics stats, string dxfFileName, MessageHandlerForEntities messages) {
+    public override Vector3 EmitGCode(Vector3 currPos, Transformation3 t, double globalS_mm,
+                                      List<GCode> gcodes, Statistics stats, string dxfFileName, MessageHandlerForEntities messages) {
         AssertNear(currPos.XY(), t.Transform(Start), ErrorContext(dxfFileName));
 
         Vector2 target = t.Transform(End);
         double s_mm = _params!.S_mm;
         GCodeHelpers.SweepAndDrillSafelyFromTo(currPos, target.AsVector3(s_mm), t_mm: _params!.T_mm,
-                                               sk_mm: s_mm, f_mmpmin: _params!.F_mmpmin,
-                                               backtracking: Order == PathModel.BACKTRACK_ORDER, t, sw, stats);
+                                               sk_mm: s_mm, globalS_mm: globalS_mm, f_mmpmin: _params!.F_mmpmin,
+                                               backtracking: Order == PathModel.BACKTRACK_ORDER, t, gcodes, stats);
         return target.AsVector3(_params!.S_mm);
     }
 }
@@ -336,8 +337,8 @@ public class HelixSegment : PathMarkOrMillSegment, IRawSegment {
         _params = new HelixParams(ParamsText, IsMark, ErrorContext(dxfFileName), pathParams, onError);
     }
 
-    public override Vector3 EmitGCode(Vector3 currPos, Transformation3 t,
-        StreamWriter sw, Statistics stats, string dxfFileName, MessageHandlerForEntities messages) {
+    public override Vector3 EmitGCode(Vector3 currPos, Transformation3 t, double globalS_mm,
+        List<GCode> gcodes, Statistics stats, string dxfFileName, MessageHandlerForEntities messages) {
         Vector2 c = t.Transform(Center);
         AssertNear(currPos.XY(), c, MessageHandlerForEntities.Context(Source, Center, dxfFileName));
         double t_mm = _params!.T_mm;
@@ -350,39 +351,39 @@ public class HelixSegment : PathMarkOrMillSegment, IRawSegment {
         double y0 = c.Y - millingRadius_mm;
         double y1 = c.Y + millingRadius_mm;
 
-        GCodeHelpers.DrillOrPullZFromTo(currPos.XY(), currPos.Z, t_mm, t_mm: t_mm, f_mmpmin: f_mmpmin, t, sw, stats);
-        sw.WriteLine($"MillHelix l={c.F3()} r={Radius_mm.F3()}".AsComment(2));
-        sw.WriteLine($"G01 X{c.X.F3()} Y{y0.F3()} F{f_mmpmin.F3()}"); // G01, as we touch the top
+        GCodeHelpers.DrillOrPullZFromTo(currPos.XY(), currPos.Z, t_mm, t_mm: t_mm, f_mmpmin: f_mmpmin, t, gcodes, stats);
+        gcodes.AddComment($"MillHelix l={c.F3()} r={Radius_mm.F3()}", 2);
+        gcodes.Add($"G01 F{f_mmpmin.F3()} X{c.X.F3()} Y{y0.F3()}"); // G01, as we touch the top
         stats.AddMillLength(c.Y, y0, f_mmpmin);
 
         // This will not create full holes - a core will remain; paths for full holes must be manually drawn.
         double done_mm = t_mm;
         for (double d_mm = t_mm; done_mm > bottom_mm; d_mm -= i_mm) {
-            sw.WriteLine($"MillSemiCircle l={d_mm.F3()}".AsComment(4));
+            gcodes.AddComment($"MillSemiCircle l={d_mm.F3()}", 4);
 
             double b1_mm = Math.Max(d_mm - i_mm / 2, bottom_mm);
-            sw.WriteLine($"G02 F{f_mmpmin.F3()} I0 J{millingRadius_mm.F3()} X{c.X.F3()} Y{y1.F3()} Z{t.Expr(b1_mm, c)}");
+            gcodes.Add($"G02 F{f_mmpmin.F3()} I0 J{millingRadius_mm.F3()} X{c.X.F3()} Y{y1.F3()} Z{t.Expr(b1_mm, c)}");
             stats.AddMillLength(millingRadius_mm * Math.PI, f_mmpmin);
 
             double b0_mm = Math.Max(b1_mm - i_mm / 2, bottom_mm);
-            sw.WriteLine($"G02 F{f_mmpmin.F3()} X{c.X.F3()} Y{y0.F3()} I0 J{(-millingRadius_mm).F3()} Z{t.Expr(b0_mm, c)}");
+            gcodes.Add($"G02 F{f_mmpmin.F3()} I0 J{(-millingRadius_mm).F3()} X{c.X.F3()} Y{y0.F3()} Z{t.Expr(b0_mm, c)}");
             stats.AddMillLength(millingRadius_mm * Math.PI, f_mmpmin);
 
             done_mm = d_mm; // Spirale von millingLayer_mm nach b0_mm gefräst = nur bis millingLayer_mm ist Loch fertig!
         }
         if (Radius_mm <= _params!.O_mm) {
             // If radius <= 0, then there is no core in the center --> we can sweep straight to the center
-            sw.WriteLine($"G00 X{c.X.F3()} Y{c.Y.F3()}");
+            gcodes.Add($"G00 X{c.X.F3()} Y{c.Y.F3()}");
             stats.AddSweepLength(millingRadius_mm);
 
             return c.AsVector3(bottom_mm);
         } else {
             // Otherwise, first pull up to S (to avoid core), then sweep to center.
             double s_mm = _params!.S_mm;
-            sw.WriteLine($"G00 Z{t.Expr(s_mm, c)}");
+            gcodes.Add($"G00 Z{t.Expr(s_mm, c)}");
             stats.AddSweepLength(bottom_mm, s_mm);
 
-            sw.WriteLine($"G00 X{c.X.F3()} Y{c.Y.F3()}");
+            gcodes.AddG0H(c.X, c.Y, s_mm, globalS_mm);
             stats.AddSweepLength(millingRadius_mm);
 
             return c.AsVector3(s_mm);
@@ -413,13 +414,13 @@ public class DrillSegment : PathMarkOrMillSegment, IRawSegment {
         _params = new DrillParams(ParamsText, IsMark, ErrorContext(dxfFileName), pathParams, onError);
     }
 
-    public override Vector3 EmitGCode(Vector3 currPos, Transformation3 t, StreamWriter sw, Statistics stats, string dxfFileName, MessageHandlerForEntities messages) {
+    public override Vector3 EmitGCode(Vector3 currPos, Transformation3 t, double globalS_mm, List<GCode> gcodes, Statistics stats, string dxfFileName, MessageHandlerForEntities messages) {
         Vector2 c = t.Transform(Center);
         AssertNear(currPos.XY(), c, MessageHandlerForEntities.Context(Source, Center, dxfFileName));
 
-        sw.WriteLine($"Drill l={c.F3()}".AsComment(2));
+        gcodes.AddComment($"Drill l={c.F3()}", 2);
         double bottom_mm = IsMark ? _params!.D_mm : _params!.B_mm;
-        GCodeHelpers.DrillOrPullZFromTo(currPos.XY(), currPos.Z, bottom_mm, t_mm: _params!.T_mm, f_mmpmin: _params.F_mmpmin, t, sw, stats);
+        GCodeHelpers.DrillOrPullZFromTo(currPos.XY(), currPos.Z, bottom_mm, t_mm: _params!.T_mm, f_mmpmin: _params.F_mmpmin, t, gcodes, stats);
         return c.AsVector3(bottom_mm);
     }
 }
@@ -519,12 +520,12 @@ public class SubPathSegment : PathSegmentWithParamsText, IRawSegment {
         }
     }
 
-    public override Vector3 EmitGCode(Vector3 currPos, Transformation3 t,
-        StreamWriter sw, Statistics stats, string dxfFileName, MessageHandlerForEntities messages) {
+    public override Vector3 EmitGCode(Vector3 currPos, Transformation3 t, double globalS_mm,
+        List<GCode> gcodes, Statistics stats, string dxfFileName, MessageHandlerForEntities messages) {
         Transformation3 compound = t.Transform3(new Transformation2(_model!.Start, _model.End, _start, _end));
-        sw.WriteLine($"START Subpath {_name} t={compound}".AsComment(2));
-        currPos = _model.EmitMillingGCode(currPos, compound, sw, stats, _model.DxfFilePath, messages);
-        sw.WriteLine($"END Subpath {_name} t={compound}".AsComment(2));
+        gcodes.AddComment($"START Subpath {_name} t={compound}", 2);
+        currPos = _model.EmitMillingGCode(currPos, compound, globalS_mm, gcodes, stats, _model.DxfFilePath, messages);
+        gcodes.AddComment($"END Subpath {_name} t={compound}", 2);
         return currPos;
     }
 }
