@@ -114,8 +114,8 @@ public class PathModel {
                      : name2Model[p] = new RawPathModel(p);
         }
 
-        bool IsLineTypeHidden(EntityObject e) => GeometryHelpers.GetLinetype(e, layerLinetypes)?.Name == "HIDDEN";
-        bool IsLineTypePhantomCircle(Circle c) => GeometryHelpers.GetLinetype(c, layerLinetypes)?.Name == "PHANTOM";
+        bool IsLineTypeHidden(EntityObject e) => DxfHelper.GetLinetype(e, layerLinetypes)?.Name == "HIDDEN";
+        bool IsLineTypePhantomCircle(Circle c) => DxfHelper.GetLinetype(c, layerLinetypes)?.Name == "PHANTOM";
         bool IsStartMarker(Circle c) => IsLineTypePhantomCircle(c) && c.Radius.Near(0.5);
         bool IsTurnMarker(Circle c) => IsLineTypePhantomCircle(c) && c.Radius.Near(0.75);
         bool IsEndMarker(Circle c) => IsLineTypePhantomCircle(c) && c.Radius.Near(1);
@@ -129,7 +129,7 @@ public class PathModel {
         // 5. Load subpaths at the very end (tail-recursion hopefully reduces problems)
 
         // 1. Collect all objects on path layers - circles, lines, and arcs
-        List<Circle> circles = entities.Circles.Where(e => e.IsOnPathLayer(options.PathNamePattern, dxfFilePath)).ToList();
+        List<Circle> circles = entities.Circles.Where(e => e.IsOnPathLayer(options.PathNamePattern,  dxfFilePath)).ToList();
         List<Line> lines = entities.Lines.Where(e => e.IsOnPathLayer(options.PathNamePattern, dxfFilePath)).ToList();
         List<Arc> arcs = entities.Arcs.Where(e => e.IsOnPathLayer(options.PathNamePattern, dxfFilePath)).ToList();
 
@@ -145,10 +145,10 @@ public class PathModel {
                 .Select(e => (TextCircle: GetOverlapSurrounding(e, dxfFilePath, messages), Text: e.PlainText(), E: (EntityObject)e, Position: e.Position.AsVector2()))
             ).Where(bs => bs.TextCircle != null)) {
             EntityObject? overlappingObject =
-                   // Order is important: Circles in pole position, then arcs, then lines.
-                   NearestOverlappingCircle(circles.Except(texts.Keys.OfType<Circle>()).Except(nonTextCircles), TextCircle!, Text)
-                ?? NearestOverlappingArc(arcs.Except(texts.Keys.OfType<Arc>()).Except(nonTextArcs), TextCircle!, Text)
-                ?? NearestOverlappingLine(lines.Except(texts.Keys.OfType<Line>()).Except(nonTextLines), TextCircle!, Text);
+                // Order is important: Circles in pole position, then arcs, then lines.
+                NearestOverlappingCircle(circles.Except(texts.Keys.OfType<Circle>()).Except(nonTextCircles), TextCircle!, Text, TextObject.Layer.Name)
+                ?? NearestOverlappingArc(arcs.Except(texts.Keys.OfType<Arc>()).Except(nonTextArcs), TextCircle!, Text, TextObject.Layer.Name)
+                ?? NearestOverlappingLine(lines.Except(texts.Keys.OfType<Line>()).Except(nonTextLines), TextCircle!, Text, TextObject.Layer.Name);
             if (overlappingObject == null) {
                 messages.AddError(TextObject, Position, dxfFilePath, Messages.PathModel_NoObjectFound_Text_Center_Diameter, Text, TextCircle!.Center.F3(), (TextCircle!.Radius * 2).F3());
             } else {
@@ -293,18 +293,18 @@ public class PathModel {
     }
 
     private static string? LineTypeName(Dictionary<string, Linetype> layerLinetypes, EntityObject eo) {
-        return GeometryHelpers.GetLinetype(eo, layerLinetypes)?.Name;
+        return DxfHelper.GetLinetype(eo, layerLinetypes)?.Name;
     }
 
-    private static EntityObject? NearestOverlappingCircle(IEnumerable<Circle> circles, Circle2 textCircle, string text) {
-        return NearestOverlapping(circles, textCircle, text,
+    private static EntityObject? NearestOverlappingCircle(IEnumerable<Circle> circles, Circle2 textCircle, string text, string layerName) {
+        return NearestOverlapping(circles, textCircle, text, layerName,
             textCircleOverLaps: c => textCircle.Center.Distance(c.Center) < textCircle.Radius + c.Radius,
             isNearerThan: (textCenter, c1, c2)
                 => textCenter.SquareDistance(c1.Center) < textCenter.SquareDistance(c2.Center));
     }
 
-    private static EntityObject? NearestOverlappingLine(IEnumerable<Line> lines, Circle2 textCircle, string text) {
-        return NearestOverlapping(lines, textCircle, text,
+    private static EntityObject? NearestOverlappingLine(IEnumerable<Line> lines, Circle2 textCircle, string text, string layerName) {
+        return NearestOverlapping(lines, textCircle, text, layerName,
             textCircleOverLaps: c => CircleOverlapsLine(textCircle, c),
             isNearerThan: (textCenter, line1, line2)
                 => MathHelper.PointLineDistance(textCenter, line1.StartPoint.AsVector2(), line1.Direction.AsVector2())
@@ -322,8 +322,8 @@ public class PathModel {
             && MathHelper.PointInSegment(basePoint, origin, line.EndPoint.AsVector2()) == 0;
     }
 
-    private static EntityObject? NearestOverlappingArc(IEnumerable<Arc> arcs, Circle2 textCircle, string text) {
-        return NearestOverlapping(arcs, textCircle, text,
+    private static EntityObject? NearestOverlappingArc(IEnumerable<Arc> arcs, Circle2 textCircle, string text, string layerName) {
+        return NearestOverlapping(arcs, textCircle, text, layerName,
             textCircleOverLaps: c => CircleOverlapsArc(textCircle, c, text),
             isNearerThan: (textCenter, arc1, arc2)
                 => DistanceToArcCircle(textCenter, arc1) < DistanceToArcCircle(textCenter, arc2)
@@ -345,9 +345,9 @@ public class PathModel {
     }
 
     private static EntityObject? NearestOverlapping<T>(IEnumerable<T> objects, Circle2 textCircle, string text,
-        Func<T, bool> textCircleOverLaps, Func<Vector2, T, T, bool> isNearerThan) where T : EntityObject {
+        string layerName, Func<T, bool> textCircleOverLaps, Func<Vector2, T, T, bool> isNearerThan) where T : EntityObject {
         T? nearestOverlapping = null;
-        foreach (var eo in objects.Where(textCircleOverLaps)) {
+        foreach (var eo in objects.Where(eo => eo.Layer.Name == layerName && textCircleOverLaps(eo))) {
             if (nearestOverlapping == null || isNearerThan(textCircle.Center, eo, nearestOverlapping)) {
                 nearestOverlapping = eo;
             }
@@ -462,7 +462,7 @@ public class PathModel {
         {
             IRawSegment? last = orderedRawSegments.LastOrDefault();
             if (last != null && !last.End.Near(rawModel.End.Value)) {
-                messages.AddError(last.Source, last.End, dxfFilePath, Messages.PathModel_LostEnd_End, rawModel.End.Value);
+                messages.AddError(last.Source, last.End, dxfFilePath, Messages.PathModel_LostEnd_End, rawModel.End.Value.F3());
             }
         }
 
@@ -487,6 +487,7 @@ public class PathModel {
                 segments.Add(new MillChain(currChain.ToArray()));
             }
         }
+
         // C. Create Params
         void OnError(string context, string msg) {
             messages.AddError(context, msg);
@@ -532,6 +533,7 @@ public class PathModel {
 
     public Vector3 EmitMillingGCode(Vector3 currPos, Transformation3 t, double globalS_mm,
         List<GCode> gcodes, string dxfFileName, MessageHandlerForEntities messages) {
+
         foreach (var s in _segments) {
             try {
                 currPos = s.EmitGCode(currPos, t, globalS_mm, gcodes, dxfFileName, messages);

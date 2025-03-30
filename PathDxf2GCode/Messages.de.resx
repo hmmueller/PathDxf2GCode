@@ -232,7 +232,9 @@ Optionen:
     <value>Kreis mit Linientyp PHANTOM (__ _ _ __) mit Durchmesser {0} hat keine spezielle Bedeutung</value>
   </data>
   <data name="PathModel_TextAssignment_Obj_Text" xml:space="preserve">
-    <value>Objekt ...\n{0}\n...hat zugeordneten Text '{1}'</value>
+    <value>Objekt
+   {0}
+hat zugeordneten Text '{1}'</value>
   </data>
   <data name="PathModel_TextLayerDifferentFromElementLayer_TextLayer_ElementLayer" xml:space="preserve">
     <value>Text-Layername '{0}' weicht von Element-Layername '{1}' ab</value>

@@ -11,12 +11,9 @@ public readonly struct PathName {
 
     public PathName(string name, string fileNameForMessages) {
         // Paths in DXF have _ instead of . (e.g. in Caddy) ., * etc. -> transform back!
-        _name = ConvertDxfLayerToPathName(name);
-        _fileNameForMessages = fileNameForMessages;
+        _name = Regex.Replace(name, DxfHelper.TILDE_SUFFIX_REGEX + "$", "", RegexOptions.IgnoreCase).Replace('_', '.');
+        _fileNameForMessages = Path.GetFileName(fileNameForMessages);
     }
-
-    public static string ConvertDxfLayerToPathName(string name)
-        => name.Replace('_', '.');
 
     public readonly string AsString()
         => _name;
@@ -71,11 +68,12 @@ public class PathModelCollection {
 
     public SortedDictionary<string, PathModel> Load(string dxfFilePath, Options options, string contextForErrors, MessageHandlerForEntities messages) {
         var result = new SortedDictionary<string, PathModel>();
-        if (_readFiles.Add(dxfFilePath)) {
-            DxfDocument? d = DxfHelper.LoadDxfDocument(dxfFilePath, options.Dump, options.PathNamePattern,
+        string fullDxfFilePath = Path.GetFullPath(dxfFilePath);
+        if (_readFiles.Add(fullDxfFilePath)) {
+            DxfDocument? d = DxfHelper.LoadDxfDocument(fullDxfFilePath, options.Dump, options.PathNamePattern,
                                                      out Dictionary<string, Linetype> layerLinetypes, messages);
             if (d != null) {
-                Dictionary<PathName, PathModel> models = PathModel.TransformDxf2PathModel(dxfFilePath, d.Entities,
+                Dictionary<PathName, PathModel> models = PathModel.TransformDxf2PathModel(fullDxfFilePath, d.Entities,
                     layerLinetypes, options, messages, this);
                 foreach (var kvp in models) {
                     if (_models.TryAdd(kvp.Key, kvp.Value)) {

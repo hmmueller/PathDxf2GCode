@@ -232,7 +232,9 @@ Options:
     <value>Circle with line type PHANTOM (__ _ _ __) and diameter {0} has no special meaning</value>
   </data>
   <data name="PathModel_TextAssignment_Obj_Text" xml:space="preserve">
-    <value>Object ...\n{0}\n...has assigned text '{1}'</value>
+    <value>Object
+   {0}
+has assigned text '{1}'</value>
   </data>
   <data name="PathModel_TextLayerDifferentFromElementLayer_TextLayer_ElementLayer" xml:space="preserve">
     <value>Text layer name '{0}' different from element layer name '{1}'</value>

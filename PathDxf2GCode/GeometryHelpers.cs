@@ -1,10 +1,7 @@
 ﻿namespace de.hmmueller.PathDxf2GCode;
 
 using static System.FormattableString;
-using System.Text.RegularExpressions;
 using netDxf;
-using netDxf.Entities;
-using netDxf.Tables;
 
 public static class GeometryHelpers {
     public const double RELATIVE_EPS = 1e-6;
@@ -58,17 +55,6 @@ public static class GeometryHelpers {
         => startAngle < endAngle
             ? angle.Between(startAngle, endAngle)
             : angle >= startAngle || angle <= endAngle;
-
-    public static bool IsOnPathLayer(this EntityObject e, string pathNamePattern, string fileNameForMessages)
-        => Regex.IsMatch(new PathName(e.Layer.Name, fileNameForMessages).AsString(), "^" + pathNamePattern + "$");
-
-    public static PathName? AsPathReference(this string text, string pathNamePattern, string fileNameForMessages) {
-        Match m = Regex.Match(text, pathNamePattern);
-        return m.Success ? new PathName(m.Value, fileNameForMessages) : null;
-    }
-
-    public static Linetype GetLinetype(this EntityObject e, Dictionary<string, Linetype> layerLinetypes)
-        => e.Linetype.IsByLayer ? layerLinetypes[e.Layer.Name] : e.Linetype;
 
     public static Vector3 AsVector3(this Vector2 a, double z)
         => new(a.X, a.Y, z);

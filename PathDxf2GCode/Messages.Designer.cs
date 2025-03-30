@@ -368,7 +368,9 @@ namespace de.hmmueller.PathDxf2GCode {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Object ...\n{0}\n...has assigned text &apos;{1}&apos; ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Object
+        ///   {0}
+        ///has assigned text &apos;{1}&apos; ähnelt.
         /// </summary>
         internal static string PathModel_TextAssignment_Obj_Text {
             get {

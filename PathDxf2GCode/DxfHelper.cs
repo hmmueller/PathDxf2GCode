@@ -1,14 +1,17 @@
 ﻿namespace de.hmmueller.PathDxf2GCode;
 
+using System.Diagnostics.CodeAnalysis;
+using System.Text.RegularExpressions;
 using netDxf;
 using netDxf.Collections;
 using netDxf.Entities;
 using netDxf.Tables;
 using netDxf.Header;
 using de.hmmueller.PathGCodeLibrary;
-using System.Diagnostics.CodeAnalysis;
 
 public static class DxfHelper {
+    public const string TILDE_SUFFIX_REGEX = "(~[a-z]+)?";
+
     public static DxfDocument? LoadDxfDocument(string dxfFilePath, bool dump, string pathNamePattern,
             out Dictionary<string, Linetype> layerLinetypes, MessageHandlerForEntities messages) {
         messages.Write(MessageHandler.InfoPrefix + Messages.DxfHelper_ReadingFile__FileName, dxfFilePath);
@@ -31,6 +34,17 @@ public static class DxfHelper {
         }
         return d;
     }
+
+    public static bool IsOnPathLayer(this EntityObject e, string pathNamePattern, string fileNameForMessages)
+        => Regex.IsMatch(new PathName(e.Layer.Name, fileNameForMessages).AsString(), "^" + pathNamePattern + "$", RegexOptions.IgnoreCase);
+
+    public static PathName? AsPathReference(this string text, string pathNamePattern, string fileNameForMessages) {
+        Match m = Regex.Match(text, pathNamePattern, RegexOptions.IgnoreCase);
+        return m.Success ? new PathName(m.Value, fileNameForMessages) : null;
+    }
+
+    public static Linetype GetLinetype(this EntityObject e, Dictionary<string, Linetype> layerLinetypes)
+        => e.Linetype.IsByLayer ? layerLinetypes[e.Layer.Name] : e.Linetype;
 
     [ExcludeFromCodeCoverage]
     private static void Dump(string dxfFilePath, DrawingEntities d, Dictionary<string, Linetype> layerLinetypes, string pathNamePattern) {

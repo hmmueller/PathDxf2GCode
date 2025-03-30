@@ -21,18 +21,18 @@ public class ParamsText {
         : this(text, source?.CodeName + " @ " + position?.F3(), source?.Layer.Name, position ?? Vector2.Zero, textCenter, textRadius) {
     }
 
-    private ParamsText(string text, string context, string? layer, Vector2 position, Vector2 textCenter, double textRadius)
-        : this(text, context, layer, position,
-        text.Split(['\n', ' '])
+    private ParamsText(string text, string context, string? layerName, Vector2 position, Vector2 textCenter, double textRadius)
+        : this(text, context, layerName, position, text
+            .Split(['\n', ' '])
             .Select(s => s.Trim())
             .Where(s => !string.IsNullOrEmpty(s))
             .ToDictionary(s => s[0], s => s[1..]), textCenter, textRadius) {
     }
 
-    private ParamsText(string text, string context, string? layer, Vector2 position, Dictionary<char, string> strings, Vector2 textCenter, double textRadius) {
+    private ParamsText(string text, string context, string? layerName, Vector2 position, Dictionary<char, string> strings, Vector2 textCenter, double textRadius) {
         Text = text;
         Context = context;
-        LayerName = layer;
+        LayerName = layerName;
         Position = position;
         _strings = strings;
         _values = strings

@@ -4,7 +4,7 @@ using de.hmmueller.PathGCodeLibrary;
 using netDxf;
 
 public class Program {
-    public const string VERSION = "2025-03-24";
+    public const string VERSION = "2025-03-30";
 
     public static int Main(string[] args) {
         var messages = new MessageHandlerForEntities(Console.Error);
@@ -140,13 +140,15 @@ public class Program {
         sw.WriteLine("%");
         sw.WriteLine($"PathDxf2GCode - HMMüller 2024-2025 V.{VERSION}".AsComment(0));
 
-        // UGS mag das folgende O-Command nicht, daher weggelassen.
+        // UGS does not like the following command, therefore I removed it.
         //sw.WriteLine($"O{Path.GetFileNameWithoutExtension(dxfFilePath)} {dxfFilePath.AsComment(0)}");
-        sw.WriteLine(dxfFilePath.AsComment(0));
 
-        sw.WriteLine("F150"); // initial feed rate 150 mm/min - GRBL/µCNC will das vor den _g-Commands
-                              // G17 use XY plane, G21 mm mode, G40 cancel diameter compensation, G49 cancel length offset, G54 use
-                              // coordinate system 1, G80 cancel canned cycles, G90 absolute distance mode, G94 feed/ minute mode.
+        sw.WriteLine(Path.GetFileName(dxfFilePath).AsComment(0));
+
+        sw.WriteLine("F150"); // initial feed rate 150 mm/min - GRBL/µCNC wants this before the G-Commands
+                              // G17 use XY plane, G21 mm mode, G40 cancel diameter compensation,
+                              // G49 cancel length offset, G54 use coordinate system 1,
+                              // G80 cancel canned cycles, G90 absolute distance mode, G94 feed/ minute mode.
         sw.WriteLine("G17 G21 G40 G49 G54 G80 G90 G94");
 
         //sw.WriteLine("M6 T1"); // select tool 1
