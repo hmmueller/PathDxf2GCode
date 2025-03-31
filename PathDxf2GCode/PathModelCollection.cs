@@ -70,7 +70,7 @@ public class PathModelCollection {
         var result = new SortedDictionary<string, PathModel>();
         string fullDxfFilePath = Path.GetFullPath(dxfFilePath);
         if (_readFiles.Add(fullDxfFilePath)) {
-            DxfDocument? d = DxfHelper.LoadDxfDocument(fullDxfFilePath, options.Dump, options.PathNamePattern,
+            DxfDocument? d = DxfHelper.LoadDxfDocument(fullDxfFilePath, options,
                                                      out Dictionary<string, Linetype> layerLinetypes, messages);
             if (d != null) {
                 Dictionary<PathName, PathModel> models = PathModel.TransformDxf2PathModel(fullDxfFilePath, d.Entities,

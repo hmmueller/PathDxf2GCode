@@ -2069,4 +2069,14 @@ G00 Z5.000
 M30
 %");
     }
+
+    [TestMethod]
+    public void TestMethod21() {
+        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/c", "8999.21P.dxf"]));
+    }
+
+    [TestMethod]
+    public void TestMethod22() {
+        Assert.AreEqual(1, Program.Main(["/f150", "/v500", "/c", "8999.22P.dxf"]));
+    }
 }

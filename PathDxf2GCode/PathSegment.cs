@@ -3,6 +3,7 @@
 using netDxf;
 using netDxf.Entities;
 using System.Collections.Generic;
+using System.Runtime.InteropServices.Marshalling;
 using System.Text.RegularExpressions;
 
 public interface IRawSegment {
@@ -50,7 +51,7 @@ public abstract class PathSegment {
     }
 
     public abstract Vector3 EmitGCode(Vector3 currPos, Transformation3 zCorr, double globalS_mm,
-        List<GCode> gcodes, string dxfFileName, MessageHandlerForEntities messages);
+        List<GCode> gcodes, string dxfFileName, MessageHandlerForEntities messages, int depth);
 }
 
 public abstract class PathSegmentWithParamsText : PathSegment {
@@ -111,7 +112,7 @@ public class MillChain : PathSegment {
     }
 
     public override Vector3 EmitGCode(Vector3 currPos, Transformation3 t, double globalS_mm,
-                                      List<GCode> gcodes, string dxfFileName, MessageHandlerForEntities messages) {
+                                      List<GCode> gcodes, string dxfFileName, MessageHandlerForEntities messages, int depth) {
         // Create actual edges
         List<Edge> edges = new();
         foreach (var s in _segments) {
@@ -164,12 +165,12 @@ public class MillChain : PathSegment {
         // Create code
         double sk_mm = _params!.RawK_mm ?? _params!.S_mm;
         foreach (var e in sortedEdges) {
-            currPos = GCodeHelpers.SweepAndDrillSafelyFromTo(from: currPos, 
-                to: e.Milled == EdgeMilled.Start2End ? e.Start(t) : e.End(t), 
-                t_mm: _params!.T_mm, sk_mm: sk_mm, globalS_mm, _params!.F_mmpmin, 
+            currPos = GCodeHelpers.SweepAndDrillSafelyFromTo(from: currPos,
+                to: e.Milled == EdgeMilled.Start2End ? e.Start(t) : e.End(t),
+                t_mm: _params!.T_mm, sk_mm: sk_mm, globalS_mm, _params!.F_mmpmin,
                 backtracking: false, t, gcodes);
 
-            currPos = e.Segment.EmitGCode(currPos, e.MillingBottom_mm, e.Milled == EdgeMilled.Start2End, 
+            currPos = e.Segment.EmitGCode(currPos, e.MillingBottom_mm, e.Milled == EdgeMilled.Start2End,
                 globalS_mm, t, gcodes, dxfFileName);
         }
 
@@ -229,9 +230,9 @@ public class ChainSegment : IRawSegment, IMarkOrMillSegment {
         _params = new MillParams(ParamsText, IsMark, ErrorContext(dxfFileName), chainParams, onError);
     }
 
-    internal Vector3 EmitGCode(Vector3 currPos, double millingLayer_mm, bool start2End, double globalS_mm, 
+    internal Vector3 EmitGCode(Vector3 currPos, double millingLayer_mm, bool start2End, double globalS_mm,
                                 Transformation3 t, List<GCode> gcodes, string dxfFileName) {
-        return 
+        return
             (start2End ? _geometry : _geometry.CloneReversed()).EmitGCode(currPos, t, globalS_mm, gcodes, dxfFileName,
             millingTarget_mm: Math.Max(millingLayer_mm, Bottom_mm),
             t_mm: _params!.T_mm, f_mmpmin: _params!.F_mmpmin, backtracking: Order == PathModel.BACKTRACK_ORDER);
@@ -262,7 +263,7 @@ public abstract class AbstractSweepSegment : PathSegmentWithParamsText, IRawSegm
         => new BackSweepSegment(Source, ParamsText, _end, _start);
 
     public override Vector3 EmitGCode(Vector3 currPos, Transformation3 t, double globalS_mm,
-                                      List<GCode> gcodes, string dxfFileName, MessageHandlerForEntities messages) {
+                                      List<GCode> gcodes, string dxfFileName, MessageHandlerForEntities messages, int depth) {
         AssertNear(currPos.XY(), t.Transform(Start), ErrorContext(dxfFileName));
 
         Vector2 target = t.Transform(End);
@@ -338,7 +339,7 @@ public class HelixSegment : PathMarkOrMillSegment, IRawSegment {
     }
 
     public override Vector3 EmitGCode(Vector3 currPos, Transformation3 t, double globalS_mm,
-        List<GCode> gcodes, string dxfFileName, MessageHandlerForEntities messages) {
+        List<GCode> gcodes, string dxfFileName, MessageHandlerForEntities messages, int depth) {
         Vector2 c = t.Transform(Center);
         AssertNear(currPos.XY(), c, MessageHandlerForEntities.Context(Source, Center, dxfFileName));
         double t_mm = _params!.T_mm;
@@ -407,7 +408,7 @@ public class DrillSegment : PathMarkOrMillSegment, IRawSegment {
         _params = new DrillParams(ParamsText, IsMark, ErrorContext(dxfFileName), pathParams, onError);
     }
 
-    public override Vector3 EmitGCode(Vector3 currPos, Transformation3 t, double globalS_mm, List<GCode> gcodes, string dxfFileName, MessageHandlerForEntities messages) {
+    public override Vector3 EmitGCode(Vector3 currPos, Transformation3 t, double globalS_mm, List<GCode> gcodes, string dxfFileName, MessageHandlerForEntities messages, int depth) {
         Vector2 c = t.Transform(Center);
         AssertNear(currPos.XY(), c, MessageHandlerForEntities.Context(Source, Center, dxfFileName));
 
@@ -422,22 +423,25 @@ public class SubPathSegment : PathSegmentWithParamsText, IRawSegment {
     public int Preference => 3;
 
     private readonly string _overlayTextForErrors;
+    private readonly PathModelCollection _models;
+    private readonly Options _options;
     private readonly PathName _name;
-    private PathModel? _model;
     private Vector2 _start;
     private Vector2 _end;
 
-    public SubPathSegment(EntityObject source, ParamsText text, Vector2 start, Vector2 end, string pathNamePattern,
-            double order, string dxfFilePath, Action<string> onError) : base(source, text) {
+    public SubPathSegment(EntityObject source, ParamsText text, Vector2 start, Vector2 end, Options options, 
+        double order, PathModelCollection models, string dxfFilePath, Action<string> onError) : base(source, text) {
         _start = start;
         _end = end;
         _overlayTextForErrors = $"{text.Text} ({text.Context})";
+        _models = models;
+        _options = options;
         Order = order;
         string? path = text.GetString('>');
         if (path == null) {
             throw new ArgumentException(MessageHandlerForEntities.Context(source, start, dxfFilePath) + ": " + Messages.PathSegment_GtMissing);
         } else {
-            _name = path.AsPathReference(pathNamePattern, dxfFilePath)
+            _name = path.AsPathReference(options.PathNamePattern, dxfFilePath)
                 ?? throw new ArgumentException(string.Format(MessageHandlerForEntities.Context(source, start, dxfFilePath) +
                     ": " + Messages.PathSegment_InvalidPathName_Dir_Path, '>', path));
         }
@@ -455,32 +459,34 @@ public class SubPathSegment : PathSegmentWithParamsText, IRawSegment {
     public IRawSegment ReversedSegmentAfterTurn()
         => new BackSweepSegment(Source, ParamsText, _end, _start);
 
-    internal void Load(PathModelCollection subModels, string currentDxfFile, Options options, MessageHandlerForEntities messages) {
-        if (!subModels.Contains(_name)) {
+    private PathModel? Load(string currentDxfFile, MessageHandlerForEntities messages) {
+        if (!_models.Contains(_name)) {
             string searchedFiles = "";
-            foreach (var directory in options.DirAndSearchDirectories(Path.GetDirectoryName(Path.GetFullPath(currentDxfFile)))) {
+            foreach (var directory in _options.DirAndSearchDirectories(Path.GetDirectoryName(Path.GetFullPath(currentDxfFile)))) {
                 string[] dxfFiles = Directory.GetFiles(directory, "*.dxf");
                 foreach (var f in dxfFiles) {
-                    if (FileNameMatchesPathName(Path.GetFileNameWithoutExtension(f), _name, options.PathNamePattern)) {
-                        subModels.Load(f, options, _overlayTextForErrors, messages);
+                    if (FileNameMatchesPathName(Path.GetFileNameWithoutExtension(f), _name, _options.PathNamePattern)) {
+                        _models.Load(f, _options, _overlayTextForErrors, messages);
                         searchedFiles += (searchedFiles == "" ? "" : ", ") + f;
                         break;
                     }
                     // Load all matching files! - we want to know whether the path might be defined more than once.
                 }
             }
-            if (!subModels.Contains(_name)) {
+            if (!_models.Contains(_name)) {
                 messages.AddError(_overlayTextForErrors, Messages.PathSegment_PathNotFound_Name_Files, _name.AsString(), searchedFiles);
-                return;
+                return null;
             }
         }
-        _model = subModels.Get(_name);
+        PathModel model = _models.Get(_name);
 
-        double modelSize = _model.Start.Distance(_model.End);
+        double modelSize = model.Start.Distance(model.End);
         double referenceSize = Start.Distance(End);
         if (!modelSize.Near(referenceSize, 1e-3)) {
             messages.AddError(_overlayTextForErrors, Messages.PathSegment_DistanceDiffers_CallerDist_CalledDist, referenceSize.F3(), modelSize.F3());
         }
+
+        return model;
     }
 
     public static bool FileNameMatchesPathName(string fileName, PathName path, string pathNamePattern) {
@@ -501,24 +507,31 @@ public class SubPathSegment : PathSegmentWithParamsText, IRawSegment {
     }
 
     public override void CreateParams(PathParams pathParams, string dxfFileName, Action<string, string> onError) {
-        if (_model != null) { // Error "path not found" has already been emitted.
-            string errorContext = ErrorContext(dxfFileName);
-            _params = new SubpathParams(ParamsText, errorContext, pathParams, onError);
-            if (_params.M != _model.Params.M) {
-                onError(errorContext, string.Format(Messages.PathSegment_DifferingM_Caller_Path_Called, _params.M, _model.Name, _model.Params.M));
-            }
-            if (_params.O_mm != _model.Params.O_mm) {
-                onError(errorContext, string.Format(Messages.PathSegment_DifferingO_Caller_Path_Called, _params.O_mm, _model.Name, _model.Params.O_mm));
-            }
-        }
+        string errorContext = ErrorContext(dxfFileName);
+        _params = new SubpathParams(ParamsText, errorContext, pathParams, onError);
     }
 
     public override Vector3 EmitGCode(Vector3 currPos, Transformation3 t, double globalS_mm,
-        List<GCode> gcodes, string dxfFileName, MessageHandlerForEntities messages) {
-        Transformation3 compound = t.Transform3(new Transformation2(_model!.Start, _model.End, _start, _end));
-        gcodes.AddComment($"START Subpath {_name} t={compound}", 2);
-        currPos = _model.EmitMillingGCode(currPos, compound, globalS_mm, gcodes, _model.DxfFilePath, messages);
-        gcodes.AddComment($"END Subpath {_name} t={compound}", 2);
+        List<GCode> gcodes, string dxfFileName, MessageHandlerForEntities messages, int depth) {
+        if (depth > 9) {
+            throw new Exception(string.Format(Messages.PathSegment_CallDepthGt9_Path, _name));
+        }
+
+        PathModel? model = Load(dxfFileName, messages);
+        if (model != null) {
+            if (_params!.M != model.Params.M) {
+                messages.AddError(dxfFileName, Messages.PathSegment_DifferingM_Caller_Path_Called, _params.M, model.Name, model.Params.M);
+            }
+            if (_params.O_mm != model.Params.O_mm) {
+                messages.AddError(dxfFileName, Messages.PathSegment_DifferingO_Caller_Path_Called, _params.O_mm, model.Name, model.Params.O_mm);
+            }
+
+            Transformation3 compound = t.Transform3(new Transformation2(model!.Start, model.End, _start, _end));
+            gcodes.AddComment($"START Subpath {_name} t={compound}", 2);
+            currPos = model.EmitMillingGCode(currPos, compound, globalS_mm, gcodes, model.DxfFilePath, messages, depth + 1);
+            gcodes.AddComment($"END Subpath {_name} t={compound}", 2);
+        }
+
         return currPos;
     }
 }

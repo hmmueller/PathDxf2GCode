@@ -104,7 +104,7 @@ public class PathModel {
             var p = new PathName(e.Layer.Name, dxfFilePath);
             return name2Model.TryGetValue(p, out RawPathModel? result)
                      ? result
-                     : throw new Exception(MessageHandlerForEntities.Context(e, position, dxfFilePath) + ": " + string.Format(Messages.PathModel_MissingPathDefinition_PathName, p.AsString()));
+                     : throw new KeyNotFoundException(MessageHandlerForEntities.Context(e, position, dxfFilePath) + ": " + string.Format(Messages.PathModel_MissingPathDefinition_PathName, p.AsString()));
         }
 
         RawPathModel GetOrCreateRawModel(EntityObject e) {
@@ -244,7 +244,7 @@ public class PathModel {
             RawPathModel rawModel = GetRawModel(line, start);
             LineGeometry geometry = new(start, end);
 
-            HandleLineOrArc(layerLinetypes, dxfFilePath, options, messages, subPaths, line, start, end, lineText, rawModel, order, geometry);
+            HandleLineOrArc(layerLinetypes, dxfFilePath, subPathDefs, options, messages, subPaths, line, start, end, lineText, rawModel, order, geometry);
         }
 
         // 4c. Arcs
@@ -254,21 +254,16 @@ public class PathModel {
             RawPathModel rawModel = GetRawModel(arc, arcGeometry.Start);
             double order = arcText.GetDouble('N') ?? LAST_ORDER;
 
-            HandleLineOrArc(layerLinetypes, dxfFilePath, options, messages, subPaths, arc, arcGeometry.Start, arcGeometry.End,
-                arcText, rawModel, order, arcGeometry);
-        }
-
-        // 5. Load subpaths at the very end (tail-recursion hopefully reduces problems)
-        foreach (var s in subPaths) {
-            s.Load(subPathDefs, dxfFilePath, options, messages);
+            HandleLineOrArc(layerLinetypes, dxfFilePath, subPathDefs, options, messages, subPaths, arc, arcGeometry.Start, arcGeometry.End, arcText, rawModel, order, arcGeometry);
         }
 
         return name2Model;
     }
 
     private static void HandleLineOrArc(Dictionary<string, Linetype> layerLinetypes, string dxfFilePath,
-        Options options, MessageHandlerForEntities messages, List<SubPathSegment> subPaths, EntityObject lineOrArc,
-        Vector2 start, Vector2 end, ParamsText text, RawPathModel rawModel, double order, MillGeometry geometry) {
+        PathModelCollection subPathDefs, Options options, MessageHandlerForEntities messages, 
+        List<SubPathSegment> subPaths, EntityObject lineOrArc, Vector2 start, Vector2 end, 
+        ParamsText text, RawPathModel rawModel, double order, MillGeometry geometry) {
         void OnError(string s) {
             messages.AddError(rawModel.Name.AsString(), s);
         }
@@ -277,7 +272,7 @@ public class PathModel {
         if (isMark || IsLineType(layerLinetypes, lineOrArc, "CONTINUOUS")) {
             rawModel.RawSegments.Add(new ChainSegment(geometry, isMark, lineOrArc, text, order));
         } else if (IsLineType(layerLinetypes, lineOrArc, "DASHDOT")) { // Subpath
-            var s = new SubPathSegment(lineOrArc, text, start, end, options.PathNamePattern, order, dxfFilePath, OnError);
+            var s = new SubPathSegment(lineOrArc, text, start, end, options, order, subPathDefs, dxfFilePath, OnError);
             rawModel.RawSegments.Add(s);
             subPaths.Add(s);
         } else if (IsLineType(layerLinetypes, lineOrArc, "DASHED")
@@ -532,11 +527,11 @@ public class PathModel {
     public bool HasZProbes => _zProbes.Any();
 
     public Vector3 EmitMillingGCode(Vector3 currPos, Transformation3 t, double globalS_mm,
-        List<GCode> gcodes, string dxfFileName, MessageHandlerForEntities messages) {
+        List<GCode> gcodes, string dxfFileName, MessageHandlerForEntities messages, int depth) {
 
         foreach (var s in _segments) {
             try {
-                currPos = s.EmitGCode(currPos, t, globalS_mm, gcodes, dxfFileName, messages);
+                currPos = s.EmitGCode(currPos, t, globalS_mm, gcodes, dxfFileName, messages, depth);
             } catch (EmitGCodeException ex) {
                 messages.AddError(ex.ErrorContext, ex.Message);
             }

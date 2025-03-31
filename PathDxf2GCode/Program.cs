@@ -93,7 +93,7 @@ public class Program {
                 Vector3 init = new(0, 0, m.Params.S_mm * (1 + 2 * GeometryHelpers.RELATIVE_EPS));
                 List<GCode> gcodes = new();
 
-                Vector3 currpos = m.EmitMillingGCode(init, m.CreateTransformation(), m.Params.S_mm, gcodes, dxfFilePath, messages);
+                Vector3 currpos = m.EmitMillingGCode(init, m.CreateTransformation(), m.Params.S_mm, gcodes, dxfFilePath, messages, depth: 0);
 
                 gcodes.AddNonhorizontalG00($"G00 Z{init.Z.F3()}", Math.Abs(currpos.Z- init.Z));
 
@@ -121,7 +121,6 @@ public class Program {
                 messages.WriteLine();
                 WriteStat($"  {{0,-12}} {stats.SweepLength_mm,5:F0} mm   {AsMin(stats.RoughSweepTime)} min", Messages.Program_SweepLength);
                 WriteStat($"  {{0,-12}} {stats.TotalLength_mm,5:F0} mm   {AsMin(stats.TotalTime)} min", Messages.Program_SumLength);
-                messages.WriteLine();
                 WriteStat($"  {{0,-12}} {stats.CommandCount}", Messages.Program_CommandCount);
                 messages.WriteLine();
 

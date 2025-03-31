@@ -12,12 +12,12 @@ using de.hmmueller.PathGCodeLibrary;
 public static class DxfHelper {
     public const string TILDE_SUFFIX_REGEX = "(~[a-z]+)?";
 
-    public static DxfDocument? LoadDxfDocument(string dxfFilePath, bool dump, string pathNamePattern,
+    public static DxfDocument? LoadDxfDocument(string dxfFilePath, Options options,
             out Dictionary<string, Linetype> layerLinetypes, MessageHandlerForEntities messages) {
         messages.Write(MessageHandler.InfoPrefix + Messages.DxfHelper_ReadingFile__FileName, dxfFilePath);
 
         DxfVersion v = DxfDocument.CheckDxfFileVersion(dxfFilePath, out bool isBinary);
-        messages.WriteLine(" (DXF-Version: {0}, isBinary: {1})", v, isBinary);
+        messages.WriteLine(" (DXF-Version: {0})", v);
 
         DxfDocument d = DxfDocument.Load(dxfFilePath);
         string x = "a" + v + " c";
@@ -28,8 +28,8 @@ public static class DxfHelper {
         } else {
             layerLinetypes = d.Layers.ToDictionary(layer => layer.Name, layer => layer.Linetype);
 
-            if (dump) {
-                Dump(dxfFilePath, d.Entities, layerLinetypes, pathNamePattern);
+            if (options.Dump) {
+                Dump(dxfFilePath, d.Entities, layerLinetypes, options.PathNamePattern);
             }
         }
         return d;

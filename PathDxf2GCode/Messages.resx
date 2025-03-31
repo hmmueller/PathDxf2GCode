@@ -217,7 +217,7 @@ Options:
     <value>No parameters found for path {0}; maybe path text center is not near enough to start marker</value>
   </data>
   <data name="PathModel_MissingPathDefinition_PathName" xml:space="preserve">
-    <value>Path definition {0} not found</value>
+    <value>Path definition {0} not found; maybe start marker is not of line type PHANTOM(__ _ _ __)</value>
   </data>
   <data name="PathModel_MissingStart" xml:space="preserve">
     <value>Start marker missing</value>
@@ -250,6 +250,9 @@ has assigned text '{1}'</value>
   </data>
   <data name="PathModel_UnreachedSegments" xml:space="preserve">
     <value>{0} segments (e.g. this one here) not reached - maybe N value is missing</value>
+  </data>
+  <data name="PathSegment_CallDepthGt9_Path" xml:space="preserve">
+    <value>Nesting depth deeper than 9 levels at path {0}</value>
   </data>
   <data name="PathSegment_DifferingM_Caller_Path_Called" xml:space="preserve">
     <value>M={0} at subpath {1} is different from M={2} in referenced path</value>

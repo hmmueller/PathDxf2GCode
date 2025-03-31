@@ -217,7 +217,7 @@ Optionen:
     <value>Keine Parameter für Pfad {0} gefunden; vielleicht ist Pfadtext nicht nahe genug an Start-Merkierung</value>
   </data>
   <data name="PathModel_MissingPathDefinition_PathName" xml:space="preserve">
-    <value>Pfaddefinition {0} nicht gefunden</value>
+    <value>Pfaddefinition {0} nicht gefunden; vielleicht hat Start-Markierung nicht Linientyp PHANTOM(__ _ _ __)</value>
   </data>
   <data name="PathModel_MissingStart" xml:space="preserve">
     <value>Start-Markierung fehlt</value>
@@ -250,6 +250,9 @@ hat zugeordneten Text '{1}'</value>
   </data>
   <data name="PathModel_UnreachedSegments" xml:space="preserve">
     <value>{0} Segmente (u.a. dieses hier) wurden nicht erreicht - evtl. fehlt N-Auszeichnung</value>
+  </data>
+  <data name="PathSegment_CallDepthGt9_Path" xml:space="preserve">
+    <value>Mehr als 9 verschachtelte Subpfade bei Einbettung von {0}</value>
   </data>
   <data name="PathSegment_DifferingM_Caller_Path_Called" xml:space="preserve">
     <value>M={0} an Subpfad {1} weicht von M={2} in referenziertem Modell ab</value>

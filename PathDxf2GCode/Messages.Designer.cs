@@ -323,7 +323,7 @@ namespace de.hmmueller.PathDxf2GCode {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Path definition {0} not found ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Path definition {0} not found; maybe start marker is not of line type PHANTOM(__ _ _ __) ähnelt.
         /// </summary>
         internal static string PathModel_MissingPathDefinition_PathName {
             get {
@@ -429,6 +429,15 @@ namespace de.hmmueller.PathDxf2GCode {
         internal static string PathModelCollection_PathDefinedTwice_Path_File {
             get {
                 return ResourceManager.GetString("PathModelCollection_PathDefinedTwice_Path_File", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Nesting depth deeper than 9 levels at path {0} ähnelt.
+        /// </summary>
+        internal static string PathSegment_CallDepthGt9_Path {
+            get {
+                return ResourceManager.GetString("PathSegment_CallDepthGt9_Path", resourceCulture);
             }
         }
         

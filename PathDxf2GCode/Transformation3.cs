@@ -41,7 +41,7 @@ public class ZProbe {
 
     internal void SetName(string name) {
         if (_name != null) {
-            throw new Exception("name already set");
+            throw new Exception("Internal error - name of ZProbe already set");
         }
         _name = name;
     }
