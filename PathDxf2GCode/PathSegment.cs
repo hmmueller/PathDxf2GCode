@@ -468,9 +468,9 @@ public class SubPathSegment : PathSegmentWithParamsText, IRawSegment {
                     if (FileNameMatchesPathName(Path.GetFileNameWithoutExtension(f), _name, _options.PathNamePattern)) {
                         _models.Load(f, _options, _overlayTextForErrors, messages);
                         searchedFiles += (searchedFiles == "" ? "" : ", ") + f;
-                        break;
                     }
-                    // Load all matching files! - we want to know whether the path might be defined more than once.
+                    // Continue loop, i.e. load all matching files! - we want to know whether
+                    // the path might be defined more than once.
                 }
             }
             if (!_models.Contains(_name)) {
