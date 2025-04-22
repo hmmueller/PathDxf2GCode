@@ -54,18 +54,18 @@ public static class GCodeHelpers {
         return target;
     }
 
-    public static Vector3 SweepAndDrillSafelyFromTo(Vector3 from, Vector3 to, double t_mm, double sk_mm,
+    public static Vector3 SweepAndDrillSafelyFromTo(Vector3 from, Vector3 to, double t_mm, double s_mm,
             double globalS_mm, double f_mmpmin, bool backtracking,
             Transformation3 zCorr, List<GCode> gcodes) {
-        gcodes.AddComment($"SweepAndDrillSafelyFromTo {from.F3()} {to.F3()} s={sk_mm.F3()} bt={backtracking}", 2);
+        gcodes.AddComment($"SweepAndDrillSafelyFromTo {from.F3()} {to.F3()} s={s_mm.F3()} bt={backtracking}", 2);
         Vector2 fromXY = from.XY();
         Vector2 toXY = to.XY();
         if (fromXY.Near(toXY)) {
             DrillOrPullZFromTo(fromXY, from.Z, to.Z, t_mm, f_mmpmin, zCorr, gcodes);
         } else {
-            DrillOrPullZFromTo(fromXY, from.Z, sk_mm, t_mm, f_mmpmin, zCorr, gcodes);
+            DrillOrPullZFromTo(fromXY, from.Z, s_mm, t_mm, f_mmpmin, zCorr, gcodes);
             to = SweepFromTo(from, to, globalS_mm, gcodes);
-            DrillOrPullZFromTo(toXY, sk_mm, to.Z, t_mm, f_mmpmin, zCorr, gcodes);
+            DrillOrPullZFromTo(toXY, s_mm, to.Z, t_mm, f_mmpmin, zCorr, gcodes);
         }
         return to;
     }

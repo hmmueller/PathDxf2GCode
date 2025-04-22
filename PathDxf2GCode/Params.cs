@@ -82,7 +82,6 @@ public interface IParams {
     int? RawC { get; }
     double? RawS_mm { get; }
     double V_mmpmin { get; }
-    double? RawK_mm { get; }
     double T_mm { get; }
     double O_mm { get; }
     string M { get; }
@@ -92,7 +91,6 @@ public interface IParams {
     double I_mm { get; }
     int C { get; }
     double S_mm { get; }
-    double K_mm { get; }
 }
 
 public abstract class AbstractParams : IParams {
@@ -171,7 +169,6 @@ public abstract class AbstractParams : IParams {
     public abstract int? RawC { get; }
     public abstract double? RawS_mm { get; }
     public abstract double V_mmpmin { get; }
-    public abstract double? RawK_mm { get; }
     public abstract double T_mm { get; }
     public abstract double O_mm { get; }
     public abstract string M { get; }
@@ -180,7 +177,6 @@ public abstract class AbstractParams : IParams {
     public double D_mm => RawD_mm ?? throw new EmitGCodeException(_errorContext, Messages.Params_MissingKey_Key, 'D');
     public double I_mm => RawI_mm ?? throw new EmitGCodeException(_errorContext, Messages.Params_MissingKey_Key, 'I');
     public double S_mm => RawS_mm ?? throw new EmitGCodeException(_errorContext, Messages.Params_MissingKey_Key, 'S');
-    public double K_mm => RawK_mm ?? throw new EmitGCodeException(_errorContext, Messages.Params_MissingKey_Key, 'K');
     public int C => RawC ?? throw new EmitGCodeException(_errorContext, Messages.Params_MissingKey_Key, 'C');
 }
 
@@ -192,7 +188,6 @@ public class PathParams : AbstractParams {
     public override double? RawD_mm => Text.GetDouble('D');
     public override int? RawC => (int?)Text.GetDouble('C');
     public override double? RawI_mm => Text.GetDouble('I');
-    public override double? RawK_mm => Text.GetDouble('K');
     public override double? RawS_mm => Text.GetDouble('S');
     public override double V_mmpmin => _options.GlobalSweepRate_mmpmin;
     public override double T_mm => Text.GetDouble('T', OnErrorNaN);
@@ -201,7 +196,7 @@ public class PathParams : AbstractParams {
 
     public PathParams(ParamsText text, string errorContext, Options options, Action<string, string> onError) : base(text, errorContext, onError) {
         _options = options;
-        CheckKeysAndValues(text, "FBDCIKSTOM");
+        CheckKeysAndValues(text, "FBDCISTOM");
         if (RawD_mm.HasValue && RawB_mm.HasValue && (RawD_mm < RawB_mm || RawD_mm.Value.Near(RawB_mm.Value))) {
             Error(Messages.Params_DMustBeGtThanB_D_B, RawD_mm, B_mm);
         }
@@ -216,7 +211,6 @@ public abstract class AbstractChildParams : AbstractParams {
     public override double? RawD_mm => _parent.RawD_mm;
     public override int? RawC => _parent.RawC;
     public override double? RawI_mm => _parent.RawI_mm;
-    public override double? RawK_mm => _parent.RawK_mm;
     public override double? RawS_mm => _parent.RawS_mm;
     public override double V_mmpmin => _parent.V_mmpmin;
     public override double T_mm => _parent.T_mm;
@@ -229,10 +223,9 @@ public abstract class AbstractChildParams : AbstractParams {
 }
 
 public class ChainParams : AbstractChildParams, IParams {
-    public const string KEYS = "CIKN";
+    public const string KEYS = "CIN";
     public override int? RawC => (int?)Text.GetDouble('C') ?? base.RawC;
     public override double? RawI_mm => Text.GetDouble('I') ?? base.RawI_mm;
-    public override double? RawK_mm => Text.GetDouble('K') ?? base.RawK_mm;
 
     public ChainParams(ParamsText text, string errorContext, IParams pathParams, Action<string, string> onError) : base(text.LimitedTo(KEYS), errorContext, pathParams, onError) {
         CheckKeysAndValues(text, KEYS + MillParams.MILL_KEYS + MillParams.MARK_KEYS);
@@ -249,10 +242,9 @@ public class SweepParams : AbstractChildParams {
 
 public class BackSweepParams : AbstractChildParams {
     public override double? RawS_mm => Text.GetDouble('S') ?? base.RawS_mm;
-    public override double? RawK_mm => Text.GetDouble('K') ?? base.RawS_mm;
 
     public BackSweepParams(ParamsText text, string errorContext, IParams pathParams, Action<string, string> onError) : base(text, errorContext, pathParams, onError) {
-        CheckKeysAndValues(text, "FBDCIKSTOMN<>"); // Backsweeps are allowed for all sorts of objects, as they inherit their parents' fulll parameter set
+        CheckKeysAndValues(text, "FBDCISTOMN<>"); // Backsweeps are allowed for all sorts of objects, as they inherit their parents' fulll parameter set
     }
 }
 
@@ -295,10 +287,9 @@ public class SubpathParams : AbstractChildParams {
     public override double T_mm => Text.GetDouble('T') ?? base.T_mm;
     public override double O_mm => Text.GetDouble('O') ?? base.O_mm;
     public override string M => Text.GetString('M') ?? base.M;
-    public override double? RawK_mm => Text.GetDouble('K') ?? base.RawK_mm;
 
     public SubpathParams(ParamsText text, string errorContext, IParams pathParams, Action<string, string> onError) : base(text, errorContext, pathParams, onError) {
-        CheckKeysAndValues(text, "TOMKN<>");
+        CheckKeysAndValues(text, "TOMN<>");
     }
 }
 

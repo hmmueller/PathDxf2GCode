@@ -163,11 +163,11 @@ public class MillChain : PathSegment {
         }
 
         // Create code
-        double sk_mm = _params!.RawK_mm ?? _params!.S_mm;
+        double s_mm = _params!.S_mm;
         foreach (var e in sortedEdges) {
             currPos = GCodeHelpers.SweepAndDrillSafelyFromTo(from: currPos,
                 to: e.Milled == EdgeMilled.Start2End ? e.Start(t) : e.End(t),
-                t_mm: _params!.T_mm, sk_mm: sk_mm, globalS_mm, _params!.F_mmpmin,
+                t_mm: _params!.T_mm, s_mm: s_mm, globalS_mm, _params!.F_mmpmin,
                 backtracking: false, t, gcodes);
 
             currPos = e.Segment.EmitGCode(currPos, e.MillingBottom_mm, e.Milled == EdgeMilled.Start2End,
@@ -175,8 +175,8 @@ public class MillChain : PathSegment {
         }
 
         Vector2 end = t.Transform(_segments.Last().End);
-        currPos = GCodeHelpers.SweepAndDrillSafelyFromTo(from: currPos, to: end.AsVector3(sk_mm),
-            t_mm: _params!.T_mm, sk_mm: sk_mm, globalS_mm, _params!.F_mmpmin, backtracking: false, t, gcodes);
+        currPos = GCodeHelpers.SweepAndDrillSafelyFromTo(from: currPos, to: end.AsVector3(s_mm),
+            t_mm: _params!.T_mm, s_mm: s_mm, globalS_mm, _params!.F_mmpmin, backtracking: false, t, gcodes);
         AssertNear(currPos.XY(), end, MessageHandlerForEntities.Context(_segments.Last().Source, _segments.First().Start, dxfFileName));
         return currPos;
     }
@@ -269,7 +269,7 @@ public abstract class AbstractSweepSegment : PathSegmentWithParamsText, IRawSegm
         Vector2 target = t.Transform(End);
         double s_mm = _params!.S_mm;
         GCodeHelpers.SweepAndDrillSafelyFromTo(currPos, target.AsVector3(s_mm), t_mm: _params!.T_mm,
-                                               sk_mm: s_mm, globalS_mm: globalS_mm, f_mmpmin: _params!.F_mmpmin,
+                                               s_mm: s_mm, globalS_mm: globalS_mm, f_mmpmin: _params!.F_mmpmin,
                                                backtracking: Order == PathModel.BACKTRACK_ORDER, t, gcodes);
         return target.AsVector3(_params!.S_mm);
     }
