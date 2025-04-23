@@ -64,7 +64,7 @@ public static class GCodeHelpers {
             DrillOrPullZFromTo(fromXY, from.Z, to.Z, t_mm, f_mmpmin, zCorr, gcodes);
         } else {
             DrillOrPullZFromTo(fromXY, from.Z, s_mm, t_mm, f_mmpmin, zCorr, gcodes);
-            to = SweepFromTo(from, to, globalS_mm, gcodes);
+            SweepFromTo(fromXY.AsVector3(s_mm), to, globalS_mm, gcodes);
             DrillOrPullZFromTo(toXY, s_mm, to.Z, t_mm, f_mmpmin, zCorr, gcodes);
         }
         return to;

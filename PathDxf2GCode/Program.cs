@@ -52,7 +52,8 @@ public class Program {
             dxfFilePath += ".dxf";
         }
 
-        var models = pathModels.Load(dxfFilePath, options, dxfFilePath, messages);
+        SortedDictionary<string, PathModel> models = pathModels.Load(dxfFilePath, 
+            options.CheckModels ? null : options.GlobalSweepHeight_mm, options, dxfFilePath, messages);
         if (options.CheckModels) {
             foreach (var m in models) {
                 messages.WriteLine(MessageHandler.InfoPrefix + Messages.Program_Checking_Path, m.Key);
@@ -95,7 +96,7 @@ public class Program {
 
                 Vector3 currpos = m.EmitMillingGCode(init, m.CreateTransformation(), m.Params.S_mm, gcodes, dxfFilePath, messages, depth: 0);
 
-                gcodes.AddNonhorizontalG00($"G00 Z{init.Z.F3()}", Math.Abs(currpos.Z- init.Z));
+                gcodes.AddNonhorizontalG00($"G00 Z{init.Z.F3()}", Math.Abs(currpos.Z - init.Z));
 
                 gcodes = gcodes.Optimize();
 

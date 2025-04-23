@@ -29,6 +29,12 @@ public class Options : AbstractOptions {
     public double GlobalSweepRate_mmpmin { get; private set; } = -1;
 
     /// <summary>
+    /// /s: Sweep height for main path; must be higher than any obstacle
+    /// the router bits might encounter.
+    /// </summary>
+    public double GlobalSweepHeight_mm { get; private set; } = -1;
+
+    /// <summary>
     /// /c: Dry run for all paths of a DXF file, no gcode output
     /// </summary>
     public bool CheckModels { get; private set; } = false;
@@ -126,6 +132,9 @@ public class Options : AbstractOptions {
                             case "v":
                                 options.GlobalSweepRate_mmpmin = GetDoubleOption(ref i);
                                 break;
+                            case "s":
+                                options.GlobalSweepHeight_mm = GetDoubleOption(ref i);
+                                break;
                             case "l":
                                 Thread.CurrentThread.CurrentUICulture = new CultureInfo(GetStringOption(ref i));
                                 break;
@@ -150,6 +159,10 @@ public class Options : AbstractOptions {
         }
         if (options.GlobalSweepRate_mmpmin <= 0) {
             messages.AddError("Options", Messages.Options_MissingV);
+            doNotRun = true;
+        }
+        if (options.GlobalSweepHeight_mm <= 0) {
+            messages.AddError("Options", Messages.Options_MissingS);
             doNotRun = true;
         }
 

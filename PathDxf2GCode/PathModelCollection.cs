@@ -66,7 +66,8 @@ public class PathModelCollection {
     private readonly Dictionary<PathName, PathModel> _models = new();
     private readonly HashSet<string> _readFiles = new();
 
-    public SortedDictionary<string, PathModel> Load(string dxfFilePath, Options options, string contextForErrors, MessageHandlerForEntities messages) {
+    public SortedDictionary<string, PathModel> Load(string dxfFilePath, double? defaultSorNullForTplusO_mm, Options options, 
+                                                    string contextForErrors, MessageHandlerForEntities messages) {
         var result = new SortedDictionary<string, PathModel>();
         string fullDxfFilePath = Path.GetFullPath(dxfFilePath);
         if (_readFiles.Add(fullDxfFilePath)) {
@@ -74,7 +75,7 @@ public class PathModelCollection {
                                                      out Dictionary<string, Linetype> layerLinetypes, messages);
             if (d != null) {
                 Dictionary<PathName, PathModel> models = PathModel.TransformDxf2PathModel(fullDxfFilePath, d.Entities,
-                    layerLinetypes, options, messages, this);
+                    layerLinetypes, defaultSorNullForTplusO_mm, options, messages, this);
                 foreach (var kvp in models) {
                     if (_models.TryAdd(kvp.Key, kvp.Value)) {
                         result.Add(kvp.Key.AsString(), kvp.Value);

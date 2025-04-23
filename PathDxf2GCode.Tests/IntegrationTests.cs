@@ -38,7 +38,7 @@ public class IntegrationTests {
 
     [TestMethod]
     public void TestMethod01() {
-        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "8999.01P.dxf"]));
+        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s5", "8999.01P.dxf"]));
         Compare("8999.01P_Milling.gcode", $@"%
 (PathDxf2GCode - HMMüller 2024-2025 V.{Program.VERSION})
 (8999.01P.dxf)
@@ -76,7 +76,7 @@ M30
 
     [TestMethod]
     public void TestMethod02() {
-        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "8999.02P.dxf"]));
+        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s15", "8999.02P.dxf"]));
         Compare("8999.02P_Milling.gcode", $@"%
 (PathDxf2GCode - HMMüller 2024-2025 V.{Program.VERSION})
 (8999.02P.dxf)
@@ -105,27 +105,27 @@ G01 F150.000 X5.948 Y5.963 Z-0.100
   (SweepAndDrillSafelyFromTo [5.948|5.963|-0.100] [63.635|5.963|20.000] s=20.000 bt=False)
     (DrillOrPullZFromTo -0.100 20.000)
 G00 Z20.000
-G00 X63.635 Y5.963
+; G00 X63.635 Y5.963
   (SweepAndDrillSafelyFromTo [63.635|5.963|20.000] [76.907|14.144|20.000] s=20.000 bt=False)
 G00 X76.907 Y14.144
 G00 Z20.000
   (Fräslänge:     115 mm   ca.  2 min)
   (Bohrungen:       2 mm   ca.  1 min)
-  (Leerfahrten:   124 mm   ca.  1 min)
-  (Summe:         241 mm   ca.  2 min)
-  (Befehlszahl: 11)
+  (Leerfahrten:    63 mm   ca.  1 min)
+  (Summe:         180 mm   ca.  2 min)
+  (Befehlszahl: 10)
 M30
 %");
     }
 
     [TestMethod]
     public void TestMethod05() {
-        Assert.AreNotEqual(0, Program.Main(["/f150", "/v500", "8999.05P.dxf"]));
+        Assert.AreNotEqual(0, Program.Main(["/f150", "/v500", "/s15", "8999.05P.dxf"]));
     }
 
     [TestMethod]
     public void TestMethod08() {
-        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "8999.08P.dxf"]));
+        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s15", "8999.08P.dxf"]));
         Compare("8999.08P_Milling.gcode", $@"%
 (PathDxf2GCode - HMMüller 2024-2025 V.{Program.VERSION})
 (8999.08P.dxf)
@@ -196,7 +196,7 @@ M30
 
     [TestMethod]
     public void TestMethod09() {
-        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "8999.09P.dxf"]));
+        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s15", "8999.09P.dxf"]));
         Compare("8999.09P_Milling.gcode", $@"%
 (PathDxf2GCode - HMMüller 2024-2025 V.{Program.VERSION})
 (8999.09P.dxf)
@@ -305,7 +305,7 @@ M30
 
     [TestMethod]
     public void TestMethod10() {
-        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "8999.10P.dxf"]));
+        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s15", "8999.10P.dxf"]));
         Compare("8999.10P_Milling.gcode", $@"%
 (PathDxf2GCode - HMMüller 2024-2025 V.{Program.VERSION})
 (8999.10P.dxf)
@@ -334,8 +334,8 @@ G00 X-14.142 Y5.858
 G00 Z5.000
   (Fräslänge:      31 mm   ca.  1 min)
   (Bohrungen:       3 mm   ca.  1 min)
-  (Leerfahrten:    24 mm   ca.  1 min)
-  (Summe:          59 mm   ca.  1 min)
+  (Leerfahrten:    23 mm   ca.  1 min)
+  (Summe:          58 mm   ca.  1 min)
   (Befehlszahl: 8)
 M30
 %");
@@ -343,7 +343,7 @@ M30
 
     [TestMethod]
     public void TestMethod11() {
-        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "8999.11P.dxf"]));
+        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s15", "8999.11P.dxf"]));
         Compare("8999.11P_Milling.gcode", $@"%
 (PathDxf2GCode - HMMüller 2024-2025 V.{Program.VERSION})
 (8999.11P.dxf)
@@ -385,23 +385,23 @@ G01 F150.000 X20.000 Y0.000 Z-0.300
   (SweepAndDrillSafelyFromTo [20.000|0.000|-0.300] [20.000|70.000|5.000] s=5.000 bt=False)
     (DrillOrPullZFromTo -0.300 5.000)
 G00 Z5.000
-G00 X20.000 Y70.000
+; G00 X20.000 Y70.000
   (END Subpath 8998.2P[8999.11P.dxf] t=[ [120.000|170.000]=>[20.000|0.000] / [120.000|100.000]=>[20.000|70.000] ])
   (SweepAndDrillSafelyFromTo [20.000|70.000|5.000] [0.000|70.000|5.000] s=5.000 bt=False)
 G00 X0.000 Y70.000
 G00 Z5.000
   (Fräslänge:     173 mm   ca.  2 min)
   (Bohrungen:       2 mm   ca.  1 min)
-  (Leerfahrten:   120 mm   ca.  1 min)
-  (Summe:         295 mm   ca.  2 min)
-  (Befehlszahl: 15)
+  (Leerfahrten:    49 mm   ca.  1 min)
+  (Summe:         225 mm   ca.  2 min)
+  (Befehlszahl: 14)
 M30
 %");
     }
 
     [TestMethod]
     public void TestMethod12() {
-        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "8999.12P.dxf"]));
+        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s15", "8999.12P.dxf"]));
         Compare("8999.12P_Milling.gcode", $@"%
 (PathDxf2GCode - HMMüller 2024-2025 V.{Program.VERSION})
 (8999.12P.dxf)
@@ -444,7 +444,7 @@ M30
 
     [TestMethod]
     public void TestMethod13() {
-        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "8999.13P.dxf"]));
+        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s15", "8999.13P.dxf"]));
         Compare("8999.13P_Milling.gcode", $@"%
 (PathDxf2GCode - HMMüller 2024-2025 V.{Program.VERSION})
 (8999.13P.dxf)
@@ -787,7 +787,7 @@ M30
 
     [TestMethod]
     public void TestMethod14() { // Löcher
-        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "8999.14P.dxf"]));
+        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s15", "8999.14P.dxf"]));
         Compare("8999.14P_Milling.gcode", $@"%
 (PathDxf2GCode - HMMüller 2024-2025 V.{Program.VERSION})
 (8999.14P.dxf)
@@ -1236,8 +1236,8 @@ G00 X100.000 Y0.000
 G00 Z5.000
   (Fräslänge:     315 mm   ca.  3 min)
   (Bohrungen:       5 mm   ca.  1 min)
-  (Leerfahrten:   423 mm   ca.  2 min)
-  (Summe:         743 mm   ca.  5 min)
+  (Leerfahrten:   405 mm   ca.  2 min)
+  (Summe:         725 mm   ca.  5 min)
   (Befehlszahl: 241)
 M30
 %");
@@ -1245,7 +1245,7 @@ M30
 
     [TestMethod]
     public void TestMethod15() {
-        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "8999.15P.dxf"]));
+        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s15", "8999.15P.dxf"]));
         Compare("8999.15P_Milling.gcode", $@"%
 (PathDxf2GCode - HMMüller 2024-2025 V.{Program.VERSION})
 (8999.15P.dxf)
@@ -1294,7 +1294,7 @@ G01 F150.000 X0.000 Y0.000 Z-0.100
   (SweepAndDrillSafelyFromTo [0.000|0.000|-0.100] [160.000|25.000|5.000] s=5.000 bt=False)
     (DrillOrPullZFromTo -0.100 5.000)
 G00 Z5.000
-G00 X160.000 Y25.000
+; G00 X160.000 Y25.000
   (SweepAndDrillSafelyFromTo [160.000|25.000|5.000] [200.000|0.000|5.000] s=5.000 bt=False)
 G00 X200.000 Y0.000
   (SweepAndDrillSafelyFromTo [200.000|0.000|5.000] [200.000|0.000|0.800] s=5.000 bt=False)
@@ -1340,16 +1340,16 @@ G00 X360.000 Y25.000
 G00 Z5.000
   (Fräslänge:     992 mm   ca. 10 min)
   (Bohrungen:      13 mm   ca.  1 min)
-  (Leerfahrten:   507 mm   ca.  2 min)
-  (Summe:        1512 mm   ca. 11 min)
-  (Befehlszahl: 38)
+  (Leerfahrten:   345 mm   ca.  1 min)
+  (Summe:        1350 mm   ca. 11 min)
+  (Befehlszahl: 37)
 M30
 %");
     }
 
     [TestMethod]
     public void TestMethod16() {
-        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "8999.16P.dxf"]));
+        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s15", "8999.16P.dxf"]));
         Compare("8999.16P_Milling.gcode", $@"%
 (PathDxf2GCode - HMMüller 2024-2025 V.{Program.VERSION})
 (8999.16P.dxf)
@@ -1700,7 +1700,7 @@ G01 F150.000 X65.000 Y-10.000 Z-0.100
   (SweepAndDrillSafelyFromTo [65.000|-10.000|-0.100] [60.000|15.000|5.000] s=5.000 bt=False)
     (DrillOrPullZFromTo -0.100 5.000)
 G00 Z5.000
-G00 X60.000 Y15.000
+; G00 X60.000 Y15.000
   (SweepAndDrillSafelyFromTo [60.000|15.000|5.000] [75.000|5.000|5.000] s=5.000 bt=False)
 G00 X75.000 Y5.000
   (SweepAndDrillSafelyFromTo [75.000|5.000|5.000] [75.000|5.000|0.800] s=5.000 bt=False)
@@ -1741,7 +1741,7 @@ G01 F150.000 X70.000 Y20.000 Z-0.100
   (SweepAndDrillSafelyFromTo [70.000|20.000|-0.100] [85.000|20.000|5.000] s=5.000 bt=False)
     (DrillOrPullZFromTo -0.100 5.000)
 G00 Z5.000
-G00 X85.000 Y20.000
+; G00 X85.000 Y20.000
   (SweepAndDrillSafelyFromTo [85.000|20.000|5.000] [105.000|15.000|5.000] s=5.000 bt=False)
 G00 X105.000 Y15.000
   (SweepAndDrillSafelyFromTo [105.000|15.000|5.000] [105.000|15.000|0.800] s=5.000 bt=False)
@@ -1804,7 +1804,7 @@ G01 F150.000 X85.000 Y20.000 Z-0.100
   (SweepAndDrillSafelyFromTo [85.000|20.000|-0.100] [70.000|20.000|5.000] s=5.000 bt=False)
     (DrillOrPullZFromTo -0.100 5.000)
 G00 Z5.000
-G00 X70.000 Y20.000
+; G00 X70.000 Y20.000
   (SweepAndDrillSafelyFromTo [70.000|20.000|5.000] [60.000|15.000|5.000] s=5.000 bt=True)
 G00 X60.000 Y15.000
   (SweepAndDrillSafelyFromTo [60.000|15.000|5.000] [60.000|15.000|0.800] s=5.000 bt=False)
@@ -1821,7 +1821,7 @@ G01 F150.000 X60.000 Y15.000 Z-0.100
   (SweepAndDrillSafelyFromTo [60.000|15.000|-0.100] [20.000|0.000|5.000] s=5.000 bt=False)
     (DrillOrPullZFromTo -0.100 5.000)
 G00 Z5.000
-G00 X20.000 Y0.000
+; G00 X20.000 Y0.000
   (SweepAndDrillSafelyFromTo [20.000|0.000|5.000] [50.000|30.000|5.000] s=5.000 bt=False)
 G00 X50.000 Y30.000
   (START Subpath 8998.2P[8999.16P.dxf] t=[ [120.000|170.000]=>[50.000|30.000] / [120.000|100.000]=>[50.000|100.000] ])
@@ -1851,7 +1851,7 @@ G01 F150.000 X50.000 Y30.000 Z-0.300
   (SweepAndDrillSafelyFromTo [50.000|30.000|-0.300] [50.000|100.000|5.000] s=5.000 bt=False)
     (DrillOrPullZFromTo -0.300 5.000)
 G00 Z5.000
-G00 X50.000 Y100.000
+; G00 X50.000 Y100.000
   (END Subpath 8998.2P[8999.16P.dxf] t=[ [120.000|170.000]=>[50.000|30.000] / [120.000|100.000]=>[50.000|100.000] ])
   (SweepAndDrillSafelyFromTo [50.000|100.000|5.000] [65.000|35.000|5.000] s=5.000 bt=False)
 G00 X65.000 Y35.000
@@ -1882,7 +1882,7 @@ G01 F150.000 X65.000 Y35.000 Z-0.300
   (SweepAndDrillSafelyFromTo [65.000|35.000|-0.300] [65.000|105.000|5.000] s=5.000 bt=False)
     (DrillOrPullZFromTo -0.300 5.000)
 G00 Z5.000
-G00 X65.000 Y105.000
+; G00 X65.000 Y105.000
   (END Subpath 8998.2P[8999.16P.dxf] t=[ [120.000|170.000]=>[65.000|35.000] / [120.000|100.000]=>[65.000|105.000] ])
   (SweepAndDrillSafelyFromTo [65.000|105.000|5.000] [65.000|35.000|5.000] s=5.000 bt=True)
 ; G00 X65.000 Y35.000
@@ -1919,7 +1919,7 @@ G01 F150.000 X95.000 Y40.000 Z-0.300
   (SweepAndDrillSafelyFromTo [95.000|40.000|-0.300] [95.000|110.000|5.000] s=5.000 bt=False)
     (DrillOrPullZFromTo -0.300 5.000)
 G00 Z5.000
-G00 X95.000 Y110.000
+; G00 X95.000 Y110.000
   (END Subpath 8998.2P[8999.16P.dxf] t=[ [120.000|170.000]=>[95.000|40.000] / [120.000|100.000]=>[95.000|110.000] ])
   (SweepAndDrillSafelyFromTo [95.000|110.000|5.000] [95.000|40.000|5.000] s=5.000 bt=True)
 ; G00 X95.000 Y40.000
@@ -1932,16 +1932,16 @@ G00 X20.000 Y110.000
 G00 Z5.000
   (Fräslänge:    1957 mm   ca. 19 min)
   (Bohrungen:      61 mm   ca.  1 min)
-  (Leerfahrten:  1049 mm   ca.  3 min)
-  (Summe:        3066 mm   ca. 22 min)
-  (Befehlszahl: 240)
+  (Leerfahrten:   733 mm   ca.  3 min)
+  (Summe:        2750 mm   ca. 21 min)
+  (Befehlszahl: 233)
 M30
 %");
     }
 
     [TestMethod]
     public void TestMethod17() {
-        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "8999.17P.dxf"]));
+        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s15", "8999.17P.dxf"]));
         Compare("8999.17P_Milling.gcode", $@"%
 (PathDxf2GCode - HMMüller 2024-2025 V.{Program.VERSION})
 (8999.17P.dxf)
@@ -2006,12 +2006,12 @@ M30
 
     [TestMethod]
     public void TestMethod18() {
-        Assert.AreEqual(1, Program.Main(["/f150", "/v500", "8999.18P.dxf"]));
+        Assert.AreEqual(1, Program.Main(["/f150", "/v500", "/s15", "8999.18P.dxf"]));
     }
 
     [TestMethod]
     public void TestMethod19() {
-        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "8999.19P.dxf"]));
+        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s15", "8999.19P.dxf"]));
         Compare("8999.19P_Clean.gcode", $@"%
 (PathDxf2GCode - HMMüller 2024-2025 V.{Program.VERSION})
 (8999.19P.dxf)
@@ -2072,11 +2072,11 @@ M30
 
     [TestMethod]
     public void TestMethod21() {
-        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/c", "8999.21P.dxf"]));
+        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s15", "/c", "8999.21P.dxf"]));
     }
 
     [TestMethod]
     public void TestMethod22() {
-        Assert.AreEqual(1, Program.Main(["/f150", "/v500", "/c", "8999.22P.dxf"]));
+        Assert.AreEqual(1, Program.Main(["/f150", "/v500", "/s15", "/c", "8999.22P.dxf"]));
     }
 }

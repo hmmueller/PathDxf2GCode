@@ -466,7 +466,7 @@ public class SubPathSegment : PathSegmentWithParamsText, IRawSegment {
                 string[] dxfFiles = Directory.GetFiles(directory, "*.dxf");
                 foreach (var f in dxfFiles) {
                     if (FileNameMatchesPathName(Path.GetFileNameWithoutExtension(f), _name, _options.PathNamePattern)) {
-                        _models.Load(f, _options, _overlayTextForErrors, messages);
+                        _models.Load(f, null, _options, _overlayTextForErrors, messages);
                         searchedFiles += (searchedFiles == "" ? "" : ", ") + f;
                     }
                     // Continue loop, i.e. load all matching files! - we want to know whether

@@ -57,12 +57,12 @@ public class PathModel {
 
     public static Dictionary<PathName, PathModel> TransformDxf2PathModel(
         string dxfFilePath, DrawingEntities entities, Dictionary<string, Linetype> layerLinetypes,
-        Options options, MessageHandlerForEntities messages, PathModelCollection subPathDefs) {
+        double? defaultSorNullForTplusO_mm, Options options, MessageHandlerForEntities messages, PathModelCollection subPathDefs) {
         Dictionary<PathName, RawPathModel> models =
             CollectSegments(entities, layerLinetypes, subPathDefs, dxfFilePath, options, messages);
         Dictionary<PathName, PathModel> result = new();
         foreach (var kvp in models) {
-            PathModel? m = CreatePathModel(kvp.Key, kvp.Value, dxfFilePath, options, messages);
+            PathModel? m = CreatePathModel(kvp.Key, kvp.Value, defaultSorNullForTplusO_mm, dxfFilePath, options, messages);
             if (m != null) {
                 result.Add(kvp.Key, m);
             }
@@ -386,8 +386,8 @@ public class PathModel {
         }
     }
 
-    private static PathModel? CreatePathModel(PathName name, RawPathModel rawModel, string dxfFilePath,
-        Options options, MessageHandlerForEntities messages) {
+    private static PathModel? CreatePathModel(PathName name, RawPathModel rawModel, double? defaultSorNullForTplusO_mm,
+        string dxfFilePath, Options options, MessageHandlerForEntities messages) {
         if (rawModel.Start == null) {
             messages.AddError(name, Messages.PathModel_MissingStart);
         }
@@ -487,7 +487,7 @@ public class PathModel {
         void OnError(string context, string msg) {
             messages.AddError(context, msg);
         }
-        PathParams pathParams = new(rawModel.ParamsText!,
+        PathParams pathParams = new(rawModel.ParamsText!, defaultSorNullForTplusO_mm,
             MessageHandlerForEntities.Context(rawModel.StartObject!, rawModel.Start.Value, dxfFilePath), options, OnError);
         {
 
