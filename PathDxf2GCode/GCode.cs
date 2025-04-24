@@ -17,10 +17,9 @@ public abstract class GCode {
 public class HorizontalSweepGCode : GCode {
     private readonly double _lg_mm;
 
-    public override char Letter { get; }
+    public override char Letter => 'H';
 
-    public HorizontalSweepGCode(double x_mm, double y_mm, double lg_mm, bool atOrAboveGlobalS) : base($"G00 X{x_mm.F3()} Y{y_mm.F3()}") {
-        Letter = atOrAboveGlobalS ? 'H' : DEFAULT_LETTER;
+    public HorizontalSweepGCode(double x_mm, double y_mm, double lg_mm) : base($"G00 X{x_mm.F3()} Y{y_mm.F3()}") {
         _lg_mm = lg_mm;
     }
 

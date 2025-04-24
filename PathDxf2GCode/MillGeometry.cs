@@ -1,7 +1,6 @@
 ﻿namespace de.hmmueller.PathDxf2GCode;
 
 using netDxf;
-using System.IO;
 
 public abstract class MillGeometry {
     public abstract Vector2 Start { get; }

@@ -9,7 +9,7 @@ public static class GCodeHelpers {
     }
 
     public static void AddHorizontalG00(this List<GCode> gcodes, Vector2 to, double lg_mm, double minZ_mm, double globalS_mm) {
-        gcodes.Add(new HorizontalSweepGCode(to.X, to.Y, lg_mm, minZ_mm >= globalS_mm || minZ_mm.Near(globalS_mm)));
+        gcodes.Add(new HorizontalSweepGCode(to.X, to.Y, lg_mm));
     }
 
     public static void AddNonhorizontalG00(this List<GCode> gcodes, string g, double lg_mm) {
