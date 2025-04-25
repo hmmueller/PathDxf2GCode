@@ -125,8 +125,6 @@ public class MillChain : PathSegment {
             }
         }
 
-        ISet<Edge> topEdges = edges.Where(e => e.Above == null).ToHashSet();
-
         int remaining = edges.Count;
         List<Edge> sortedEdges = new();
 
@@ -136,20 +134,16 @@ public class MillChain : PathSegment {
         while (remaining > 0) {
             Edge? nearest = null;
             bool nearestConnectAtStart = true;
-            Vector3 NearestMillingStart() => nearestConnectAtStart ? nearest!.Start(t) : nearest!.End(t);
+            Vector3 NearestMillingTip() => nearestConnectAtStart ? nearest!.Start(t) : nearest!.End(t);
 
             foreach (var candidate in edges.Where(e => e.TopUnmilled)) {
-                double distToStart_mm = headPos.Distance(candidate.Start(t));
-                double distToEnd_mm = headPos.Distance(candidate.End(t));
-                if (nearest == null) {
+                double distToCandidateStart_mm = headPos.Distance(candidate.Start(t));
+                double distToCandidateEnd_mm = headPos.Distance(candidate.End(t));
+                bool candStartIsNearer = distToCandidateStart_mm < distToCandidateEnd_mm;
+                double distToNearerCandidateTip = candStartIsNearer ? distToCandidateStart_mm : distToCandidateEnd_mm;
+                if (nearest == null || distToNearerCandidateTip < headPos.Distance(NearestMillingTip())) {
                     nearest = candidate;
-                    nearestConnectAtStart = distToStart_mm < distToEnd_mm;
-                } else if (distToStart_mm < headPos.Distance(NearestMillingStart())) {
-                    nearest = candidate;
-                    nearestConnectAtStart = true;
-                } else if (distToEnd_mm < headPos.Distance(NearestMillingStart())) {
-                    nearest = candidate;
-                    nearestConnectAtStart = false;
+                    nearestConnectAtStart = candStartIsNearer;
                 }
             }
 
@@ -429,7 +423,7 @@ public class SubPathSegment : PathSegmentWithParamsText, IRawSegment {
     private Vector2 _start;
     private Vector2 _end;
 
-    public SubPathSegment(EntityObject source, ParamsText text, Vector2 start, Vector2 end, Options options, 
+    public SubPathSegment(EntityObject source, ParamsText text, Vector2 start, Vector2 end, Options options,
         double order, PathModelCollection models, string dxfFilePath, Action<string> onError) : base(source, text) {
         _start = start;
         _end = end;
