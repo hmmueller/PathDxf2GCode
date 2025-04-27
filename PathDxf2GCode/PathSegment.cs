@@ -362,6 +362,7 @@ public class HelixSegment : PathSegmentWithParamsText, IRawSegment {
 
         double t_mm = pars.T_mm;
         double i_mm = pars.I_mm;
+        double o_mm = pars.O_mm;
         double f_mmpmin = pars.F_mmpmin;
 
         double millingRadius_mm = Radius_mm - pars.O_mm / 2;
@@ -369,9 +370,10 @@ public class HelixSegment : PathSegmentWithParamsText, IRawSegment {
         double y0 = c.Y - millingRadius_mm;
         double y1 = c.Y + millingRadius_mm;
 
-        GCodeHelpers.DrillOrPullZFromTo(currPos.XY(), currPos.Z, t_mm, t_mm: t_mm, f_mmpmin: f_mmpmin, t, gcodes);
+        // We lift to T+O, i.e. "somewhat above T".
+        GCodeHelpers.DrillOrPullZFromTo(currPos.XY(), currPos.Z, t_mm + o_mm, t_mm: t_mm, f_mmpmin: f_mmpmin, t, gcodes);
         gcodes.AddComment($"MillHelix l={c.F3()} r={Radius_mm.F3()}", 2);
-        gcodes.AddMill($"G01 F{f_mmpmin.F3()} X{c.X.F3()} Y{y0.F3()}", Math.Abs(c.Y - y0), f_mmpmin); // G01, as we touch the top
+        gcodes.AddHorizontalG00(new Vector2(c.X, y0), Math.Abs(c.Y - y0));
 
         // First, we mill as long as we can mill complete circles (actually,two semicircles).
         double done_mm = t_mm;
