@@ -16,10 +16,10 @@ public class Transformation2 {
     protected Transformation2(Transformation2 t) : this(t._fromStart, t._fromEnd, t._toStart, t._toEnd) { }
 
     public Transformation2(Vector2 fromStart, Vector2 fromEnd, Vector2 toStart, Vector2 toEnd) {
-        double fromDistance = Vector2.Distance(fromStart, fromEnd);
-        double toDistance = Vector2.Distance(toStart, toEnd);
-        if (!fromDistance.Near(toDistance)) {
-            throw new ArgumentException(string.Format(Messages.Transformation2_DifferentDistances_FromS_FromE_FromD_ToS_ToE_ToD, fromStart.F3(), fromEnd.F3(), fromDistance.F3(), toStart.F3(), toEnd.F3(), toDistance.F3()));
+        double fromDistance_mm = Vector2.Distance(fromStart, fromEnd);
+        double toDistance_mm = Vector2.Distance(toStart, toEnd);
+        if (!fromDistance_mm.AbsNear(toDistance_mm, 1e-3)) {
+            throw new ArgumentException(string.Format(Messages.Transformation2_DifferentDistances_FromS_FromE_FromD_ToS_ToE_ToD, fromStart.F3(), fromEnd.F3(), fromDistance_mm.F3(), toStart.F3(), toEnd.F3(), toDistance_mm.F3()));
         }
         _fromStart = fromStart;
         _fromEnd = fromEnd;
@@ -31,7 +31,7 @@ public class Transformation2 {
         double a_rad = Vector2.AngleBetween(from, to);
         // cos is equal for clockwise and counterclockwise rotations, unfortunately -
         // an explicit direction check is therefore necessary.
-        _rotation_rad = Vector2.Rotate(from, a_rad).Near(to) ? a_rad : Vector2.Rotate(from, -a_rad).Near(to) ? -a_rad : throw new Exception("**** cos cannot rotate as required");
+        _rotation_rad = Vector2.Rotate(from, a_rad).AbsNear(to, 1e-3) ? a_rad : Vector2.Rotate(from, -a_rad).Near(to) ? -a_rad : throw new Exception("**** cos cannot rotate as required");
         Rotation_deg = MathHelper.NormalizeAngle(_rotation_rad * MathHelper.RadToDeg);
     }
 

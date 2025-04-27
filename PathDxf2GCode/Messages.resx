@@ -270,8 +270,8 @@ has assigned text '{1}'</value>
   <data name="PathSegment_DifferingO_Caller_Path_Called" xml:space="preserve">
     <value>O={0} at subpath {1} is different from O={2} in referenced path</value>
   </data>
-  <data name="PathSegment_DistanceDiffers_CallerDist_CalledDist" xml:space="preserve">
-    <value>Distance {0} is not equal to distance {1} in referenced path</value>
+  <data name="PathSegment_DistanceDiffers_CallerDist_ModelName_CalledDist" xml:space="preserve">
+    <value>Subpath size {0} is not equal to size {2} in referenced path {1}</value>
   </data>
   <data name="PathSegment_GtMissing" xml:space="preserve">
     <value>&gt;... missing</value>

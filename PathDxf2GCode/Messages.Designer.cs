@@ -487,11 +487,11 @@ namespace de.hmmueller.PathDxf2GCode {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Distance {0} is not equal to distance {1} in referenced path ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Subpath size {0} is not equal to size {2} in referenced path {1} ähnelt.
         /// </summary>
-        internal static string PathSegment_DistanceDiffers_CallerDist_CalledDist {
+        internal static string PathSegment_DistanceDiffers_CallerDist_ModelName_CalledDist {
             get {
-                return ResourceManager.GetString("PathSegment_DistanceDiffers_CallerDist_CalledDist", resourceCulture);
+                return ResourceManager.GetString("PathSegment_DistanceDiffers_CallerDist_ModelName_CalledDist", resourceCulture);
             }
         }
         

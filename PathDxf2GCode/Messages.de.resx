@@ -271,8 +271,8 @@ hat zugeordneten Text '{1}'</value>
   <data name="PathSegment_DifferingO_Caller_Path_Called" xml:space="preserve">
     <value>O={0} an Subpfad {1} weicht von O={2} in referenziertem Modell ab</value>
   </data>
-  <data name="PathSegment_DistanceDiffers_CallerDist_CalledDist" xml:space="preserve">
-    <value>Distanz {0} ist nicht gleich Distanz {1} in referenziertem Subpfad</value>
+  <data name="PathSegment_DistanceDiffers_CallerDist_ModelName_CalledDist" xml:space="preserve">
+    <value>Subpath-Länge {0} ist nicht gleich Länge {2} des referenzierten Subpfads {1}</value>
   </data>
   <data name="PathSegment_GtMissing" xml:space="preserve">
     <value>&gt;... fehlt</value>

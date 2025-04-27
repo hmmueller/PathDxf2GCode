@@ -18,11 +18,14 @@ public static class GeometryHelpers {
 
     public const double RELATIVE_EPS = 1e-6;
 
-    public static bool Near(this double d, double e, double relative_eps)
-        => Math.Abs(d - e) <= relative_eps * (Math.Max(Math.Abs(d), Math.Abs(e)) + 0.001);
+    public static bool Near(this double d, double e, double relativeEps)
+        => Math.Abs(d - e) <= relativeEps * (Math.Max(Math.Abs(d), Math.Abs(e)) + 0.001);
 
     public static bool Near(this double d, double e)
         => Near(d, e, RELATIVE_EPS);
+
+    public static bool AbsNear(this double d, double e, double absoluteEps)
+        => Math.Abs(d - e) <= absoluteEps;
 
     public static bool Between(this double a, double b, double c)
         => a >= b && a <= c;
@@ -51,7 +54,10 @@ public static class GeometryHelpers {
 
     public static bool Near(this Vector2 d, Vector2 e)
         => Vector2.SquareDistance(d, e).Near(0);
-    
+
+    public static bool AbsNear(this Vector2 d, Vector2 e, double absoluteEps)
+        => Vector2.Distance(d, e).AbsNear(0, absoluteEps);
+
     public static Vector2 AsVector2(this Vector3 a)
         => a.Z.Near(0) ? new Vector2(a.X, a.Y) : throw new ArgumentOutOfRangeException($"**** ({a}).Z != 0 - cannot convert to Vector2");
 

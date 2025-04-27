@@ -507,7 +507,8 @@ public class SubPathSegment : PathSegmentWithParamsText, IRawSegment {
                 }
             }
             if (!_models.Contains(_name)) {
-                messages.AddError(_overlayTextForErrors, Messages.PathSegment_PathNotFound_Name_Files, _name.AsString(), searchedFiles);
+                messages.AddError(Source, End, currentDxfFile, Messages.PathSegment_PathNotFound_Name_Files, 
+                                  _name.AsString(), searchedFiles);
                 return null;
             }
         }
@@ -515,8 +516,10 @@ public class SubPathSegment : PathSegmentWithParamsText, IRawSegment {
 
         double modelSize = model.Start.Distance(model.End);
         double referenceSize = Start.Distance(End);
-        if (!modelSize.Near(referenceSize, 1e-3)) {
-            messages.AddError(_overlayTextForErrors, Messages.PathSegment_DistanceDiffers_CallerDist_CalledDist, referenceSize.F3(), modelSize.F3());
+        if (!modelSize.AbsNear(referenceSize, 1e-3)) {
+            messages.AddError(Source, End, currentDxfFile, 
+                Messages.PathSegment_DistanceDiffers_CallerDist_ModelName_CalledDist, 
+                referenceSize.F3(), model.Name, modelSize.F3());
         }
 
         return model;
