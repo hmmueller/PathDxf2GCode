@@ -11,14 +11,14 @@ public class TransformationTests {
     [TestMethod]
     public void ZeroDoesNothingToLineGeometry() {
         var geometry = new LineGeometry(x0, y0);
-        MillGeometry transformed = geometry.Transform(Transformation2.Zero);
+        IMillGeometry transformed = geometry.Transform(Transformation2.Zero);
         Assert.IsTrue(geometry.Equals(transformed));
     }
 
     [TestMethod]
     public void ZeroDoesNothingToArcGeometry() {
         var geometry = new ArcGeometry(x0, 5, 200, 400, true);
-        MillGeometry transformed = geometry.Transform(Transformation2.Zero);
+        IMillGeometry transformed = geometry.Transform(Transformation2.Zero);
         Assert.IsTrue(geometry.Equals(transformed));
     }
 
@@ -26,7 +26,7 @@ public class TransformationTests {
     public void RotateLineBy90Deg() {
         var geometry = new LineGeometry(x0, y0);
         Transformation2 t = new(zero, y0, zero, x0);
-        MillGeometry transformed = geometry.Transform(t);
+        IMillGeometry transformed = geometry.Transform(t);
         Assert.IsTrue(transformed.Equals(new LineGeometry(-y0, x0)));
     }
 
@@ -34,7 +34,7 @@ public class TransformationTests {
     public void RotateArcBy90Deg() {
         var geometry = new ArcGeometry(-x0, 5, 200, 400, true);
         Transformation2 t = new(zero, y0, zero, x0);
-        MillGeometry transformed = geometry.Transform(t);
+        IMillGeometry transformed = geometry.Transform(t);
         Assert.IsTrue(transformed.Equals(new ArcGeometry(y0, 5, 200 - 90, 400 - 90, true)));
     }
     
@@ -42,7 +42,7 @@ public class TransformationTests {
     public void ShiftLineByUnitX() {
         var geometry = new LineGeometry(x0, y0);
         Transformation2 t = new(zero, y0, x0, x0 + y0);
-        MillGeometry transformed = geometry.Transform(t);
+        IMillGeometry transformed = geometry.Transform(t);
         Assert.IsTrue(transformed.Equals(new LineGeometry(2 * x0, x0 + y0)));
     }
 
@@ -50,7 +50,7 @@ public class TransformationTests {
     public void ShiftArcByUnitX() {
         var geometry = new ArcGeometry(-x0, 5, 200, 400, true);
         Transformation2 t = new(zero, y0, x0, x0 + y0);
-        MillGeometry transformed = geometry.Transform(t);
+        IMillGeometry transformed = geometry.Transform(t);
         Assert.IsTrue(transformed.Equals(new ArcGeometry(zero, 5, 200, 400, true)));
     }
 }

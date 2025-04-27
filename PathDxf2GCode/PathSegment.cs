@@ -3,8 +3,9 @@
 using netDxf;
 using netDxf.Entities;
 using System.Collections.Generic;
-using System.Runtime.InteropServices.Marshalling;
 using System.Text.RegularExpressions;
+
+public enum MillType { Mill, Mark, WithSupports }
 
 public interface IRawSegment {
     EntityObject Source { get; }
@@ -40,18 +41,12 @@ public abstract class PathSegment {
 
     public abstract void CreateParams(PathParams pathParams, string dxfFileName, Action<string, string> onError);
 
-    public static void Assert(bool b, string errorContext, string message) {
-        if (!b) {
-            throw new EmitGCodeException(errorContext, message);
-        }
-    }
-
     public static void AssertNear(Vector2 a, Vector2 b, string errorContext) {
-        Assert(a.Near(b), errorContext, $"!{a.F3()}.Near({b.F3()})");
+        GeometryHelpers.Assert(a.Near(b), errorContext, $"!{a.F3()}.Near({b.F3()})");
     }
 
     public abstract Vector3 EmitGCode(Vector3 currPos, Transformation3 zCorr, double globalS_mm,
-        List<GCode> gcodes, string dxfFileName, MessageHandlerForEntities messages, int depth);
+        List<GCode> gcodes, string dxfFileName, MessageHandlerForEntities messages, int nestingDepth);
 }
 
 public abstract class PathSegmentWithParamsText : PathSegment {
@@ -112,7 +107,7 @@ public class MillChain : PathSegment {
     }
 
     public override Vector3 EmitGCode(Vector3 currPos, Transformation3 t, double globalS_mm,
-                                      List<GCode> gcodes, string dxfFileName, MessageHandlerForEntities messages, int depth) {
+                                      List<GCode> gcodes, string dxfFileName, MessageHandlerForEntities messages, int nestingDepth) {
         // Create actual edges
         List<Edge> edges = new();
         foreach (var s in _segments) {
@@ -128,7 +123,7 @@ public class MillChain : PathSegment {
         int remaining = edges.Count;
         List<Edge> sortedEdges = new();
 
-        // Optimized order
+        // Create optimized order
         Vector3 headPos = edges.First().Start(t);
 
         while (remaining > 0) {
@@ -176,27 +171,23 @@ public class MillChain : PathSegment {
     }
 }
 
-public interface IMarkOrMillSegment {
-    bool IsMark { get; }
-    double Bottom_mm { get; }
-}
-
-public class ChainSegment : IRawSegment, IMarkOrMillSegment {
+public class ChainSegment : IRawSegment {
     public int Preference => 4;
 
     public EntityObject Source { get; }
     public ParamsText ParamsText { get; }
-    public bool IsMark { get; }
+    public MillType MillType { get; }
 
-    private MillGeometry _geometry;
+    private IMillGeometry _geometry;
     private IParams? _params;
+    private IMillGeometry[]? _supportGeometries;
 
     public double Bottom_mm
-        => IsMark ? _params!.D_mm : _params!.B_mm;
+        => MillType == MillType.Mark ? _params!.D_mm : _params!.B_mm;
 
-    public ChainSegment(MillGeometry geometry, bool isMark, EntityObject source, ParamsText paramsText, double order) {
+    public ChainSegment(IMillGeometry geometry, MillType millType, EntityObject source, ParamsText paramsText, double order) {
         _geometry = geometry;
-        IsMark = isMark;
+        MillType = millType;
         Source = source;
         Order = order;
         ParamsText = paramsText;
@@ -215,22 +206,35 @@ public class ChainSegment : IRawSegment, IMarkOrMillSegment {
         => ReversedSegment();
 
     public ChainSegment ReversedSegment()
-        => new ChainSegment(_geometry.CloneReversed(), IsMark, Source, ParamsText, PathModel.BACKTRACK_ORDER);
+        => new ChainSegment(_geometry.CloneReversed(), MillType, Source, ParamsText, PathModel.BACKTRACK_ORDER);
 
     protected string ErrorContext(string dxfFileName)
         => MessageHandlerForEntities.Context(Source, Start, dxfFileName);
 
     internal void CreateParams(ChainParams chainParams, string dxfFileName, Action<string, string> onError) {
-        _params = new MillParams(ParamsText, IsMark, ErrorContext(dxfFileName), chainParams, onError);
+        _params = new MillParams(ParamsText, MillType, ErrorContext(dxfFileName), chainParams, onError);
+
+        // Also create geometries for support bars; done here once because
+        // EmitGCode is called for each milling depth, but the geometries do not change.
+        _supportGeometries = MillType == MillType.WithSupports && _geometry.Length_mm > 2 * _params.P_mm
+            ? _geometry.CreateBarGeometries(_params.O_mm, _params.P_mm, _params.U_mm)
+            : [];
     }
 
     internal Vector3 EmitGCode(Vector3 currPos, double millingLayer_mm, bool start2End, double globalS_mm,
                                 Transformation3 t, List<GCode> gcodes, string dxfFileName) {
-        return
-            (start2End ? _geometry : _geometry.CloneReversed()).EmitGCode(currPos, t, globalS_mm, gcodes, dxfFileName,
-            millingTarget_mm: Math.Max(millingLayer_mm, Bottom_mm),
-            t_mm: _params!.T_mm, f_mmpmin: _params!.F_mmpmin, backtracking: Order == PathModel.BACKTRACK_ORDER);
+        IParams pars = _params!;
+        double fullMillBottom = MillType == MillType.Mill ? pars.B_mm : pars.D_mm;
+        bool backtracking = Order == PathModel.BACKTRACK_ORDER;
+        currPos = _supportGeometries!.Any() && fullMillBottom.Gt(millingLayer_mm)
+            ? _supportGeometries!.MillSupports(currPos, millingLayer_mm, start2End, 
+                        globalS_mm, t, gcodes, dxfFileName, pars, backtracking)
+            : (start2End ? _geometry : _geometry.CloneReversed()).EmitGCode(currPos, t, globalS_mm,
+                        gcodes, dxfFileName, millingTarget_mm: Math.Max(millingLayer_mm, fullMillBottom),
+                        t_mm: pars.T_mm, f_mmpmin: pars.F_mmpmin, backtracking);
+        return currPos;
     }
+
 }
 
 public abstract class AbstractSweepSegment : PathSegmentWithParamsText, IRawSegment {
@@ -257,7 +261,7 @@ public abstract class AbstractSweepSegment : PathSegmentWithParamsText, IRawSegm
         => new BackSweepSegment(Source, ParamsText, _end, _start);
 
     public override Vector3 EmitGCode(Vector3 currPos, Transformation3 t, double globalS_mm,
-                                      List<GCode> gcodes, string dxfFileName, MessageHandlerForEntities messages, int depth) {
+                                      List<GCode> gcodes, string dxfFileName, MessageHandlerForEntities messages, int nestingDepth) {
         AssertNear(currPos.XY(), t.Transform(Start), ErrorContext(dxfFileName));
 
         Vector2 target = t.Transform(End);
@@ -293,29 +297,35 @@ public class BackSweepSegment : AbstractSweepSegment {
     }
 }
 
-public abstract class PathMarkOrMillSegment : PathSegmentWithParamsText, IMarkOrMillSegment {
-    public bool IsMark { get; }
+public abstract class MarkOrMillPathSegment : PathSegmentWithParamsText {
+    protected readonly bool _isMark;
 
-    protected PathMarkOrMillSegment(EntityObject source, ParamsText paramsText, bool isMark) : base(source, paramsText) {
-        IsMark = isMark;
+    protected MarkOrMillPathSegment(EntityObject source, ParamsText paramsText, bool isMark) : base(source, paramsText) {
+        _isMark = isMark;
     }
 
     public double Bottom_mm
-        => IsMark ? _params!.D_mm : _params!.B_mm;
+        => _isMark ? _params!.D_mm : _params!.B_mm;
 }
 
-public class HelixSegment : PathMarkOrMillSegment, IRawSegment {
+public class HelixSegment : PathSegmentWithParamsText, IRawSegment {
     public int Preference => 2;
     public Vector2 Center { get; }
     public double Radius_mm { get; }
+    public MillType MillType { get; }
+    private IMillGeometry[]? _supportGeometries;
 
-    public HelixSegment(EntityObject source, ParamsText pars, Vector2 center, double radius_mm, bool isMark) : base(source, pars, isMark) {
+    public double Bottom_mm
+        => MillType == MillType.Mark ? _params!.D_mm : _params!.B_mm;
+
+    public HelixSegment(EntityObject source, ParamsText pars, Vector2 center, double radius_mm, MillType millType) : base(source, pars) {
         Center = center;
         Radius_mm = radius_mm;
+        MillType = millType;
     }
 
     // Multiple helixes at the same place must be milled from inside out (to avoid cores
-    // that tumble around), this those with a smaller radius must have a lower order.
+    // that tumble around), thus those with a smaller radius must have a lower order.
     // Moreover, the order must be "very negative" so that they are far before the N orders.
     public double Order => -1000000 + Radius_mm;
 
@@ -329,19 +339,32 @@ public class HelixSegment : PathMarkOrMillSegment, IRawSegment {
     public IRawSegment ReversedSegmentAfterTurn() => new BackSweepSegment(Source, ParamsText, Center, Center);
 
     public override void CreateParams(PathParams pathParams, string dxfFileName, Action<string, string> onError) {
-        _params = new HelixParams(ParamsText, IsMark, ErrorContext(dxfFileName), pathParams, onError);
+        _params = new HelixParams(ParamsText, MillType, ErrorContext(dxfFileName), pathParams, onError);
+
+        // Also create geometries for support bars; done here once because
+        // EmitGCode is called for each milling depth, but the geometries do not change.
+        // The arc is oriented clockwise, as the helix is milled with G02, i.e. clockwise semicircles.
+        // It starts and ends at 270 deg, as the semicircles also start there.
+        IMillGeometry fullArc = new ArcGeometry(Center, Radius_mm - _params.O_mm / 2, 270,
+                                                270 * (1 + GeometryHelpers.RELATIVE_EPS), counterclockwise: false);
+        _supportGeometries = MillType == MillType.WithSupports && Radius_mm > _params.P_mm / 2
+            ? fullArc.CreateBarGeometries(_params.O_mm, _params.P_mm, _params.U_mm)
+            : [];
     }
 
     public override Vector3 EmitGCode(Vector3 currPos, Transformation3 t, double globalS_mm,
-        List<GCode> gcodes, string dxfFileName, MessageHandlerForEntities messages, int depth) {
+        List<GCode> gcodes, string dxfFileName, MessageHandlerForEntities messages, int nestingDepth) {
         Vector2 c = t.Transform(Center);
         AssertNear(currPos.XY(), c, MessageHandlerForEntities.Context(Source, Center, dxfFileName));
-        double t_mm = _params!.T_mm;
-        double i_mm = _params!.I_mm;
-        double f_mmpmin = _params!.F_mmpmin;
-        double bottom_mm = Bottom_mm;
 
-        double millingRadius_mm = Radius_mm - _params!.O_mm / 2;
+        IParams pars = _params!;
+        double fullMillBottom = MillType == MillType.Mill ? pars.B_mm : pars.D_mm;
+
+        double t_mm = pars.T_mm;
+        double i_mm = pars.I_mm;
+        double f_mmpmin = pars.F_mmpmin;
+
+        double millingRadius_mm = Radius_mm - pars.O_mm / 2;
         // Milling many small semicircles
         double y0 = c.Y - millingRadius_mm;
         double y1 = c.Y + millingRadius_mm;
@@ -350,36 +373,52 @@ public class HelixSegment : PathMarkOrMillSegment, IRawSegment {
         gcodes.AddComment($"MillHelix l={c.F3()} r={Radius_mm.F3()}", 2);
         gcodes.AddMill($"G01 F{f_mmpmin.F3()} X{c.X.F3()} Y{y0.F3()}", Math.Abs(c.Y - y0), f_mmpmin); // G01, as we touch the top
 
-        // This will not create full holes - a core will remain; paths for full holes must be manually drawn.
+        // First, we mill as long as we can mill complete circles (actually,two semicircles).
         double done_mm = t_mm;
-        for (double d_mm = t_mm; done_mm > bottom_mm; d_mm -= i_mm) {
+        for (double d_mm = t_mm; done_mm.Gt(fullMillBottom); d_mm -= i_mm) {
             gcodes.AddComment($"MillSemiCircle l={d_mm.F3()}", 4);
 
-            double b1_mm = Math.Max(d_mm - i_mm / 2, bottom_mm);
+            double b1_mm = Math.Max(d_mm - i_mm / 2, fullMillBottom);
             gcodes.AddMill($"G02 F{f_mmpmin.F3()} I0 J{millingRadius_mm.F3()} X{c.X.F3()} Y{y1.F3()} Z{t.Expr(b1_mm, c)}", millingRadius_mm * Math.PI, f_mmpmin);
 
-            double b0_mm = Math.Max(b1_mm - i_mm / 2, bottom_mm);
+            double b0_mm = Math.Max(b1_mm - i_mm / 2, fullMillBottom);
             gcodes.AddMill($"G02 F{f_mmpmin.F3()} I0 J{(-millingRadius_mm).F3()} X{c.X.F3()} Y{y0.F3()} Z{t.Expr(b0_mm, c)}", millingRadius_mm * Math.PI, f_mmpmin);
 
-            done_mm = d_mm; // Spirale von millingLayer_mm nach b0_mm gefräst = nur bis millingLayer_mm ist Loch fertig!
+            done_mm = d_mm; // We can only guarantee that depth d_mm has been reached;
+                            // all lower depths might have been reached only in some parts of the semicircles.
+            currPos = new(c.X, y0, b0_mm);
         }
-        if (Radius_mm <= _params!.O_mm) {
-            // If radius <= O, then there is no core in the center --> we can sweep straight to the center
-            gcodes.AddHorizontalG00(c, millingRadius_mm, bottom_mm, globalS_mm);
 
-            return c.AsVector3(bottom_mm);
+        // Now, if necessary we mill the support bar section.
+        if (_supportGeometries!.Any()) {
+            for (double d_mm = done_mm; done_mm.Gt(pars.B_mm); d_mm -= i_mm) {
+                double b_mm = Math.Max(d_mm - i_mm, pars.B_mm);
+                currPos = _supportGeometries!.MillSupports(currPos, 
+                    millingBottom_mm: b_mm, start2End: true, 
+                    globalS_mm, t, gcodes, dxfFileName, pars, backtracking: false);
+                done_mm = b_mm;
+            }
+        }
+
+        if (Radius_mm <= pars.O_mm) {
+            // If radius <= O, then there is no core in the center --> we can sweep straight to the center
+            gcodes.AddHorizontalG00(c, lg_mm: millingRadius_mm);
+
+            currPos = c.AsVector3(currPos.Z);
         } else {
             // Otherwise, first pull up to S (to avoid core), then sweep to lastPos.
-            double s_mm = _params!.S_mm;
-            gcodes.AddNonhorizontalG00($"G00 Z{t.Expr(s_mm, c)}", millingRadius_mm);
-            gcodes.AddHorizontalG00(c, millingRadius_mm, s_mm, globalS_mm);
+            double s_mm = pars.S_mm;
+            gcodes.AddNonhorizontalG00($"G00 Z{t.Expr(s_mm, c)}", lg_mm: s_mm - done_mm);
+            gcodes.AddHorizontalG00(c, lg_mm: millingRadius_mm);
 
-            return c.AsVector3(s_mm);
+            currPos = c.AsVector3(s_mm);
         }
+
+        return currPos;
     }
 }
 
-public class DrillSegment : PathMarkOrMillSegment, IRawSegment {
+public class DrillSegment : MarkOrMillPathSegment, IRawSegment {
     public Vector2 Center { get; }
     // See HelixSegment
     public double Order => -1000000;
@@ -399,15 +438,15 @@ public class DrillSegment : PathMarkOrMillSegment, IRawSegment {
     public IRawSegment ReversedSegmentAfterTurn() => new BackSweepSegment(Source, ParamsText, Center, Center);
 
     public override void CreateParams(PathParams pathParams, string dxfFileName, Action<string, string> onError) {
-        _params = new DrillParams(ParamsText, IsMark, ErrorContext(dxfFileName), pathParams, onError);
+        _params = new DrillParams(ParamsText, _isMark, ErrorContext(dxfFileName), pathParams, onError);
     }
 
-    public override Vector3 EmitGCode(Vector3 currPos, Transformation3 t, double globalS_mm, List<GCode> gcodes, string dxfFileName, MessageHandlerForEntities messages, int depth) {
+    public override Vector3 EmitGCode(Vector3 currPos, Transformation3 t, double globalS_mm, List<GCode> gcodes, string dxfFileName, MessageHandlerForEntities messages, int nestingDepth) {
         Vector2 c = t.Transform(Center);
         AssertNear(currPos.XY(), c, MessageHandlerForEntities.Context(Source, Center, dxfFileName));
 
         gcodes.AddComment($"Drill l={c.F3()}", 2);
-        double bottom_mm = IsMark ? _params!.D_mm : _params!.B_mm;
+        double bottom_mm = _isMark ? _params!.D_mm : _params!.B_mm;
         GCodeHelpers.DrillOrPullZFromTo(currPos.XY(), currPos.Z, bottom_mm, t_mm: _params!.T_mm, f_mmpmin: _params.F_mmpmin, t, gcodes);
         return c.AsVector3(bottom_mm);
     }
@@ -506,8 +545,8 @@ public class SubPathSegment : PathSegmentWithParamsText, IRawSegment {
     }
 
     public override Vector3 EmitGCode(Vector3 currPos, Transformation3 t, double globalS_mm,
-        List<GCode> gcodes, string dxfFileName, MessageHandlerForEntities messages, int depth) {
-        if (depth > 9) {
+        List<GCode> gcodes, string dxfFileName, MessageHandlerForEntities messages, int nestingDepth) {
+        if (nestingDepth > 9) {
             throw new Exception(string.Format(Messages.PathSegment_CallDepthGt9_Path, _name));
         }
 
@@ -522,7 +561,7 @@ public class SubPathSegment : PathSegmentWithParamsText, IRawSegment {
 
             Transformation3 compound = t.Transform3(new Transformation2(model!.Start, model.End, _start, _end));
             gcodes.AddComment($"START Subpath {_name} t={compound}", 2);
-            currPos = model.EmitMillingGCode(currPos, compound, globalS_mm, gcodes, model.DxfFilePath, messages, depth + 1);
+            currPos = model.EmitMillingGCode(currPos, compound, globalS_mm, gcodes, model.DxfFilePath, messages, nestingDepth + 1);
             gcodes.AddComment($"END Subpath {_name} t={compound}", 2);
         }
 

@@ -169,6 +169,12 @@ Options:
   <data name="Params_CMustBeGtThan0_C" xml:space="preserve">
     <value>C={0} must be &gt; 0</value>
   </data>
+  <data name="Params_UMustBeGtThan0_U" xml:space="preserve">
+    <value>U={0} must be &gt; 0</value>
+  </data>
+  <data name="Params_PMustBeGtThan0_P" xml:space="preserve">
+    <value>P={0} must be &gt; 0</value>
+  </data>
   <data name="Params_DMustBeGtThanB_D_B" xml:space="preserve">
     <value>D={0} must be larger than B={1}</value>
   </data>

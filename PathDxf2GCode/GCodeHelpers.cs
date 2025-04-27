@@ -8,7 +8,7 @@ public static class GCodeHelpers {
         gcodes.Add(new CommentGCode(comment.AsComment(indent)));
     }
 
-    public static void AddHorizontalG00(this List<GCode> gcodes, Vector2 to, double lg_mm, double minZ_mm, double globalS_mm) {
+    public static void AddHorizontalG00(this List<GCode> gcodes, Vector2 to, double lg_mm) {
         gcodes.Add(new HorizontalSweepGCode(to.X, to.Y, lg_mm));
     }
 
@@ -73,7 +73,7 @@ public static class GCodeHelpers {
     public static Vector3 SweepFromTo(Vector3 from, Vector3 to, double globalS_mm, List<GCode> gcodes) {
         double distance = (to - from).Modulus();
         if (!distance.Near(0)) {
-            gcodes.AddHorizontalG00(to.XY(), distance, Math.Min(from.Z, to.Z), globalS_mm);
+            gcodes.AddHorizontalG00(to.XY(), distance);
         }
 
         return to;

@@ -78,6 +78,7 @@ public class PathModel {
         // HIDDEN:     ____ _____  = Sweep (G00) without parameters
         // CONTINUOUS: ___________ = Mill (G01/02) to full depth (B)
         // DIVIDE:     ___ . . ___ = Mill (G01/02) to mark depth (D)
+        // BORDER:     __ __ . __  = Mill (G01/02) to full depth with support bars at mark depth
         // DASHDOT:    ___ . ___ . = Subpath
 
         // Special circles:
@@ -222,9 +223,9 @@ public class PathModel {
                         messages.AddError(circle, center, dxfFilePath, Messages.PathModel_LineTypeNotSupported_LineType, LineTypeName(layerLinetypes, circle));
                     }
                 } else if (circle.Radius > bitRadius_mm.Value) {
-                    bool isMark = IsLineType(layerLinetypes, circle, "DIVIDE");
-                    if (isMark || IsLineType(layerLinetypes, circle, "CONTINUOUS")) {
-                        rawModel.RawSegments.Add(new HelixSegment(circle, circleText, center, circle.Radius, isMark));
+                    MillType? millType = MillTypeFromLineType(layerLinetypes, circle);
+                    if (millType.HasValue) {
+                        rawModel.RawSegments.Add(new HelixSegment(circle, circleText, center, circle.Radius, millType.Value));
                     } else {
                         messages.AddError(circle, center, dxfFilePath, Messages.PathModel_LineTypeNotSupported_LineType, LineTypeName(layerLinetypes, circle));
                     }
@@ -263,14 +264,14 @@ public class PathModel {
     private static void HandleLineOrArc(Dictionary<string, Linetype> layerLinetypes, string dxfFilePath,
         PathModelCollection subPathDefs, Options options, MessageHandlerForEntities messages, 
         List<SubPathSegment> subPaths, EntityObject lineOrArc, Vector2 start, Vector2 end, 
-        ParamsText text, RawPathModel rawModel, double order, MillGeometry geometry) {
+        ParamsText text, RawPathModel rawModel, double order, IMillGeometry geometry) {
         void OnError(string s) {
             messages.AddError(rawModel.Name.AsString(), s);
         }
 
-        bool isMark = IsLineType(layerLinetypes, lineOrArc, "DIVIDE");
-        if (isMark || IsLineType(layerLinetypes, lineOrArc, "CONTINUOUS")) {
-            rawModel.RawSegments.Add(new ChainSegment(geometry, isMark, lineOrArc, text, order));
+        MillType? millType = MillTypeFromLineType(layerLinetypes, lineOrArc);
+        if (millType.HasValue) {
+            rawModel.RawSegments.Add(new ChainSegment(geometry, millType.Value, lineOrArc, text, order));
         } else if (IsLineType(layerLinetypes, lineOrArc, "DASHDOT")) { // Subpath
             var s = new SubPathSegment(lineOrArc, text, start, end, options, order, subPathDefs, dxfFilePath, OnError);
             rawModel.RawSegments.Add(s);
@@ -285,6 +286,13 @@ public class PathModel {
 
     private static bool IsLineType(Dictionary<string, Linetype> layerLinetypes, EntityObject eo, string prefix) {
         return LineTypeName(layerLinetypes, eo)?.StartsWith(prefix) ?? false;
+    }
+
+    private static MillType? MillTypeFromLineType(Dictionary<string, Linetype> layerLinetypes, EntityObject eo) {
+        return IsLineType(layerLinetypes, eo, "CONTINUOUS") ? MillType.Mill
+            : IsLineType(layerLinetypes, eo, "DIVIDE") ? MillType.Mark
+            : IsLineType(layerLinetypes, eo, "BORDER") ? MillType.WithSupports
+            : null;
     }
 
     private static string? LineTypeName(Dictionary<string, Linetype> layerLinetypes, EntityObject eo) {

@@ -242,6 +242,15 @@ namespace de.hmmueller.PathDxf2GCode {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die P={0} must be &gt; 0 ähnelt.
+        /// </summary>
+        internal static string Params_PMustBeGtThan0_P {
+            get {
+                return ResourceManager.GetString("Params_PMustBeGtThan0_P", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die S={0} must be above T={1}  ähnelt.
         /// </summary>
         internal static string Params_SMustBeGtThanT_S_T {
@@ -256,6 +265,15 @@ namespace de.hmmueller.PathDxf2GCode {
         internal static string Params_TMustBeGtThan0_T {
             get {
                 return ResourceManager.GetString("Params_TMustBeGtThan0_T", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die U={0} must be &gt; 0 ähnelt.
+        /// </summary>
+        internal static string Params_UMustBeGtThan0_U {
+            get {
+                return ResourceManager.GetString("Params_UMustBeGtThan0_U", resourceCulture);
             }
         }
         

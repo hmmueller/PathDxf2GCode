@@ -25,6 +25,7 @@ public class ZProbe {
 
     public double T_mm => _params!.T_mm;
     public string? L => _params!.L;
+
     public string Name => _name ?? throw new NullReferenceException("SetName was not called");
 
     public Vector3 EmitGCode(Vector3 currPos, Transformation2 t,
@@ -32,9 +33,14 @@ public class ZProbe {
         Vector2 c = t.Transform(Center);
         PathSegment.AssertNear(currPos.XY(), c, MessageHandlerForEntities.Context(Source, Center, dxfFileName));
 
-        gcodes.Add("G38.3 Z0"); // Slow Z probe - I might have to place the probe below the lowering router bit!
+        double o_mm = _params!.O_mm;
+        gcodes.AddNonhorizontalG00($"G00 Z{(T_mm + o_mm).F3()}", currPos.Z - T_mm - o_mm); // Go down quickly to T+O
+
+        gcodes.Add($"G38.3 Z0 F{_params!.Z_mmpmin.F3()}"); // Slow Z probe - I have to place the probe below the lowering router bit!
         gcodes.Add("G04 P4"); // Wait 4s to allow reading the value
-        gcodes.AddNonhorizontalG00($"G00 Z{currPos.Z.F3()}", currPos.Z); // Return to previous Z height; distance is estimate
+        // The previous two statements are currently not added to the statistics; maybe later.
+
+        gcodes.AddNonhorizontalG00($"G00 Z{currPos.Z.F3()}", currPos.Z - T_mm); // Return to previous Z height
 
         return currPos;
     }
