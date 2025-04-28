@@ -225,7 +225,7 @@ Optionen:
     <value>{0}-Wert fehlt</value>
   </data>
   <data name="PathModel_MissingParams_Path" xml:space="preserve">
-    <value>Keine Parameter für Pfad {0} gefunden; vielleicht ist Pfadtext nicht nahe genug an Start-Merkierung</value>
+    <value>Keine Parameter für Pfad {0} gefunden; vielleicht ist Pfadtext nicht nahe genug an Start-Markierung</value>
   </data>
   <data name="PathModel_MissingPathDefinition_PathName" xml:space="preserve">
     <value>Pfaddefinition {0} nicht gefunden; vielleicht hat Start-Markierung nicht Linientyp PHANTOM(__ _ _ __)</value>
