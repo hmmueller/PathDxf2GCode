@@ -197,6 +197,9 @@ Optionen:
   <data name="Params_SMustBeGtThanT_S_T" xml:space="preserve">
     <value>S={0} darf nicht unter oder nahe an T={1} liegen</value>
   </data>
+  <data name="Params_AMustBeGtThan0_A" xml:space="preserve">
+    <value>A={0} muss &gt; 0 sein</value>
+  </data>
   <data name="Params_TMustBeGtThan0_T" xml:space="preserve">
     <value>T={0} muss &gt; 0 sein</value>
   </data>
@@ -318,5 +321,8 @@ hat zugeordneten Text '{1}'</value>
   </data>
   <data name="Transformation2_DifferentDistances_FromS_FromE_FromD_ToS_ToE_ToD" xml:space="preserve">
     <value>Distanz {0}...{1} = {2} ist nicht gleich Distanz {3}...{4} = {5}</value>
+  </data>
+  <data name="PathSegment_DiameterGtA_Diameter_A" xml:space="preserve">
+    <value>Helix-Durchmesser {0} ist größer als A={1}; möglichst durch Bogenpfad ersetzen</value>
   </data>
 </root>

@@ -95,6 +95,7 @@ public interface IParams {
     double U_mm { get; }
     int C { get; }
     double S_mm { get; }
+    double A_mm { get; }
 }
 
 public abstract class AbstractParams : IParams {
@@ -156,6 +157,9 @@ public abstract class AbstractParams : IParams {
         if (RawD_mm.HasValue && RawD_mm.Value.Ge(T_mm)) {
             Error(Messages.Params_DMustBeLessThanT_D_T, RawD_mm, T_mm);
         }
+        if (A_mm <= 0) {
+            Error(Messages.Params_AMustBeGtThan0_A, A_mm);
+        }
     }
 
     protected static string GetString(ParamsText text, char key, Action<string> onError) {
@@ -177,6 +181,7 @@ public abstract class AbstractParams : IParams {
     public abstract double T_mm { get; }
     public abstract double O_mm { get; }
     public abstract double S_mm { get; }
+    public abstract double A_mm { get; }
     public abstract string M { get; }
     public abstract double Z_mmpmin { get; }
 
@@ -199,6 +204,7 @@ public class PathParams : AbstractParams {
     public override int? RawC => (int?)Text.GetDouble('C');
     public override double? RawI_mm => Text.GetDouble('I');
     public override double S_mm { get; }
+    public override double A_mm { get; }
     public override double V_mmpmin => _options.GlobalSweepRate_mmpmin;
     public override double T_mm => Text.GetDouble('T', OnErrorNaN);
     public override double O_mm => Text.GetDouble('O', OnErrorNaN);
@@ -208,8 +214,9 @@ public class PathParams : AbstractParams {
     public PathParams(ParamsText text, double? defaultSorNullForTplusO_mm, string errorContext, Options options, Action<string, string> onError) : base(text, errorContext, onError) {
         _options = options;
         S_mm = Text.GetDouble('S') ?? defaultSorNullForTplusO_mm ?? T_mm + O_mm;
+        A_mm = Text.GetDouble('A') ?? 4 * O_mm;
 
-        CheckKeysAndValues(text, "FBDCISTOMPUZ");
+        CheckKeysAndValues(text, "FBDCISTOMPUZA");
         if (RawD_mm.HasValue && RawB_mm.HasValue && RawB_mm.Value.Ge(RawD_mm.Value)) {
             Error(Messages.Params_DMustBeGtThanB_D_B, RawD_mm, B_mm);
         }
@@ -238,6 +245,7 @@ public abstract class AbstractChildParams : AbstractParams {
     public override double O_mm => _parent.O_mm;
     public override string M => _parent.M;
     public override double Z_mmpmin => _parent.Z_mmpmin;
+    public override double A_mm => _parent.A_mm;
 
     protected AbstractChildParams(ParamsText text, string errorContext, IParams parent, Action<string, string> onError) : base(text, errorContext, onError) {
         _parent = parent;

@@ -196,6 +196,9 @@ Options:
   <data name="Params_SMustBeGtThanT_S_T" xml:space="preserve">
     <value>S={0} must be above T={1} </value>
   </data>
+  <data name="Params_AMustBeGtThan0_A" xml:space="preserve">
+    <value>A={0} must be &gt; 0</value>
+  </data>
   <data name="Params_TMustBeGtThan0_T" xml:space="preserve">
     <value>T={0} must be &gt; 0</value>
   </data>
@@ -317,5 +320,8 @@ has assigned text '{1}'</value>
   </data>
   <data name="Transformation2_DifferentDistances_FromS_FromE_FromD_ToS_ToE_ToD" xml:space="preserve">
     <value>Distance {0}...{1} = {2} ist not equal to distance {3}...{4} = {5}</value>
+  </data>
+  <data name="PathSegment_DiameterGtA_Diameter_A" xml:space="preserve">
+    <value>Diameter {0} of helix circle is larger than A={1}; possibly replace with arc path</value>
   </data>
 </root>

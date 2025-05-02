@@ -170,6 +170,15 @@ namespace de.hmmueller.PathDxf2GCode {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die A={0} must be &gt; 0 ähnelt.
+        /// </summary>
+        internal static string Params_AMustBeGtThan0_A {
+            get {
+                return ResourceManager.GetString("Params_AMustBeGtThan0_A", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die B={0} must not be larger than T={1} ähnelt.
         /// </summary>
         internal static string Params_BMustBeLessThanT_B_T {
@@ -465,6 +474,15 @@ namespace de.hmmueller.PathDxf2GCode {
         internal static string PathSegment_CallDepthGt9_Path {
             get {
                 return ResourceManager.GetString("PathSegment_CallDepthGt9_Path", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Diameter {0} of helix circle is larger than A={1}; possibly replace with arc path ähnelt.
+        /// </summary>
+        internal static string PathSegment_DiameterGtA_Diameter_A {
+            get {
+                return ResourceManager.GetString("PathSegment_DiameterGtA_Diameter_A", resourceCulture);
             }
         }
         

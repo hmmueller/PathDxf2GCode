@@ -2,6 +2,7 @@
 
 using netDxf;
 using netDxf.Entities;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
@@ -212,7 +213,7 @@ public class ChainSegment : IRawSegment {
         => MessageHandlerForEntities.Context(Source, Start, dxfFileName);
 
     internal void CreateParams(ChainParams chainParams, string dxfFileName, Action<string, string> onError) {
-        _params = new MillParams(ParamsText, MillType, ErrorContext(dxfFileName), chainParams, onError);
+        _params = new MillParams(ParamsText, MillType, MessageHandlerForEntities.Context(Source, Start, dxfFileName), chainParams, onError);
 
         // Also create geometries for support bars; done here once because
         // EmitGCode is called for each milling depth, but the geometries do not change.
@@ -227,7 +228,7 @@ public class ChainSegment : IRawSegment {
         double fullMillBottom = MillType == MillType.Mill ? pars.B_mm : pars.D_mm;
         bool backtracking = Order == PathModel.BACKTRACK_ORDER;
         currPos = _supportGeometries!.Any() && fullMillBottom.Gt(millingLayer_mm)
-            ? _supportGeometries!.MillSupports(currPos, millingLayer_mm, start2End, 
+            ? _supportGeometries!.MillSupports(currPos, millingLayer_mm, start2End,
                         globalS_mm, t, gcodes, dxfFileName, pars, backtracking)
             : (start2End ? _geometry : _geometry.CloneReversed()).EmitGCode(currPos, t, globalS_mm,
                         gcodes, dxfFileName, millingTarget_mm: Math.Max(millingLayer_mm, fullMillBottom),
@@ -262,7 +263,7 @@ public abstract class AbstractSweepSegment : PathSegmentWithParamsText, IRawSegm
 
     public override Vector3 EmitGCode(Vector3 currPos, Transformation3 t, double globalS_mm,
                                       List<GCode> gcodes, string dxfFileName, MessageHandlerForEntities messages, int nestingDepth) {
-        AssertNear(currPos.XY(), t.Transform(Start), ErrorContext(dxfFileName));
+        AssertNear(currPos.XY(), t.Transform(Start), MessageHandlerForEntities.Context(Source, Start, dxfFileName));
 
         Vector2 target = t.Transform(End);
         double s_mm = _params!.S_mm;
@@ -281,7 +282,7 @@ public class SweepSegment : AbstractSweepSegment {
     }
 
     public override void CreateParams(PathParams pathParams, string dxfFileName, Action<string, string> onError) {
-        _params = new SweepParams(ParamsText, ErrorContext(dxfFileName), pathParams, onError);
+        _params = new SweepParams(ParamsText, MessageHandlerForEntities.Context(Source, Start, dxfFileName), pathParams, onError);
     }
 }
 
@@ -293,7 +294,7 @@ public class BackSweepSegment : AbstractSweepSegment {
     }
 
     public override void CreateParams(PathParams pathParams, string dxfFileName, Action<string, string> onError) {
-        _params = new BackSweepParams(ParamsText, ErrorContext(dxfFileName), pathParams, onError);
+        _params = new BackSweepParams(ParamsText, MessageHandlerForEntities.Context(Source, Start, dxfFileName), pathParams, onError);
     }
 }
 
@@ -339,8 +340,11 @@ public class HelixSegment : PathSegmentWithParamsText, IRawSegment {
     public IRawSegment ReversedSegmentAfterTurn() => new BackSweepSegment(Source, ParamsText, Center, Center);
 
     public override void CreateParams(PathParams pathParams, string dxfFileName, Action<string, string> onError) {
-        _params = new HelixParams(ParamsText, MillType, ErrorContext(dxfFileName), pathParams, onError);
-
+        string errorContext = MessageHandlerForEntities.Context(Source, Center, dxfFileName);
+        _params = new HelixParams(ParamsText, MillType, errorContext, pathParams, onError);
+        if ((2 * Radius_mm).Gt(_params.A_mm)) {
+            onError(errorContext, string.Format(Messages.PathSegment_DiameterGtA_Diameter_A, 2 * Radius_mm, _params.A_mm));
+        }
         // Also create geometries for support bars; done here once because
         // EmitGCode is called for each milling depth, but the geometries do not change.
         // The arc is oriented clockwise, as the helix is milled with G02, i.e. clockwise semicircles.
@@ -395,8 +399,8 @@ public class HelixSegment : PathSegmentWithParamsText, IRawSegment {
         if (_supportGeometries!.Any()) {
             for (double d_mm = done_mm; done_mm.Gt(pars.B_mm); d_mm -= i_mm) {
                 double b_mm = Math.Max(d_mm - i_mm, pars.B_mm);
-                currPos = _supportGeometries!.MillSupports(currPos, 
-                    millingBottom_mm: b_mm, start2End: true, 
+                currPos = _supportGeometries!.MillSupports(currPos,
+                    millingBottom_mm: b_mm, start2End: true,
                     globalS_mm, t, gcodes, dxfFileName, pars, backtracking: false);
                 done_mm = b_mm;
             }
@@ -440,7 +444,7 @@ public class DrillSegment : MarkOrMillPathSegment, IRawSegment {
     public IRawSegment ReversedSegmentAfterTurn() => new BackSweepSegment(Source, ParamsText, Center, Center);
 
     public override void CreateParams(PathParams pathParams, string dxfFileName, Action<string, string> onError) {
-        _params = new DrillParams(ParamsText, _isMark, ErrorContext(dxfFileName), pathParams, onError);
+        _params = new DrillParams(ParamsText, _isMark, MessageHandlerForEntities.Context(Source, Center, dxfFileName), pathParams, onError);
     }
 
     public override Vector3 EmitGCode(Vector3 currPos, Transformation3 t, double globalS_mm, List<GCode> gcodes, string dxfFileName, MessageHandlerForEntities messages, int nestingDepth) {
@@ -509,7 +513,7 @@ public class SubPathSegment : PathSegmentWithParamsText, IRawSegment {
                 }
             }
             if (!_models.Contains(_name)) {
-                messages.AddError(Source, End, currentDxfFile, Messages.PathSegment_PathNotFound_Name_Files, 
+                messages.AddError(Source, End, currentDxfFile, Messages.PathSegment_PathNotFound_Name_Files,
                                   _name.AsString(), searchedFiles);
                 return null;
             }
@@ -519,8 +523,8 @@ public class SubPathSegment : PathSegmentWithParamsText, IRawSegment {
         double modelSize = model.Start.Distance(model.End);
         double referenceSize = Start.Distance(End);
         if (!modelSize.AbsNear(referenceSize, 1e-3)) {
-            messages.AddError(Source, End, currentDxfFile, 
-                Messages.PathSegment_DistanceDiffers_CallerDist_ModelName_CalledDist, 
+            messages.AddError(Source, End, currentDxfFile,
+                Messages.PathSegment_DistanceDiffers_CallerDist_ModelName_CalledDist,
                 referenceSize.F3(), model.Name, modelSize.F3());
         }
 
@@ -545,7 +549,7 @@ public class SubPathSegment : PathSegmentWithParamsText, IRawSegment {
     }
 
     public override void CreateParams(PathParams pathParams, string dxfFileName, Action<string, string> onError) {
-        string errorContext = ErrorContext(dxfFileName);
+        string errorContext = MessageHandlerForEntities.Context(Source, Start, dxfFileName);
         _params = new SubpathParams(ParamsText, errorContext, pathParams, onError);
     }
 
