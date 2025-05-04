@@ -2,7 +2,6 @@
 
 using netDxf;
 using netDxf.Entities;
-using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
@@ -209,9 +208,6 @@ public class ChainSegment : IRawSegment {
     public ChainSegment ReversedSegment()
         => new ChainSegment(_geometry.CloneReversed(), MillType, Source, ParamsText, PathModel.BACKTRACK_ORDER);
 
-    protected string ErrorContext(string dxfFileName)
-        => MessageHandlerForEntities.Context(Source, Start, dxfFileName);
-
     internal void CreateParams(ChainParams chainParams, string dxfFileName, Action<string, string> onError) {
         _params = new MillParams(ParamsText, MillType, MessageHandlerForEntities.Context(Source, Start, dxfFileName), chainParams, onError);
 
@@ -362,7 +358,7 @@ public class HelixSegment : PathSegmentWithParamsText, IRawSegment {
         AssertNear(currPos.XY(), c, MessageHandlerForEntities.Context(Source, Center, dxfFileName));
 
         IParams pars = _params!;
-        double fullMillBottom = MillType == MillType.Mill ? pars.B_mm : pars.D_mm;
+        double fullMillBottom_mm = MillType == MillType.Mill ? pars.B_mm : pars.D_mm;
 
         double t_mm = pars.T_mm;
         double i_mm = pars.I_mm;
@@ -381,13 +377,13 @@ public class HelixSegment : PathSegmentWithParamsText, IRawSegment {
 
         // First, we mill as long as we can mill complete circles (actually,two semicircles).
         double done_mm = t_mm;
-        for (double d_mm = t_mm; done_mm.Gt(fullMillBottom); d_mm -= i_mm) {
+        for (double d_mm = t_mm; done_mm.Gt(fullMillBottom_mm); d_mm -= i_mm) {
             gcodes.AddComment($"MillSemiCircle l={d_mm.F3()}", 4);
 
-            double b1_mm = Math.Max(d_mm - i_mm / 2, fullMillBottom);
+            double b1_mm = Math.Max(d_mm - i_mm / 2, fullMillBottom_mm);
             gcodes.AddMill($"G02 F{f_mmpmin.F3()} I0 J{millingRadius_mm.F3()} X{c.X.F3()} Y{y1.F3()} Z{t.Expr(b1_mm, c)}", millingRadius_mm * Math.PI, f_mmpmin);
 
-            double b0_mm = Math.Max(b1_mm - i_mm / 2, fullMillBottom);
+            double b0_mm = Math.Max(b1_mm - i_mm / 2, fullMillBottom_mm);
             gcodes.AddMill($"G02 F{f_mmpmin.F3()} I0 J{(-millingRadius_mm).F3()} X{c.X.F3()} Y{y0.F3()} Z{t.Expr(b0_mm, c)}", millingRadius_mm * Math.PI, f_mmpmin);
 
             done_mm = d_mm; // We can only guarantee that depth d_mm has been reached;
