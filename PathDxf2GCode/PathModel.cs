@@ -130,7 +130,7 @@ public class PathModel {
         // 5. Load subpaths at the very end (tail-recursion hopefully reduces problems)
 
         // 1. Collect all objects on path layers - circles, lines, and arcs
-        List<Circle> circles = entities.Circles.Where(e => e.IsOnPathLayer(options.PathNamePattern,  dxfFilePath)).ToList();
+        List<Circle> circles = entities.Circles.Where(e => e.IsOnPathLayer(options.PathNamePattern, dxfFilePath)).ToList();
         List<Line> lines = entities.Lines.Where(e => e.IsOnPathLayer(options.PathNamePattern, dxfFilePath)).ToList();
         List<Arc> arcs = entities.Arcs.Where(e => e.IsOnPathLayer(options.PathNamePattern, dxfFilePath)).ToList();
 
@@ -176,7 +176,7 @@ public class PathModel {
             RawPathModel rawModel = GetOrCreateRawModel(circle);
             Vector2 center = circle.Center.AsVector2();
 
-            if (IsTurnMarker(circle)) { 
+            if (IsTurnMarker(circle)) {
                 rawModel.Turns.Add(center);
             } else if (IsStartMarker(circle)) {
                 if (rawModel.Start != null) {
@@ -262,8 +262,8 @@ public class PathModel {
     }
 
     private static void HandleLineOrArc(Dictionary<string, Linetype> layerLinetypes, string dxfFilePath,
-        PathModelCollection subPathDefs, Options options, MessageHandlerForEntities messages, 
-        List<SubPathSegment> subPaths, EntityObject lineOrArc, Vector2 start, Vector2 end, 
+        PathModelCollection subPathDefs, Options options, MessageHandlerForEntities messages,
+        List<SubPathSegment> subPaths, EntityObject lineOrArc, Vector2 start, Vector2 end,
         ParamsText text, RawPathModel rawModel, double order, IMillGeometry geometry) {
         void OnError(string s) {
             messages.AddError(rawModel.Name.AsString(), s);
@@ -428,7 +428,7 @@ public class PathModel {
                 if (!candidates.Any()) {
                     if (rawModel.HasTurnAt(currEnd)) {
                         while (backtrackForTurns.TryPop(out var s)) {
-                            s.ReversedSegmentAfterTurn().AddTo(orderedRawSegments, traversed, null, ref currEnd);
+                            s.ReversedSegmentAfterTurn().AddTo(orderedRawSegments, traversed, backtrackForTurns: null, ref currEnd);
                             IEnumerable<IRawSegment> candidatesWhileReversing = FindNonTraversedAnchoredAt(currEnd);
                             if (candidatesWhileReversing.Any()) {
                                 break;
@@ -439,7 +439,7 @@ public class PathModel {
                             IRawSegment example = rawModel.RawSegments.First(s => !traversed.Contains(s));
                             int ct = rawModel.RawSegments.Count(s => !traversed.Contains(s));
 
-                            messages.AddError(example.Source, example.Start, dxfFilePath,Messages.PathModel_UnreachedSegments, ct);
+                            messages.AddError(example.Source, example.Start, dxfFilePath, Messages.PathModel_UnreachedSegments, ct);
                         }
                         break;
                     } else {
@@ -478,7 +478,7 @@ public class PathModel {
                     currChain.Add(c);
                 } else {
                     if (currChain.Any()) {
-                        segments.Add(new MillChain(currChain.ToArray()));
+                        segments.Add(new MillChain(currChain));
                         currChain.Clear();
                     }
                     if (s is PathSegment p) {
@@ -487,7 +487,7 @@ public class PathModel {
                 }
             }
             if (currChain.Any()) {
-                segments.Add(new MillChain(currChain.ToArray()));
+                segments.Add(new MillChain(currChain));
             }
         }
 

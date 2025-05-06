@@ -199,6 +199,9 @@ Options:
   <data name="Params_AMustBeGtThan0_A" xml:space="preserve">
     <value>A={0} must be &gt; 0</value>
   </data>
+  <data name="Params_WMustBeGtThan0_W" xml:space="preserve">
+    <value>W={0} must be &gt; 0</value>
+  </data>
   <data name="Params_TMustBeGtThan0_T" xml:space="preserve">
     <value>T={0} must be &gt; 0</value>
   </data>

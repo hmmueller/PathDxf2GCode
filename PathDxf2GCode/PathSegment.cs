@@ -78,7 +78,8 @@ public class MillChain : PathSegment {
         => _segments.Last().End;
 
     public override void CreateParams(PathParams pathParams, string dxfFileName, Action<string, string> onError) {
-        _params = new ChainParams(_segments[0].ParamsText,
+        // [0] looks innocent, but with branching mill chains the "first" segment may not be easily identifiable by the user ...
+        _params = new ChainParams(_segments[0].ParamsText, 
             MessageHandlerForEntities.Context(_segments[0].Source, _segments[0].Start, dxfFileName), pathParams, onError);
         foreach (var s in _segments) {
             s.CreateParams(_params, dxfFileName, onError);
@@ -106,67 +107,145 @@ public class MillChain : PathSegment {
         public bool TopUnmilled => Milled == EdgeMilled.Unknown && (Above == null || Above.Milled != EdgeMilled.Unknown);
     }
 
+    private static EdgeMilled AddEdgeForChainWithSlowMilling(List<Edge> edgesForThisRun, Edge e, Transformation3 t, ref Vector3 headPos) {
+        Vector3 start = e.Start(t);
+        Vector3 end = e.End(t);
+
+        edgesForThisRun.Add(e);
+
+        if (headPos.Vector2Near(start)) {
+            headPos = end;
+            return EdgeMilled.Start2End;
+        } else if (headPos.Vector2Near(end)) {
+            headPos = start;
+            return EdgeMilled.End2Start;
+        } else {
+            throw new Exception("Internal error");
+        }
+    }
+
     public override Vector3 EmitGCode(Vector3 currPos, Transformation3 t, double globalS_mm,
                                       List<GCode> gcodes, string dxfFileName, MessageHandlerForEntities messages, int nestingDepth) {
-        // Create actual edges
-        List<Edge> edges = new();
-        foreach (var s in _segments) {
-            Edge? prev = default;
-            for (double millingBottom_mm = _params!.T_mm - _params!.I_mm; millingBottom_mm >= s.Bottom_mm; millingBottom_mm -= _params!.I_mm) {
-                edges.Add(prev = new Edge(s, millingBottom_mm, prev));
-            }
-            if (prev == null || !prev.MillingBottom_mm.Near(s.Bottom_mm)) {
-                edges.Add(new Edge(s, s.Bottom_mm, prev));
+        // A. Create milling movements ("edges") from segments
+        List<List<Edge>> edgesBySegment = new();
+        {
+            double firstMillingBottom_mm = _params!.W_mm ?? _params!.T_mm - _params!.I_mm;
+            foreach (var s in _segments) {
+                List<Edge> edgesOfS = new();
+                Edge? prev = default;
+                for (double millingBottom_mm = firstMillingBottom_mm; millingBottom_mm >= s.Bottom_mm; millingBottom_mm -= _params!.I_mm) {
+                    edgesOfS.Add(prev = new Edge(s, millingBottom_mm, prev));
+                }
+                if (prev == null || !prev.MillingBottom_mm.Near(s.Bottom_mm)) {
+                    edgesOfS.Add(new Edge(s, s.Bottom_mm, prev));
+                }
+                edgesBySegment.Add(edgesOfS);
             }
         }
-
-        int remaining = edges.Count;
         List<Edge> sortedEdges = new();
 
-        // Create optimized order
-        Vector3 headPos = edges.First().Start(t);
+        // B. Create optimized order
+        Vector3 headPos = edgesBySegment.First().First().Start(t);
+        if (!headPos.Vector2Near(currPos)) {
+            throw new Exception("Internal error");
+        }
 
-        while (remaining > 0) {
-            Edge? nearest = null;
-            bool nearestConnectAtStart = true;
-            Vector3 NearestMillingTip() => nearestConnectAtStart ? nearest!.Start(t) : nearest!.End(t);
+        if (_params.W_mm.HasValue) {
+            // "Slow Milling", i.e. milling without sweeps; especially for T bits.
 
-            foreach (var candidate in edges.Where(e => e.TopUnmilled)) {
-                double distToCandidateStart_mm = headPos.Distance(candidate.Start(t));
-                double distToCandidateEnd_mm = headPos.Distance(candidate.End(t));
-                bool candStartIsNearer = distToCandidateStart_mm < distToCandidateEnd_mm;
-                double distToNearerCandidateTip = candStartIsNearer ? distToCandidateStart_mm : distToCandidateEnd_mm;
-                if (nearest == null || distToNearerCandidateTip < headPos.Distance(NearestMillingTip())) {
-                    nearest = candidate;
-                    nearestConnectAtStart = candStartIsNearer;
+            int runCt = edgesBySegment.Max(es => es.Count);
+
+            // "Backmilling": If there is more than one run, but Start is near End,
+            // then Slow Milling can simply continue with the next layer of edges.
+            // If, however, Start differs from End, milling has to return
+            // to the start by tracing back all the milled edges.
+            bool requiresBackMilling = runCt > 1 && !Start.Near(End);
+
+            for (int run = 0; run < runCt; run++) {
+                List<Edge> edgesForThisRun = new();
+                foreach (var es in edgesBySegment) {
+                    if (run < es.Count) {
+                        // There is still an edge to be milled on this run for this segment.
+                        Edge e = es[run];
+                        e.Milled = AddEdgeForChainWithSlowMilling(edgesForThisRun, e, t, ref headPos);
+                    } else {
+                        // All edges have been milled for this segment; to continue, the
+                        // bottom-most milled edge is re-traced.
+                        Edge e = es.Last();
+                        AddEdgeForChainWithSlowMilling(edgesForThisRun, e, t, ref headPos);
+                        // e.Milled is already set
+                    }
+                }
+
+                sortedEdges.AddRange(edgesForThisRun);
+
+                if (requiresBackMilling && run < runCt - 1) {
+                    foreach (var e in edgesForThisRun.Reverse<Edge>()) {
+                        Edge reversedEdge = new(e.Segment, e.MillingBottom_mm, null) {
+                            Milled = e.Milled == EdgeMilled.Start2End ? EdgeMilled.End2Start : EdgeMilled.Start2End
+                        };
+                        sortedEdges.Add(reversedEdge);
+                        headPos = reversedEdge.Milled == EdgeMilled.Start2End ? reversedEdge.End(t) : reversedEdge.Start(t);
+                    }
                 }
             }
 
-            sortedEdges.Add(nearest!);
-            if (nearest!.Milled != EdgeMilled.Unknown) {
-                throw new Exception("Internal Error");
+            // Create Gcode
+            foreach (var e in sortedEdges) {
+                currPos = GCodeHelpers.DrillOrPullZFromTo(currPos, target: e.Milled == EdgeMilled.Start2End ? e.Start(t) : e.End(t),
+                    t_mm: _params!.T_mm, _params!.F_mmpmin, t, gcodes);
+                currPos = e.Segment.EmitGCode(currPos, e.MillingBottom_mm, e.Milled == EdgeMilled.Start2End,
+                    globalS_mm, t, gcodes, dxfFileName);
             }
-            nearest.Milled = nearestConnectAtStart ? EdgeMilled.Start2End : EdgeMilled.End2Start;
-            headPos = nearestConnectAtStart ? nearest.End(t) : nearest.Start(t);
-            remaining--;
+
+        } else {
+            // "Fast Milling"
+
+            IEnumerable<Edge> edges = edgesBySegment.SelectMany(es => es);
+            int remaining = edges.Count();
+            while (remaining > 0) {
+                Edge? nearest = null;
+                bool nearestConnectAtStart = true;
+                Vector3 NearestMillingTip() => nearestConnectAtStart ? nearest!.Start(t) : nearest!.End(t);
+
+                foreach (var candidate in edges.Where(e => e.TopUnmilled)) {
+                    double distToCandidateStart_mm = headPos.Distance(candidate.Start(t));
+                    double distToCandidateEnd_mm = headPos.Distance(candidate.End(t));
+                    bool candStartIsNearer = distToCandidateStart_mm < distToCandidateEnd_mm;
+                    double distToNearerCandidateTip = candStartIsNearer ? distToCandidateStart_mm : distToCandidateEnd_mm;
+                    if (nearest == null || distToNearerCandidateTip < headPos.Distance(NearestMillingTip())) {
+                        nearest = candidate;
+                        nearestConnectAtStart = candStartIsNearer;
+                    }
+                }
+
+                sortedEdges.Add(nearest!);
+                if (nearest!.Milled != EdgeMilled.Unknown) {
+                    throw new Exception("Internal Error");
+                }
+                nearest.Milled = nearestConnectAtStart ? EdgeMilled.Start2End : EdgeMilled.End2Start;
+                headPos = nearestConnectAtStart ? nearest.End(t) : nearest.Start(t);
+                remaining--;
+            }
+
+            // Create Gcode
+            double s_mm = _params!.S_mm;
+            foreach (var e in sortedEdges) {
+                currPos = GCodeHelpers.SweepAndDrillSafelyFromTo(from: currPos,
+                    to: e.Milled == EdgeMilled.Start2End ? e.Start(t) : e.End(t),
+                    t_mm: _params!.T_mm, s_mm: s_mm, globalS_mm, _params!.F_mmpmin,
+                    backtracking: false, t, gcodes);
+
+                currPos = e.Segment.EmitGCode(currPos, e.MillingBottom_mm, e.Milled == EdgeMilled.Start2End,
+                    globalS_mm, t, gcodes, dxfFileName);
+            }
+
+            Vector2 end = t.Transform(_segments.Last().End);
+            currPos = GCodeHelpers.SweepAndDrillSafelyFromTo(from: currPos, to: end.AsVector3(s_mm),
+                t_mm: _params!.T_mm, s_mm: s_mm, globalS_mm, _params!.F_mmpmin, backtracking: false, t, gcodes);
+            AssertNear(currPos.XY(), end, MessageHandlerForEntities.Context(_segments.Last().Source, _segments.First().Start, dxfFileName));
         }
 
-        // Create code
-        double s_mm = _params!.S_mm;
-        foreach (var e in sortedEdges) {
-            currPos = GCodeHelpers.SweepAndDrillSafelyFromTo(from: currPos,
-                to: e.Milled == EdgeMilled.Start2End ? e.Start(t) : e.End(t),
-                t_mm: _params!.T_mm, s_mm: s_mm, globalS_mm, _params!.F_mmpmin,
-                backtracking: false, t, gcodes);
-
-            currPos = e.Segment.EmitGCode(currPos, e.MillingBottom_mm, e.Milled == EdgeMilled.Start2End,
-                globalS_mm, t, gcodes, dxfFileName);
-        }
-
-        Vector2 end = t.Transform(_segments.Last().End);
-        currPos = GCodeHelpers.SweepAndDrillSafelyFromTo(from: currPos, to: end.AsVector3(s_mm),
-            t_mm: _params!.T_mm, s_mm: s_mm, globalS_mm, _params!.F_mmpmin, backtracking: false, t, gcodes);
-        AssertNear(currPos.XY(), end, MessageHandlerForEntities.Context(_segments.Last().Source, _segments.First().Start, dxfFileName));
         return currPos;
     }
 }
@@ -231,7 +310,6 @@ public class ChainSegment : IRawSegment {
                         t_mm: pars.T_mm, f_mmpmin: pars.F_mmpmin, backtracking);
         return currPos;
     }
-
 }
 
 public abstract class AbstractSweepSegment : PathSegmentWithParamsText, IRawSegment {

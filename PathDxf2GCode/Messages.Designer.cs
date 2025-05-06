@@ -305,6 +305,15 @@ namespace de.hmmueller.PathDxf2GCode {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die W={0} must be &gt; 0 ähnelt.
+        /// </summary>
+        internal static string Params_WMustBeGtThan0_W {
+            get {
+                return ResourceManager.GetString("Params_WMustBeGtThan0_W", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Diameter {0} is smaller than O={1} ähnelt.
         /// </summary>
         internal static string PathModel_CircleTooSmall_D_O {

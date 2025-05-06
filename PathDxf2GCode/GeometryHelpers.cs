@@ -50,7 +50,7 @@ public static class GeometryHelpers {
 
     #endregion
 
-    #region Vectors
+    #region Vector2
 
     public static bool Near(this Vector2 d, Vector2 e)
         => Vector2.SquareDistance(d, e).Near(0);
@@ -67,9 +67,6 @@ public static class GeometryHelpers {
     public static Vector2 Scaled(this Vector2 a, double f)
         => a / a.Modulus() * f;
 
-    public static Vector2 XY(this Vector3 a)
-        => new Vector2(a.X, a.Y);
-
     public static double Distance(this Vector2 a, Vector3 b)
         => a.Distance(b.AsVector2());
 
@@ -79,9 +76,6 @@ public static class GeometryHelpers {
     public static double SquareDistance(this Vector2 a, Vector3 b)
         => Vector2.SquareDistance(a, b.AsVector2());
 
-    public static double Distance(this Vector3 a, Vector3 b)
-        => Vector3.Distance(a, b);
-
     public static Vector2 Rotate(this Vector2 a, double angle_rad)
         => Vector2.Rotate(a, angle_rad);
 
@@ -90,13 +84,26 @@ public static class GeometryHelpers {
 
     #endregion
 
+    #region Vector3
+
+    public static bool Vector2Near(this Vector3 d, Vector3 e)
+        => d.XY().Near(e.XY());
+
+    public static Vector2 XY(this Vector3 a)
+        => new Vector2(a.X, a.Y);
+
+    public static double Distance(this Vector3 a, Vector3 b)
+        => Vector3.Distance(a, b);
+
+    #endregion
+
     #region Formatting
 
     public static string F3(this Vector3 a)
-        => Invariant($"[{a.X:F3}|{a.Y:F3}|{a.Z:F3}]");
+        => Invariant($"[{a.X:F3} {a.Y:F3} {a.Z:F3}]");
 
     public static string F3(this Vector2 a)
-        => Invariant($"[{a.X:F3}|{a.Y:F3}]");
+        => Invariant($"[{a.X:F3} {a.Y:F3}]");
 
     public static string F3(this double d)
         => Invariant($"{d:F3}");

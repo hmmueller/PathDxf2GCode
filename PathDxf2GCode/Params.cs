@@ -87,6 +87,7 @@ public interface IParams {
     double O_mm { get; }
     string M { get; }
     double Z_mmpmin { get; }
+    double? W_mm { get; }
 
     double B_mm { get; }
     double D_mm { get; }
@@ -130,25 +131,25 @@ public abstract class AbstractParams : IParams {
         foreach (char c in text.Keys.Except(expectedKeys)) {
             Error(Messages.Params_UnsupportedKey_Name_Context, c, text.Context);
         }
-        if (F_mmpmin <= 0) {
+        if (F_mmpmin.Le(0)) {
             Error(Messages.Params_FMustBeGtThan0_F, F_mmpmin);
         }
-        if (RawI_mm <= 0) {
+        if (RawI_mm.HasValue && RawI_mm.Value.Le(0)) {
             Error(Messages.Params_IMustBeGtThan0_I, RawI_mm);
         }
         if (RawC <= 0) {
             Error(Messages.Params_CMustBeGtThan0_C, RawC);
         }
-        if (V_mmpmin <= 0) {
+        if (V_mmpmin.Le(0)) {
             Error(Messages.Params_VMustBeGtThan0_V, V_mmpmin);
         }
-        if (O_mm <= 0) {
+        if (O_mm.Le(0)) {
             Error(Messages.Params_OMustBeGtThan0_O, O_mm);
         }
-        if (T_mm <= 0) {
+        if (T_mm.Le(0)) {
             Error(Messages.Params_TMustBeGtThan0_T, T_mm);
         }
-        if (S_mm <= T_mm) {
+        if (S_mm.Le(T_mm)) {
             Error(Messages.Params_SMustBeGtThanT_S_T, S_mm, T_mm);
         }
         if (RawB_mm.HasValue && RawB_mm.Value.Ge(T_mm)) {
@@ -157,8 +158,11 @@ public abstract class AbstractParams : IParams {
         if (RawD_mm.HasValue && RawD_mm.Value.Ge(T_mm)) {
             Error(Messages.Params_DMustBeLessThanT_D_T, RawD_mm, T_mm);
         }
-        if (A_mm <= 0) {
+        if (A_mm.Le(0)) {
             Error(Messages.Params_AMustBeGtThan0_A, A_mm);
+        }
+        if (W_mm.HasValue && W_mm.Value.Le(0)) {
+            Error(Messages.Params_WMustBeGtThan0_W, W_mm);
         }
     }
 
@@ -184,6 +188,7 @@ public abstract class AbstractParams : IParams {
     public abstract double A_mm { get; }
     public abstract string M { get; }
     public abstract double Z_mmpmin { get; }
+    public abstract double? W_mm { get; }
 
     public double B_mm => RawB_mm ?? throw new EmitGCodeException(_errorContext, Messages.Params_MissingKey_Key, 'B');
     public double D_mm => RawD_mm ?? throw new EmitGCodeException(_errorContext, Messages.Params_MissingKey_Key, 'D');
@@ -210,13 +215,14 @@ public class PathParams : AbstractParams {
     public override double O_mm => Text.GetDouble('O', OnErrorNaN);
     public override string M => GetString(Text, 'M', OnError);
     public override double Z_mmpmin => Text.GetDouble('Z') ?? F_mmpmin;
+    public override double? W_mm => Text.GetDouble('W');
 
     public PathParams(ParamsText text, double? defaultSorNullForTplusO_mm, string errorContext, Options options, Action<string, string> onError) : base(text, errorContext, onError) {
         _options = options;
         S_mm = Text.GetDouble('S') ?? defaultSorNullForTplusO_mm ?? T_mm + O_mm;
         A_mm = Text.GetDouble('A') ?? 4 * O_mm;
 
-        CheckKeysAndValues(text, "FBDCISTOMPUZA");
+        CheckKeysAndValues(text, "FBDCISTOMPUZAW");
         if (RawD_mm.HasValue && RawB_mm.HasValue && RawB_mm.Value.Ge(RawD_mm.Value)) {
             Error(Messages.Params_DMustBeGtThanB_D_B, RawD_mm, B_mm);
         }
@@ -246,6 +252,7 @@ public abstract class AbstractChildParams : AbstractParams {
     public override string M => _parent.M;
     public override double Z_mmpmin => _parent.Z_mmpmin;
     public override double A_mm => _parent.A_mm;
+    public override double? W_mm => _parent.W_mm;
 
     protected AbstractChildParams(ParamsText text, string errorContext, IParams parent, Action<string, string> onError) : base(text, errorContext, onError) {
         _parent = parent;
@@ -253,9 +260,10 @@ public abstract class AbstractChildParams : AbstractParams {
 }
 
 public class ChainParams : AbstractChildParams, IParams {
-    public const string KEYS = "CIN";
+    public const string KEYS = "NICW";
     public override int? RawC => (int?)Text.GetDouble('C') ?? base.RawC;
     public override double? RawI_mm => Text.GetDouble('I') ?? base.RawI_mm;
+    public override double? W_mm => Text.GetDouble('W') ?? base.W_mm;
 
     public ChainParams(ParamsText text, string errorContext, IParams pathParams, Action<string, string> onError) : base(text.LimitedTo(KEYS), errorContext, pathParams, onError) {
         CheckKeysAndValues(text, KEYS + MillParams.MILL_KEYS + MillParams.MARK_KEYS);
@@ -270,7 +278,7 @@ public class SweepParams : AbstractChildParams {
 
 public class BackSweepParams : AbstractChildParams {
     public BackSweepParams(ParamsText text, string errorContext, IParams pathParams, Action<string, string> onError) : base(text, errorContext, pathParams, onError) {
-        CheckKeysAndValues(text, "FBDCISTOMNPU>"); // Backsweeps are allowed for all sorts of objects, as they inherit their parents' full parameter set
+        CheckKeysAndValues(text, "FBDCISTOMNPUAW>"); // Backsweeps are allowed for all sorts of objects, as they inherit their parents' full parameter set
     }
 }
 
@@ -285,10 +293,10 @@ public class MillParams : AbstractChildParams {
     public override double? RawU_mm => Text.GetDouble('U') ?? base.RawU_mm;
 
     public MillParams(ParamsText text, MillType millType, string errorContext, IParams chainParams, Action<string, string> onError) : base(text.LimitedTo(
-        millType switch { 
-            MillType.Mill => MILL_KEYS, 
-            MillType.Mark => MARK_KEYS, 
-            MillType.WithSupports => SUPPORT_KEYS, 
+        millType switch {
+            MillType.Mill => MILL_KEYS,
+            MillType.Mark => MARK_KEYS,
+            MillType.WithSupports => SUPPORT_KEYS,
             _ => throw new Exception("Internal error: Unexpected Milltype " + millType)
         }), errorContext, chainParams, onError) {
         CheckKeysAndValues(text, MILL_KEYS + MARK_KEYS + SUPPORT_KEYS + ChainParams.KEYS);
