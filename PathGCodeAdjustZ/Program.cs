@@ -41,13 +41,16 @@ public class Program {
         using (var sr = new StreamReader(zFile)) {
             int lineNo = 1;
             for (string? line = null; (line = sr.ReadLine()) != null; lineNo++) {
-                string[] fields = line.Split([ '=', ' ', '\t' ], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                // Line examples:
+                // ([77.038 191.859]/T:5.000) #51=
+                // ([77.038 191.859]/L:ZA/T:5.000) #51=
+                string[] fields = line.Split([ '#', '=', '\t' ], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
                 if (fields.Length == 0) {
                     // ignore - Leerzeile
                 } else if (fields.Length < 3) {
                     messages.AddError(f + ":" + lineNo, Messages.Program_InvalidLineFormat);
                 } else {
-                    string varName = fields[1];
+                    string varName = "#" + fields[1];
                     string value = fields[2];
                     try {
                         vars.Add(varName, double.Parse(value.Replace(',', '.'), CultureInfo.InvariantCulture));
