@@ -1,10 +1,13 @@
 namespace de.hmmueller.PathDxf2GCode.Tests;
 
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 
 [TestClass]
 public class IntegrationTests {
     // Yes, I know - this type of tests is brittle. Still, they are quick to create and worth their money. 
+
+    private const bool TEST_COMMENTS = false;
 
     private static string Truncate(string s, int lg)
         => lg >= s.Length ? s : s[..lg] + "...";
@@ -33,14 +36,21 @@ public class IntegrationTests {
         }
     }
 
+    private const string PAR_COMMENT_PATTERN = @"\([^)]*\)";
+
     private static void Compare(string filename, string? expected, Func<string, bool>? assert = null, [CallerLineNumber] int firstLineNo = 1) {
         using (StreamReader sr = new(filename)) {
             string actual = sr.ReadToEnd().Trim();
             if (expected != null) {
+                string expectedWithParComments = Regex.Replace(expected, PAR_COMMENT_PATTERN, "");
+                string actualWithParComments = Regex.Replace(actual, PAR_COMMENT_PATTERN, "");
+                AssertEqual(expectedWithParComments.Trim(), firstLineNo, actualWithParComments.Trim());
+            }
+            if (TEST_COMMENTS && expected != null) {
                 AssertEqual(expected.Trim(), firstLineNo, actual.Trim());
             }
             if (assert != null) {
-                Assert.IsTrue(assert(actual));
+                Assert.IsTrue(assert(actual), $"Guard not true.\r\n\r\nActual:\r\n{actual}");
             }
         }
     }
@@ -2121,26 +2131,32 @@ G02 F150.000 I0 J-14.000 X30.000 Y-24.000 Z1.000
     (MillSemiCircle l=1.000)
 G02 F150.000 I0 J14.000 X30.000 Y4.000 Z1.000
 G02 F150.000 I0 J-14.000 X30.000 Y-24.000 Z1.000
-  (SupportBar)
-  (MillArc l=[30.000 -10.000] r=14.000 a0=270.000 a1=241.352 h=1.000 p0=[30.000 -24.000] p1=[23.288 -22.286] bt=False)
+  (Support.Bar)
+  (MillArc l=[30.000 -10.000] r=14.000 a0=270.000 a1=241.352 fr=1.000 to=1.000 p0=[30.000 -24.000] p1=[23.288 -22.286] bt=False)
 G02 F150.000 I0.000 J14.000 X23.288 Y-22.286 Z1.000
-    (DrillOrPullZFromTo 1.000 -0.500)
-G01 Z-0.500
-  (MillArc l=[30.000 -10.000] r=14.000 a0=241.352 a1=118.648 h=-0.500 p0=[23.288 -22.286] p1=[23.288 2.286] bt=False)
-G02 F150.000 I6.712 J12.286 X23.288 Y2.286 Z-0.500
-  (SupportBar)
-    (DrillOrPullZFromTo -0.500 1.000)
-G00 Z1.000
-  (MillArc l=[30.000 -10.000] r=14.000 a0=118.648 a1=61.352 h=1.000 p0=[23.288 2.286] p1=[36.712 2.286] bt=False)
+  (Support.Down)
+  (MillArc l=[30.000 -10.000] r=14.000 a0=241.352 a1=235.213 fr=1.000 to=-0.500 p0=[23.288 -22.286] p1=[22.013 -21.498] bt=False)
+G02 F150.000 I6.712 J12.286 X22.013 Y-21.498 Z-0.500
+  (Support.Between)
+  (MillArc l=[30.000 -10.000] r=14.000 a0=235.213 a1=124.787 fr=-0.500 to=-0.500 p0=[22.013 -21.498] p1=[22.013 1.498] bt=False)
+G02 F150.000 I7.987 J11.498 X22.013 Y1.498 Z-0.500
+  (Support.Up)
+  (MillArc l=[30.000 -10.000] r=14.000 a0=124.787 a1=118.648 fr=-0.500 to=1.000 p0=[22.013 1.498] p1=[23.288 2.286] bt=False)
+G02 F150.000 I7.987 J-11.498 X23.288 Y2.286 Z1.000
+  (Support.Bar)
+  (MillArc l=[30.000 -10.000] r=14.000 a0=118.648 a1=61.352 fr=1.000 to=1.000 p0=[23.288 2.286] p1=[36.712 2.286] bt=False)
 G02 F150.000 I6.712 J-12.286 X36.712 Y2.286 Z1.000
-    (DrillOrPullZFromTo 1.000 -0.500)
-G01 Z-0.500
-  (MillArc l=[30.000 -10.000] r=14.000 a0=61.352 a1=298.648 h=-0.500 p0=[36.712 2.286] p1=[36.712 -22.286] bt=False)
-G02 F150.000 I-6.712 J-12.286 X36.712 Y-22.286 Z-0.500
-  (SupportBar)
-    (DrillOrPullZFromTo -0.500 1.000)
-G00 Z1.000
-  (MillArc l=[30.000 -10.000] r=14.000 a0=298.648 a1=270.000 h=1.000 p0=[36.712 -22.286] p1=[30.000 -24.000] bt=False)
+  (Support.Down)
+  (MillArc l=[30.000 -10.000] r=14.000 a0=61.352 a1=55.213 fr=1.000 to=-0.500 p0=[36.712 2.286] p1=[37.987 1.498] bt=False)
+G02 F150.000 I-6.712 J-12.286 X37.987 Y1.498 Z-0.500
+  (Support.Between)
+  (MillArc l=[30.000 -10.000] r=14.000 a0=55.213 a1=304.787 fr=-0.500 to=-0.500 p0=[37.987 1.498] p1=[37.987 -21.498] bt=False)
+G02 F150.000 I-7.987 J-11.498 X37.987 Y-21.498 Z-0.500
+  (Support.Up)
+  (MillArc l=[30.000 -10.000] r=14.000 a0=304.787 a1=298.648 fr=-0.500 to=1.000 p0=[37.987 -21.498] p1=[36.712 -22.286] bt=False)
+G02 F150.000 I-7.987 J11.498 X36.712 Y-22.286 Z1.000
+  (Support.Bar)
+  (MillArc l=[30.000 -10.000] r=14.000 a0=298.648 a1=270.000 fr=1.000 to=1.000 p0=[36.712 -22.286] p1=[30.000 -24.000] bt=False)
 G02 F150.000 I-6.712 J12.286 X30.000 Y-24.000 Z1.000
 G00 Z8.000
 ; G00 X30.000 Y-10.000
@@ -2148,14 +2164,14 @@ G00 Z8.000
 G00 X5.000 Y-20.000
 G00 Z8.000
   (Fräslänge:     352 mm   ca.  4 min)
-  (Bohrungen:      11 mm   ca.  1 min)
-  (Leerfahrten:    85 mm   ca.  1 min)
-  (Summe:         448 mm   ca.  4 min)
+  (Bohrungen:       0 mm   ca.  0 min)
+  (Leerfahrten:    82 mm   ca.  1 min)
+  (Summe:         434 mm   ca.  4 min)
   (Befehlszahl: 22)
 M30
 %",
 // lg=(30-2)*3.14=87.96 > 6+30+12+30+6=84 => 5 geometries, 3 bars
-s => Count(s, "SupportBar") == 3);
+s => Count(s, "Support.Bar") == 3);
     }
 
     [TestMethod]
@@ -2188,17 +2204,20 @@ G02 F150.000 I0 J-7.000 X30.000 Y-17.000 Z1.000
     (MillSemiCircle l=1.000)
 G02 F150.000 I0 J7.000 X30.000 Y-3.000 Z1.000
 G02 F150.000 I0 J-7.000 X30.000 Y-17.000 Z1.000
-  (SupportBar)
-  (MillArc l=[30.000 -10.000] r=7.000 a0=270.000 a1=212.704 h=1.000 p0=[30.000 -17.000] p1=[24.110 -13.782] bt=False)
+  (Support.Bar)
+  (MillArc l=[30.000 -10.000] r=7.000 a0=270.000 a1=212.704 fr=1.000 to=1.000 p0=[30.000 -17.000] p1=[24.110 -13.782] bt=False)
 G02 F150.000 I0.000 J7.000 X24.110 Y-13.782 Z1.000
-    (DrillOrPullZFromTo 1.000 -0.500)
-G01 Z-0.500
-  (MillArc l=[30.000 -10.000] r=7.000 a0=212.704 a1=327.296 h=-0.500 p0=[24.110 -13.782] p1=[35.890 -13.782] bt=False)
-G02 F150.000 I5.890 J3.782 X35.890 Y-13.782 Z-0.500
-  (SupportBar)
-    (DrillOrPullZFromTo -0.500 1.000)
-G00 Z1.000
-  (MillArc l=[30.000 -10.000] r=7.000 a0=327.296 a1=270.000 h=1.000 p0=[35.890 -13.782] p1=[30.000 -17.000] bt=False)
+  (Support.Down)
+  (MillArc l=[30.000 -10.000] r=7.000 a0=212.704 a1=200.427 fr=1.000 to=-0.500 p0=[24.110 -13.782] p1=[23.440 -12.443] bt=False)
+G02 F150.000 I5.890 J3.782 X23.440 Y-12.443 Z-0.500
+  (Support.Between)
+  (MillArc l=[30.000 -10.000] r=7.000 a0=200.427 a1=339.574 fr=-0.500 to=-0.500 p0=[23.440 -12.443] p1=[36.560 -12.443] bt=False)
+G02 F150.000 I6.560 J2.443 X36.560 Y-12.443 Z-0.500
+  (Support.Up)
+  (MillArc l=[30.000 -10.000] r=7.000 a0=339.574 a1=327.296 fr=-0.500 to=1.000 p0=[36.560 -12.443] p1=[35.890 -13.782] bt=False)
+G02 F150.000 I-6.560 J2.443 X35.890 Y-13.782 Z1.000
+  (Support.Bar)
+  (MillArc l=[30.000 -10.000] r=7.000 a0=327.296 a1=270.000 fr=1.000 to=1.000 p0=[35.890 -13.782] p1=[30.000 -17.000] bt=False)
 G02 F150.000 I-5.890 J3.782 X30.000 Y-17.000 Z1.000
 G00 Z8.000
 ; G00 X30.000 Y-10.000
@@ -2206,14 +2225,14 @@ G00 Z8.000
 G00 X5.000 Y-20.000
 G00 Z8.000
   (Fräslänge:     176 mm   ca.  2 min)
-  (Bohrungen:       6 mm   ca.  1 min)
-  (Leerfahrten:    77 mm   ca.  1 min)
-  (Summe:         258 mm   ca.  2 min)
+  (Bohrungen:       0 mm   ca.  0 min)
+  (Leerfahrten:    75 mm   ca.  1 min)
+  (Summe:         251 mm   ca.  2 min)
   (Befehlszahl: 18)
 M30
 %",
 // lg=(16-2)*3.14=43.98 > 6+30+6=42 => 3 geometries, 2 (half) bars
-s => Count(s, "SupportBar") == 2);
+s => Count(s, "Support.Bar") == 2);
     }
 
     [TestMethod]
@@ -2259,7 +2278,7 @@ G00 Z8.000
 M30
 %",
 // R=5 < P/2=6
-s => Count(s, "SupportBar") == 0);
+s => Count(s, "Support.Bar") == 0);
     }
 
     [TestMethod]
@@ -2279,74 +2298,83 @@ G00 X0.000 Y0.000
     (DrillOrPullZFromTo 8.000 3.000)
 G00 Z5.000
 G01 Z3.000
-  (MillLine s=[0.000 0.000] e=[100.000 0.000] h=3.000 bt=False)
+  (MillLine s=[0.000 0.000] e=[100.000 0.000] fr=3.000 to=3.000 bt=False)
 G01 F150.000 X100.000 Y0.000 Z3.000
   (SweepAndDrillSafelyFromTo [100.000 0.000 3.000] [100.000 0.000 3.000] s=8.000 bt=False)
-  (MillLine s=[100.000 0.000] e=[17.680 -56.775] h=3.000 bt=False)
+  (MillLine s=[100.000 0.000] e=[17.680 -56.775] fr=3.000 to=3.000 bt=False)
 G01 F150.000 X17.680 Y-56.775 Z3.000
   (SweepAndDrillSafelyFromTo [17.680 -56.775 3.000] [17.680 -56.775 1.000] s=8.000 bt=False)
     (DrillOrPullZFromTo 3.000 1.000)
 G01 Z1.000
-  (MillLine s=[17.680 -56.775] e=[100.000 0.000] h=1.000 bt=False)
+  (MillLine s=[17.680 -56.775] e=[100.000 0.000] fr=1.000 to=1.000 bt=False)
 G01 F150.000 X100.000 Y0.000 Z1.000
   (SweepAndDrillSafelyFromTo [100.000 0.000 1.000] [100.000 0.000 1.000] s=8.000 bt=False)
-  (MillLine s=[100.000 0.000] e=[0.000 0.000] h=1.000 bt=False)
+  (MillLine s=[100.000 0.000] e=[0.000 0.000] fr=1.000 to=1.000 bt=False)
 G01 F150.000 X0.000 Y0.000 Z1.000
   (SweepAndDrillSafelyFromTo [0.000 0.000 1.000] [0.000 0.000 -0.500] s=8.000 bt=False)
     (DrillOrPullZFromTo 1.000 -0.500)
 G01 Z-0.500
-  (SupportBar)
+  (Support.Bar)
     (DrillOrPullZFromTo -0.500 1.000)
 G00 Z1.000
-  (MillLine s=[0.000 0.000] e=[7.000 0.000] h=1.000 bt=False)
+  (MillLine s=[0.000 0.000] e=[7.000 0.000] fr=1.000 to=1.000 bt=False)
 G01 F150.000 X7.000 Y0.000 Z1.000
-    (DrillOrPullZFromTo 1.000 -0.500)
-G01 Z-0.500
-  (MillLine s=[7.000 0.000] e=[93.000 0.000] h=-0.500 bt=False)
-G01 F150.000 X93.000 Y0.000 Z-0.500
-  (SupportBar)
-    (DrillOrPullZFromTo -0.500 1.000)
-G00 Z1.000
-  (MillLine s=[93.000 0.000] e=[100.000 0.000] h=1.000 bt=False)
+  (Support.Down)
+  (MillLine s=[7.000 0.000] e=[8.500 0.000] fr=1.000 to=-0.500 bt=False)
+G01 F150.000 X8.500 Y0.000 Z-0.500
+  (Support.Between)
+  (MillLine s=[8.500 0.000] e=[91.500 0.000] fr=-0.500 to=-0.500 bt=False)
+G01 F150.000 X91.500 Y0.000 Z-0.500
+  (Support.Up)
+  (MillLine s=[91.500 0.000] e=[93.000 0.000] fr=-0.500 to=1.000 bt=False)
+G01 F150.000 X93.000 Y0.000 Z1.000
+  (Support.Bar)
+  (MillLine s=[93.000 0.000] e=[100.000 0.000] fr=1.000 to=1.000 bt=False)
 G01 F150.000 X100.000 Y0.000 Z1.000
   (SweepAndDrillSafelyFromTo [100.000 0.000 1.000] [100.000 0.000 -0.500] s=8.000 bt=False)
     (DrillOrPullZFromTo 1.000 -0.500)
 G01 Z-0.500
-  (SupportBar)
+  (Support.Bar)
     (DrillOrPullZFromTo -0.500 1.000)
 G00 Z1.000
-  (MillLine s=[100.000 0.000] e=[94.238 -3.974] h=1.000 bt=False)
+  (MillLine s=[100.000 0.000] e=[94.238 -3.974] fr=1.000 to=1.000 bt=False)
 G01 F150.000 X94.238 Y-3.974 Z1.000
-    (DrillOrPullZFromTo 1.000 -0.500)
-G01 Z-0.500
-  (MillLine s=[94.238 -3.974] e=[64.602 -24.413] h=-0.500 bt=False)
-G01 F150.000 X64.602 Y-24.413 Z-0.500
-  (SupportBar)
-    (DrillOrPullZFromTo -0.500 1.000)
-G00 Z1.000
-  (MillLine s=[64.602 -24.413] e=[53.078 -32.362] h=1.000 bt=False)
+  (Support.Down)
+  (MillLine s=[94.238 -3.974] e=[93.003 -4.826] fr=1.000 to=-0.500 bt=False)
+G01 F150.000 X93.003 Y-4.826 Z-0.500
+  (Support.Between)
+  (MillLine s=[93.003 -4.826] e=[65.837 -23.562] fr=-0.500 to=-0.500 bt=False)
+G01 F150.000 X65.837 Y-23.562 Z-0.500
+  (Support.Up)
+  (MillLine s=[65.837 -23.562] e=[64.602 -24.413] fr=-0.500 to=1.000 bt=False)
+G01 F150.000 X64.602 Y-24.413 Z1.000
+  (Support.Bar)
+  (MillLine s=[64.602 -24.413] e=[53.078 -32.362] fr=1.000 to=1.000 bt=False)
 G01 F150.000 X53.078 Y-32.362 Z1.000
-    (DrillOrPullZFromTo 1.000 -0.500)
-G01 Z-0.500
-  (MillLine s=[53.078 -32.362] e=[23.442 -52.801] h=-0.500 bt=False)
-G01 F150.000 X23.442 Y-52.801 Z-0.500
-  (SupportBar)
-    (DrillOrPullZFromTo -0.500 1.000)
-G00 Z1.000
-  (MillLine s=[23.442 -52.801] e=[17.680 -56.775] h=1.000 bt=False)
+  (Support.Down)
+  (MillLine s=[53.078 -32.362] e=[51.843 -33.213] fr=1.000 to=-0.500 bt=False)
+G01 F150.000 X51.843 Y-33.213 Z-0.500
+  (Support.Between)
+  (MillLine s=[51.843 -33.213] e=[24.677 -51.949] fr=-0.500 to=-0.500 bt=False)
+G01 F150.000 X24.677 Y-51.949 Z-0.500
+  (Support.Up)
+  (MillLine s=[24.677 -51.949] e=[23.442 -52.801] fr=-0.500 to=1.000 bt=False)
+G01 F150.000 X23.442 Y-52.801 Z1.000
+  (Support.Bar)
+  (MillLine s=[23.442 -52.801] e=[17.680 -56.775] fr=1.000 to=1.000 bt=False)
 G01 F150.000 X17.680 Y-56.775 Z1.000
   (SweepAndDrillSafelyFromTo [17.680 -56.775 1.000] [17.680 -56.775 8.000] s=8.000 bt=False)
     (DrillOrPullZFromTo 1.000 8.000)
 G00 Z8.000
 G00 Z8.000
   (Fräslänge:     600 mm   ca.  6 min)
-  (Bohrungen:      34 mm   ca.  1 min)
-  (Leerfahrten:    18 mm   ca.  1 min)
-  (Summe:         651 mm   ca.  6 min)
+  (Bohrungen:      17 mm   ca.  1 min)
+  (Leerfahrten:    13 mm   ca.  1 min)
+  (Summe:         630 mm   ca.  6 min)
   (Befehlszahl: 27)
 M30
 %",
-s => Count(s, "SupportBar") == 2 + 3);
+s => Count(s, "Support.Bar") == 2 + 3);
     }
 
     [TestMethod]

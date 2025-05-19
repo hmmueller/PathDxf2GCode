@@ -133,7 +133,7 @@ public class MillChain : PathSegment {
             foreach (var s in _segments) {
                 List<Edge> edgesOfS = new();
                 Edge? prev = default;
-                for (double millingBottom_mm = firstMillingBottom_mm; millingBottom_mm >= s.Bottom_mm; millingBottom_mm -= _params!.I_mm) {
+                for (double millingBottom_mm = firstMillingBottom_mm; millingBottom_mm.Ge(s.Bottom_mm); millingBottom_mm -= _params!.I_mm) {
                     edgesOfS.Add(prev = new Edge(s, millingBottom_mm, prev));
                 }
                 if (prev == null || !prev.MillingBottom_mm.Near(s.Bottom_mm)) {
@@ -211,9 +211,9 @@ public class MillChain : PathSegment {
                 foreach (var candidate in edges.Where(e => e.TopUnmilled)) {
                     double distToCandidateStart_mm = headPos.Distance(candidate.Start(t));
                     double distToCandidateEnd_mm = headPos.Distance(candidate.End(t));
-                    bool candStartIsNearer = distToCandidateStart_mm < distToCandidateEnd_mm;
+                    bool candStartIsNearer = distToCandidateStart_mm.Lt(distToCandidateEnd_mm);
                     double distToNearerCandidateTip = candStartIsNearer ? distToCandidateStart_mm : distToCandidateEnd_mm;
-                    if (nearest == null || distToNearerCandidateTip < headPos.Distance(NearestMillingTip())) {
+                    if (nearest == null || distToNearerCandidateTip.Lt(headPos.Distance(NearestMillingTip()))) {
                         nearest = candidate;
                         nearestConnectAtStart = candStartIsNearer;
                     }
@@ -292,8 +292,8 @@ public class ChainSegment : IRawSegment {
 
         // Also create geometries for support bars; done here once because
         // EmitGCode is called for each milling depth, but the geometries do not change.
-        _supportGeometries = MillType == MillType.WithSupports && _geometry.Length_mm > 2 * _params.P_mm
-            ? _geometry.CreateBarGeometries(_params.O_mm, _params.P_mm, _params.U_mm)
+        _supportGeometries = MillType == MillType.WithSupports
+            ? _geometry.CreateSupportBarGeometries(_params.O_mm, _params.P_mm, _params.U_mm, _params.D_mm - _params.B_mm)
             : [];
     }
 
@@ -302,11 +302,16 @@ public class ChainSegment : IRawSegment {
         IParams pars = _params!;
         double fullMillBottom = MillType == MillType.Mill ? pars.B_mm : pars.D_mm;
         bool backtracking = Order == PathModel.BACKTRACK_ORDER;
-        currPos = _supportGeometries!.Any() && fullMillBottom.Gt(millingLayer_mm)
-            ? _supportGeometries!.MillSupports(currPos, millingLayer_mm, start2End,
+        string errorContext = MessageHandlerForEntities.Context(Source, Start, dxfFileName);
+        currPos = _supportGeometries!.Any() && millingLayer_mm.Lt(fullMillBottom)
+            ? (start2End
+                ? _supportGeometries!.MillSupportsStart2End(currPos, millingLayer_mm, 
                         globalS_mm, t, gcodes, dxfFileName, pars, backtracking)
-            : (start2End ? _geometry : _geometry.CloneReversed()).EmitGCode(currPos, t, globalS_mm,
-                        gcodes, dxfFileName, millingTarget_mm: Math.Max(millingLayer_mm, fullMillBottom),
+                : _supportGeometries!.MillSupportsEnd2Start(currPos, millingLayer_mm, 
+                        globalS_mm, t, gcodes, dxfFileName, pars, backtracking))
+            : (start2End ? _geometry : _geometry.CloneReversed()).EmitGCode(currPos, t, globalS_mm, gcodes, 
+                        fromZ_mm: Math.Max(millingLayer_mm, fullMillBottom),
+                        toZ_mm: Math.Max(millingLayer_mm, fullMillBottom),
                         t_mm: pars.T_mm, f_mmpmin: pars.F_mmpmin, backtracking);
         return currPos;
     }
@@ -425,15 +430,16 @@ public class HelixSegment : PathSegmentWithParamsText, IRawSegment {
         // It starts and ends at 270 deg, as the semicircles also start there.
         IMillGeometry fullArc = new ArcGeometry(Center, Radius_mm - _params.O_mm / 2, 270,
                                                 270 * (1 + GeometryHelpers.RELATIVE_EPS), counterclockwise: false);
-        _supportGeometries = MillType == MillType.WithSupports && Radius_mm > _params.P_mm / 2
-            ? fullArc.CreateBarGeometries(_params.O_mm, _params.P_mm, _params.U_mm)
+        _supportGeometries = MillType == MillType.WithSupports
+            ? fullArc.CreateSupportBarGeometries(_params.O_mm, _params.P_mm, _params.U_mm, _params.D_mm - _params.B_mm)
             : [];
     }
 
     public override Vector3 EmitGCode(Vector3 currPos, Transformation3 t, double globalS_mm,
         List<GCode> gcodes, string dxfFileName, MessageHandlerForEntities messages, int nestingDepth) {
         Vector2 c = t.Transform(Center);
-        AssertNear(currPos.XY(), c, MessageHandlerForEntities.Context(Source, Center, dxfFileName));
+        string errorContext = MessageHandlerForEntities.Context(Source, Center, dxfFileName);
+        AssertNear(currPos.XY(), c, errorContext);
 
         IParams pars = _params!;
         double fullMillBottom_mm = MillType == MillType.Mill ? pars.B_mm : pars.D_mm;
@@ -469,18 +475,17 @@ public class HelixSegment : PathSegmentWithParamsText, IRawSegment {
             currPos = new(c.X, y0, b0_mm);
         }
 
-        // Now, if necessary we mill the support bar section.
+        // Now, if necessary, we mill the support bar section.
         if (_supportGeometries!.Any()) {
             for (double d_mm = done_mm; done_mm.Gt(pars.B_mm); d_mm -= i_mm) {
                 double b_mm = Math.Max(d_mm - i_mm, pars.B_mm);
-                currPos = _supportGeometries!.MillSupports(currPos,
-                    millingBottom_mm: b_mm, start2End: true,
-                    globalS_mm, t, gcodes, dxfFileName, pars, backtracking: false);
+                currPos = _supportGeometries!.MillSupportsStart2End(currPos, millingBottom_mm: b_mm, 
+                    globalS_mm, t, gcodes, errorContext, pars, backtracking: false);
                 done_mm = b_mm;
             }
         }
 
-        if (Radius_mm <= pars.O_mm) {
+        if (Radius_mm.Le(pars.O_mm)) {
             // If radius <= O, then there is no core in the center --> we can sweep straight to the center
             gcodes.AddHorizontalG00(c, lg_mm: millingRadius_mm);
 

@@ -39,6 +39,9 @@ public static class GeometryHelpers {
     public static bool Le(this double d, double e)
         => e.Ge(d);
 
+    public static bool Lt(this double d, double e)
+        => e.Gt(d);
+
     #endregion
 
     #region Angles
