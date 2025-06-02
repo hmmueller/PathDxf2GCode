@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 using static System.FormattableString;
 
 public class Program {
-    private const string VERSION = "2025-03-16";
+    private const string VERSION = "2025-06-02";
 
     private static int Main(string[] args) {
         MessageHandler messages = new(Console.Error);
@@ -25,13 +25,13 @@ public class Program {
             return 3;
         } else {
             foreach (var f in options.GCodeFilePaths) {
-                Process(f, messages, options.MaxCorrection_mm);
+                Process(f, messages, options.MaxCorrection_mm, options.OutputPattern);
             }
             return messages.WriteErrors() ? 1 : 0;
         }
     }
 
-    private static void Process(string f, MessageHandler messages, double maxCorrection_mm) {
+    private static void Process(string f, MessageHandler messages, double maxCorrection_mm, string? outputPattern) {
         string basePath =
             f.EndsWith(".dxf", StringComparison.InvariantCultureIgnoreCase) ? f[..^4] :
             f.EndsWith("_Clean.gcode", StringComparison.InvariantCultureIgnoreCase) ? f[..^12] :
@@ -86,6 +86,12 @@ public class Program {
                             sw.WriteLine(line[0..m.Index] + replacement + line[(m.Index + m.Length)..]);
                         } else {
                             sw.WriteLine(line);
+                        }
+
+                        if (outputPattern != null) {
+                            if (Regex.IsMatch(line, outputPattern)) {
+                                messages.WriteLine(MessageHandler.InfoPrefix + line);
+                            }
                         }
                     }
                 }

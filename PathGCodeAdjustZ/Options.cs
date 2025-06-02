@@ -14,6 +14,11 @@ public class Options : AbstractOptions {
     /// </summary>
     public double MaxCorrection_mm { get; private set; } = -1;
 
+    /// <summary>
+    /// /x: Pattern for lines that are to be written to stdout.
+    /// </summary>
+    public string? OutputPattern { get; private set; }
+
     public static void Usage(MessageHandler messages) {
         messages.WriteLine(Messages.Options_Help);
     }
@@ -41,6 +46,9 @@ public class Options : AbstractOptions {
                                 options.MaxCorrection_mm = GetDoubleOption(args, ref i,
                                     Messages.Options_MissingOptionAfter_Name, Messages.Options_NaN_Name_Value, 
                                     Messages.Options_LessThan0_Name_Value);
+                                break;
+                            case "x":
+                                options.OutputPattern = GetStringOption(args, ref i, Messages.Options_MissingOptionAfter_Name);
                                 break;
                             case "l":
                                 Thread.CurrentThread.CurrentUICulture = new CultureInfo(GetStringOption(args, ref i, Messages.Options_MissingLocale));

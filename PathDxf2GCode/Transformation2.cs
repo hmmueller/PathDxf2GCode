@@ -31,7 +31,7 @@ public class Transformation2 {
         double a_rad = Vector2.AngleBetween(from, to);
         // cos is equal for clockwise and counterclockwise rotations, unfortunately -
         // an explicit direction check is therefore necessary.
-        _rotation_rad = Vector2.Rotate(from, a_rad).AbsNear(to, 1e-3) ? a_rad : Vector2.Rotate(from, -a_rad).Near(to) ? -a_rad : throw new Exception("**** cos cannot rotate as required");
+        _rotation_rad = Vector2.Rotate(from, a_rad).AbsNear(to, 1e-3) ? a_rad : Vector2.Rotate(from, -a_rad).AbsNear(to, 1e-3) ? -a_rad : throw new Exception("**** cos cannot rotate as required");
         Rotation_deg = MathHelper.NormalizeAngle(_rotation_rad * MathHelper.RadToDeg);
     }
 

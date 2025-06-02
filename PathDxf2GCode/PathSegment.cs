@@ -146,7 +146,7 @@ public class MillChain : PathSegment {
 
         // B. Create optimized order
         Vector3 headPos = edgesBySegment.First().First().Start(t);
-        if (!headPos.Vector2Near(currPos)) {
+        if (!headPos.XY().AbsNear(currPos.XY(), 1e-3)) {
             throw new Exception("Internal error");
         }
 
