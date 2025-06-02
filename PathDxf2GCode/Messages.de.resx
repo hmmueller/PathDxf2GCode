@@ -129,6 +129,7 @@
 Optionen:
     /h     Hilfe-Anzeige
     /f 000 Fräsgeschwindigkeit in mm/min; Pflichtwert
+    /z 000 Probe-Geschwindigkeit in mm/min; Standardwert ist /f-Wert
     /v 000 Maximalgeschwindigkeit für Leerfahrten in mm/min; Pflichtwert
     /s 000 Vorgabe für Leerfahrt-Höhe in mm; Pflichtwert
     /c     Überprüfen aller Pfade in der DXF-Datei ohne G-Code-Ausgabe; wenn /c nicht 
@@ -137,7 +138,7 @@ Optionen:
            sie zugeordnet sind
     /d zzz Suchpfad für referenzierte DXF-Dateien
     /p zzz Reg.Ausdruck für Pfadbezeichnungen
-    /l zzz Meldungssprache
+    /l zzz Meldungssprache; Standard ist Windows-Einstellung
 </value>
   </data>
   <data name="Options_LessThan0_Name_Value" xml:space="preserve">

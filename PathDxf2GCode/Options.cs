@@ -29,6 +29,11 @@ public class Options : AbstractOptions {
     public double GlobalSweepRate_mmpmin { get; private set; } = -1;
 
     /// <summary>
+    /// /z: Probe rate for G38
+    /// </summary>
+    public double GlobalProbeRate_mmpmin { get; private set; } = -1;
+
+    /// <summary>
     /// /s: Sweep height for main path; must be higher than any obstacle
     /// the router bits might encounter.
     /// </summary>
@@ -129,6 +134,9 @@ public class Options : AbstractOptions {
                             case "f":
                                 options.GlobalFeedRate_mmpmin = GetDoubleOption(ref i);
                                 break;
+                            case "z":
+                                options.GlobalProbeRate_mmpmin = GetDoubleOption(ref i);
+                                break;
                             case "v":
                                 options.GlobalSweepRate_mmpmin = GetDoubleOption(ref i);
                                 break;
@@ -164,6 +172,9 @@ public class Options : AbstractOptions {
         if (options.GlobalSweepHeight_mm <= 0) {
             messages.AddError("Options", Messages.Options_MissingS);
             doNotRun = true;
+        }
+        if (options.GlobalProbeRate_mmpmin <= 0) {
+            options.GlobalProbeRate_mmpmin = options.GlobalFeedRate_mmpmin;
         }
 
         if (doNotRun) {

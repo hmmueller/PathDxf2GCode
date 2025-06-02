@@ -214,7 +214,7 @@ public class PathParams : AbstractParams {
     public override double T_mm => Text.GetDouble('T', OnErrorNaN);
     public override double O_mm => Text.GetDouble('O', OnErrorNaN);
     public override string M => GetString(Text, 'M', OnError);
-    public override double Z_mmpmin => Text.GetDouble('Z') ?? F_mmpmin;
+    public override double Z_mmpmin => Text.GetDouble('Z') ?? _options.GlobalProbeRate_mmpmin;
     public override double? W_mm => Text.GetDouble('W');
 
     public PathParams(ParamsText text, double? defaultSorNullForTplusO_mm, string errorContext, Options options, Action<string, string> onError) : base(text, errorContext, onError) {
