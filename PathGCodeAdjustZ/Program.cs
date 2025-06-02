@@ -16,6 +16,8 @@ public class Program {
         Options? options = Options.Create(args, messages);
 
         if (options == null) {
+            messages.WriteErrors();
+            messages.WriteLine();
             Options.Usage(messages);
             return 2;
         } else if (!options.GCodeFilePaths.Any()) {
@@ -23,13 +25,13 @@ public class Program {
             return 3;
         } else {
             foreach (var f in options.GCodeFilePaths) {
-                Process(f, messages);
+                Process(f, messages, options.MaxCorrection_mm);
             }
             return messages.WriteErrors() ? 1 : 0;
         }
     }
 
-    private static void Process(string f, MessageHandler messages) {
+    private static void Process(string f, MessageHandler messages, double maxCorrection_mm) {
         string basePath =
             f.EndsWith(".dxf", StringComparison.InvariantCultureIgnoreCase) ? f[..^4] :
             f.EndsWith("_Clean.gcode", StringComparison.InvariantCultureIgnoreCase) ? f[..^12] :
@@ -41,21 +43,28 @@ public class Program {
         using (var sr = new StreamReader(zFile)) {
             int lineNo = 1;
             for (string? line = null; (line = sr.ReadLine()) != null; lineNo++) {
-                // Line examples:
-                // ([77.038 191.859]/T:5.000) #51=
-                // ([77.038 191.859]/L:ZA/T:5.000) #51=
-                string[] fields = line.Split([ '#', '=', '\t' ], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                // Line example:
+                // ([77.038 191.859]/L:ZA/T=5.000) #51=5.432
+                // <        0             > <  1  > <> < 3 >
+                string[] fields = line.Split([ '#', '=' ], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
                 if (fields.Length == 0) {
                     // ignore - Leerzeile
-                } else if (fields.Length < 3) {
-                    messages.AddError(f + ":" + lineNo, Messages.Program_InvalidLineFormat);
+                } else if (fields.Length < 4) {
+                    messages.AddError(zFile + ":" + lineNo, Messages.Program_InvalidLineFormat);
                 } else {
-                    string varName = "#" + fields[1];
-                    string value = fields[2];
+                    string tValue = fields[1].TrimEnd(')', ' ');
+                    string varName = "#" + fields[2];
+                    string value = fields[3];
                     try {
-                        vars.Add(varName, double.Parse(value.Replace(',', '.'), CultureInfo.InvariantCulture));
+                        double origT = double.Parse(tValue.Replace(',', '.'), CultureInfo.InvariantCulture);
+                        double newT = double.Parse(value.Replace(',', '.'), CultureInfo.InvariantCulture);
+                        if (Math.Abs(origT - newT) > maxCorrection_mm) {
+                            messages.AddError(zFile + ":" + lineNo, Messages.Program_TDiffersTooMuch_Name_Orig_New_MaxDelta, varName, tValue, value, maxCorrection_mm);
+                        } else { 
+                            vars.Add(varName, newT); 
+                        }
                     } catch (FormatException) {
-                        messages.AddError(f + ":" + lineNo, Messages.Program_NaN_Name_Value, varName, value);
+                        messages.AddError(zFile + ":" + lineNo, Messages.Program_NaN_Name_Value, varName, value);
                     }
                 }
             }

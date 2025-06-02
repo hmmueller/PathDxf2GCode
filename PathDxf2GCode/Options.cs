@@ -86,11 +86,11 @@ public class Options : AbstractOptions {
         bool doNotRun = false;
 
         string GetStringOption(ref int i) {
-            return GetStringOption3(args, ref i, Messages.Options_MissingValue_Name);
+            return AbstractOptions.GetStringOption(args, ref i, Messages.Options_MissingValue_Name);
         }
 
-            double GetDoubleOption(ref int i) {
-                string a = args[i][2..];
+        double GetDoubleOption(ref int i) {
+            string a = args[i][2..];
             string v = GetStringOption(ref i).Replace(',', '.');
             double result;
             try {

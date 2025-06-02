@@ -122,11 +122,18 @@
 
 Options:
     /h     Help text
+    /m 000 Maximum correction of t values; required
     /l zzz Language
 </value>
   </data>
   <data name="Options_MissingOptionAfter_Name" xml:space="preserve">
     <value>Missing value after option {0}</value>
+  </data>
+  <data name="Options_MissingM" xml:space="preserve">
+    <value>Missing required /m value</value>
+  </data>
+  <data name="Options_MissingLocale" xml:space="preserve">
+    <value>Missing language option</value>
   </data>
   <data name="Options_NotSupported_Name" xml:space="preserve">
     <value>Option {0} not supported</value>
@@ -139,6 +146,12 @@ Options:
   </data>
   <data name="Program_NaN_Name_Value" xml:space="preserve">
     <value>Value '{1}' for {0} is not a valid number</value>
+  </data>
+  <data name="Options_NaN_Name_Value" xml:space="preserve">
+    <value>Value '{1}' for {0} is not a valid number</value>
+  </data>
+  <data name="Options_LessThan0_Name_Value" xml:space="preserve">
+    <value>Value '{1}' for {0} must not be negative</value>
   </data>
   <data name="Program_NoGCodeFiles" xml:space="preserve">
     <value>No GCode files specified</value>
@@ -157,5 +170,8 @@ Options:
   </data>
   <data name="Program_Writing_File" xml:space="preserve">
     <value>Writing {0}</value>
+  </data>
+  <data name="Program_TDiffersTooMuch_Name_Orig_New_MaxDelta" xml:space="preserve">
+    <value>Value {1} for {0} differs from {2} by more than /m={3}</value>
   </data>
 </root>

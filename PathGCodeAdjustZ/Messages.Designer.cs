@@ -101,6 +101,7 @@ namespace de.hmmueller.PathGCodeAdjustZ {
         ///
         ///Options:
         ///    /h     Help text
+        ///    /m 000 Maximum correction of t values; required
         ///    /l zzz Language
         /// ähnelt.
         /// </summary>
@@ -111,11 +112,47 @@ namespace de.hmmueller.PathGCodeAdjustZ {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Value &apos;{1}&apos; for {0} must not be negative ähnelt.
+        /// </summary>
+        internal static string Options_LessThan0_Name_Value {
+            get {
+                return ResourceManager.GetString("Options_LessThan0_Name_Value", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Missing language option ähnelt.
+        /// </summary>
+        internal static string Options_MissingLocale {
+            get {
+                return ResourceManager.GetString("Options_MissingLocale", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Missing required /m value ähnelt.
+        /// </summary>
+        internal static string Options_MissingM {
+            get {
+                return ResourceManager.GetString("Options_MissingM", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Missing value after option {0} ähnelt.
         /// </summary>
         internal static string Options_MissingOptionAfter_Name {
             get {
                 return ResourceManager.GetString("Options_MissingOptionAfter_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Value &apos;{1}&apos; for {0} is not a valid number ähnelt.
+        /// </summary>
+        internal static string Options_NaN_Name_Value {
+            get {
+                return ResourceManager.GetString("Options_NaN_Name_Value", resourceCulture);
             }
         }
         
@@ -161,6 +198,15 @@ namespace de.hmmueller.PathGCodeAdjustZ {
         internal static string Program_Reading_File {
             get {
                 return ResourceManager.GetString("Program_Reading_File", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Value {1} for {0} differs from {2} by more than /m={3} ähnelt.
+        /// </summary>
+        internal static string Program_TDiffersTooMuch_Name_Orig_New_MaxDelta {
+            get {
+                return ResourceManager.GetString("Program_TDiffersTooMuch_Name_Orig_New_MaxDelta", resourceCulture);
             }
         }
         

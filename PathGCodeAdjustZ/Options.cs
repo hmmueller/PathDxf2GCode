@@ -7,6 +7,13 @@ using System.Globalization;
 public class Options : AbstractOptions {
     public readonly List<string> GCodeFilePaths = new();
 
+    /// <summary>
+    /// /m: Maximum correction allowed. This is useful to
+    /// avoid wrong values in the _Z.txt file; or wrong
+    /// T settings in a DXF file.
+    /// </summary>
+    public double MaxCorrection_mm { get; private set; } = -1;
+
     public static void Usage(MessageHandler messages) {
         messages.WriteLine(Messages.Options_Help);
     }
@@ -30,8 +37,13 @@ public class Options : AbstractOptions {
                             case "?":
                                 doNotRun = true;
                                 break;
+                            case "m":
+                                options.MaxCorrection_mm = GetDoubleOption(args, ref i,
+                                    Messages.Options_MissingOptionAfter_Name, Messages.Options_NaN_Name_Value, 
+                                    Messages.Options_LessThan0_Name_Value);
+                                break;
                             case "l":
-                                Thread.CurrentThread.CurrentUICulture = new CultureInfo(GetStringOption3(args, ref i, "**** Missing locale"));
+                                Thread.CurrentThread.CurrentUICulture = new CultureInfo(GetStringOption(args, ref i, Messages.Options_MissingLocale));
                                 break;
                             default:
                                 doNotRun = true;
@@ -46,6 +58,11 @@ public class Options : AbstractOptions {
                 doNotRun = true;
                 messages.WriteLine(ex.Message);
             }
+        }
+
+        if (options.MaxCorrection_mm <= 0) {
+            messages.AddError("Options", Messages.Options_MissingM);
+            doNotRun = true;
         }
 
         if (doNotRun) {

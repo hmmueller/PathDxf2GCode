@@ -122,11 +122,18 @@
 
 Parameter:
     /h     Hilfe-Anzeige
+    /m 000 Maximale Abweichung der T-Werte; Pflichtangabe
     /l zzz Sprache
     </value>
   </data>
   <data name="Options_MissingOptionAfter_Name" xml:space="preserve">
     <value>Fehlender Wert nach {0}</value>
+  </data>
+  <data name="Options_MissingM" xml:space="preserve">
+    <value>Fehlende /m-Option</value>
+  </data>
+  <data name="Options_MissingLocale" xml:space="preserve">
+    <value>Fehlende Sprachenangabe</value>
   </data>
   <data name="Options_NotSupported_Name" xml:space="preserve">
     <value>Option {0} nicht unterstützt</value>
@@ -139,6 +146,12 @@ Parameter:
   </data>
   <data name="Program_NaN_Name_Value" xml:space="preserve">
     <value>Wert '{1}' für {0} ist keine gültige Zahl</value>
+  </data>
+  <data name="Options_NaN_Name_Value" xml:space="preserve">
+    <value>Wert '{1}' für {0} ist keine gültige Zahl</value>
+  </data>
+  <data name="Options_LessThan0_Name_Value" xml:space="preserve">
+    <value>Wert '{1}' für {0} darf nicht negativ sein</value>
   </data>
   <data name="Program_NoGCodeFiles" xml:space="preserve">
     <value>Keine G-Code-Dateien angegeben</value>
@@ -157,5 +170,8 @@ Parameter:
   </data>
   <data name="Program_Writing_File" xml:space="preserve">
     <value>Schreiben von {0}</value>
+  </data>
+  <data name="Program_TDiffersTooMuch_Name_Orig_New_MaxDelta" xml:space="preserve">
+    <value>Wert {1} für {0} unterscheidet sich von {2} um mehr als /m={3}</value>
   </data>
 </root>

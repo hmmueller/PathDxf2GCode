@@ -549,7 +549,10 @@ public class PathModel {
 
     public void WriteEmptyZ(StreamWriter sw) {
         foreach (var z in _zProbes) {
-            sw.WriteLine((z.Center.F3() + (z.L == null ? "" : "/L:" + z.L) + "/T:" + z.T_mm.F3()).AsComment(0) + " " + z.Name + "=");
+            // Line example - separators are # and =:
+            // ([77.038 191.859]/L:ZA/T=5.000) #51=
+            // <        0             > <  1  > <> < 3 >
+            sw.WriteLine((z.Center.F3() + (z.L == null ? "" : "/L:" + z.L) + "/T=" + z.T_mm.F3()).AsComment(0) + " " + z.Name + "=");
         }
     }
 
