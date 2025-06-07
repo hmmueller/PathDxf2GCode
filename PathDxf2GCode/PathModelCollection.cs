@@ -64,13 +64,14 @@ public readonly struct PathName {
 
 public class PathModelCollection {
     private readonly Dictionary<PathName, PathModel> _models = new();
-    private readonly HashSet<string> _readFiles = new();
+    private readonly Dictionary<string, SortedDictionary<string, PathModel>> _readFiles = new();
 
     public SortedDictionary<string, PathModel> Load(string dxfFilePath, double? defaultSorNullForTplusO_mm, Options options, 
                                                     string contextForErrors, MessageHandlerForEntities messages) {
-        var result = new SortedDictionary<string, PathModel>();
         string fullDxfFilePath = Path.GetFullPath(dxfFilePath);
-        if (_readFiles.Add(fullDxfFilePath)) {
+        if (!_readFiles.ContainsKey(fullDxfFilePath)) {
+            var modelsInDxfFile = new SortedDictionary<string, PathModel>();
+            _readFiles.Add(fullDxfFilePath, modelsInDxfFile);
             DxfDocument? d = DxfHelper.LoadDxfDocument(fullDxfFilePath, options,
                                                      out Dictionary<string, Linetype> layerLinetypes, messages);
             if (d != null) {
@@ -78,14 +79,14 @@ public class PathModelCollection {
                     layerLinetypes, defaultSorNullForTplusO_mm, options, messages, this);
                 foreach (var kvp in models) {
                     if (_models.TryAdd(kvp.Key, kvp.Value)) {
-                        result.Add(kvp.Key.AsString(), kvp.Value);
+                        modelsInDxfFile.Add(kvp.Key.AsString(), kvp.Value);
                     } else {
                         messages.AddError(contextForErrors, Messages.PathModelCollection_PathDefinedTwice_Path_File, kvp.Key, kvp.Value.DxfFilePath);
                     }
                 }
             }
         }
-        return result;
+        return _readFiles[fullDxfFilePath];
     }
 
     public PathModel Get(PathName path)
