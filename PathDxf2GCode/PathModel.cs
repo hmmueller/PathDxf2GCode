@@ -70,9 +70,11 @@ public class PathModel {
             if (!_models.ContainsKey((name, variables))) {
                 (RawPathModel? rawModel, string? dxfFilePath) = LoadRawModel(name, Path.GetDirectoryName(Path.GetFullPath(currentDxfFile)), options, overlayTextForErrors, messages, out searchedFiles);
                 if (rawModel == null) {
+                    throw new Exception("TODO: Unexpected error in LoadRawModel for " + name);
                 } else {
                     PathModel? m = CreatePathModel(name, rawModel, defaultSorNullForTplusO_mm: defaultSorNullForTplusO_mm, variables, dxfFilePath!, options, messages);
                     if (m == null) {
+                        throw new Exception("TODO: Unexpected error in CreatePathModel for " + name);
                     } else {
                         _models.Add((name, variables), m);
                     }
@@ -90,7 +92,9 @@ public class PathModel {
                             Dictionary<PathName, RawPathModel> newRawModels = LoadRawModels(f, options, messages);
                             foreach (var kvp in newRawModels) {
                                 if (_rawModels.TryGetValue(kvp.Key, out var alreadyDefined)) {
-                                    messages.AddError(f, Messages.PathModel_PathDefinedTwice_Path_OtherFile, kvp.Key, alreadyDefined.DxfFilePath, f);
+                                    if (alreadyDefined.DxfFilePath != f) {
+                                        messages.AddError(f, Messages.PathModel_PathDefinedTwice_Path_OtherFile, kvp.Key, alreadyDefined.DxfFilePath, f);
+                                    }
                                 } else {
                                     _rawModels.Add(kvp.Key, (kvp.Value, f));
                                 }

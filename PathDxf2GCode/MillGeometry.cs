@@ -196,16 +196,16 @@ public static class MillGeometryHelper {
             gcodes.AddComment("Support." + step, 2);
             currPos = sg.CloneReversed().EmitGCode(currPos, t, globalS_mm, gcodes,
                     fromZ_mm: Math.Max(millingBottom_mm, step switch {
-                        SupportStep.Up => pars.D_mm,
+                        SupportStep.Up => pars.B_mm,
                         SupportStep.Bar => pars.D_mm,
-                        SupportStep.Down => pars.B_mm,
+                        SupportStep.Down => pars.D_mm,
                         SupportStep.Between => pars.B_mm,
                         _ => throw new EmitGCodeException(errorContext, "Invalid step")
                     }),
                     toZ_mm: Math.Max(millingBottom_mm, step switch {
-                        SupportStep.Up => pars.B_mm,
+                        SupportStep.Up => pars.D_mm,
                         SupportStep.Bar => pars.D_mm,
-                        SupportStep.Down => pars.D_mm,
+                        SupportStep.Down => pars.B_mm,
                         SupportStep.Between => pars.B_mm,
                         _ => throw new EmitGCodeException(errorContext, "Invalid step")
                     }),
