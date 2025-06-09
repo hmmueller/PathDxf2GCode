@@ -414,6 +414,15 @@ namespace de.hmmueller.PathDxf2GCode {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Path {0} has already been defined in {1} ähnelt.
+        /// </summary>
+        internal static string PathModel_PathDefinedTwice_Path_OtherFile {
+            get {
+                return ResourceManager.GetString("PathModel_PathDefinedTwice_Path_OtherFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Object
         ///   {0}
         ///has assigned text &apos;{1}&apos; ähnelt.
@@ -466,15 +475,6 @@ namespace de.hmmueller.PathDxf2GCode {
         internal static string PathModel_UnreachedSegments {
             get {
                 return ResourceManager.GetString("PathModel_UnreachedSegments", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Path {0} has already been defined in {1} ähnelt.
-        /// </summary>
-        internal static string PathModelCollection_PathDefinedTwice_Path_File {
-            get {
-                return ResourceManager.GetString("PathModelCollection_PathDefinedTwice_Path_File", resourceCulture);
             }
         }
         

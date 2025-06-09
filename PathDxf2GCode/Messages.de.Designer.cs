@@ -415,9 +415,9 @@ namespace de.hmmueller.PathDxf2GCode {
         /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Pfad {0} schon einmal definiert in {1} ähnelt.
         /// </summary>
-        internal static string PathModelCollection_PathDefinedTwice_Path_File {
+        internal static string PathModel_PathDefinedTwice_Path_File {
             get {
-                return ResourceManager.GetString("PathModelCollection_PathDefinedTwice_Path_File", resourceCulture);
+                return ResourceManager.GetString("PathModel.Collection_PathDefinedTwice_Path_File", resourceCulture);
             }
         }
         

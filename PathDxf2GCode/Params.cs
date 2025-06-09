@@ -5,8 +5,8 @@ using netDxf;
 using netDxf.Entities;
 
 public class ParamsText {
-    private readonly Dictionary<char, string> _strings;
-    private readonly Dictionary<char, double> _values;
+    private readonly Dictionary<char, string> _rawStrings;
+    public readonly Variables Variables;
     public string Text { get; }
     public string Context { get; }
     public string? LayerName { get; }
@@ -15,7 +15,10 @@ public class ParamsText {
     public double TextRadius { get; }
     private readonly HashSet<string> _uniqueErrors = new();
 
-    public readonly static ParamsText EMPTY = new("", "", null, Vector2.Zero, Vector2.Zero, 0);
+    public static readonly ParamsText EMPTY = new("", "", null, Vector2.Zero, Vector2.Zero, 0);
+
+    private Dictionary<char, string>? _stringValues;
+    private Dictionary<char, double>? _doubleValues;
 
     public ParamsText(string text, EntityObject? source, Vector2? position, Vector2 textCenter, double textRadius)
         : this(text, source?.CodeName + " @ " + position?.F3(), source?.Layer.Name, position ?? Vector2.Zero, textCenter, textRadius) {
@@ -26,23 +29,18 @@ public class ParamsText {
             .Split(['\n', ' '])
             .Select(s => s.Trim())
             .Where(s => !string.IsNullOrEmpty(s))
-            .ToDictionary(s => s[0], s => s[1..]), textCenter, textRadius) {
+            .Select(s => (Key: s[0], Value: s[1..]))
+            .ToList(), textCenter, textRadius) {
     }
 
-    private ParamsText(string text, string context, string? layerName, Vector2 position, Dictionary<char, string> strings, Vector2 textCenter, double textRadius) {
+    private ParamsText(string text, string context, string? layerName, Vector2 position, List<(char Key, string Value)> rawStrings, Vector2 textCenter, double textRadius) {
         Text = text;
         Context = context;
         LayerName = layerName;
         Position = position;
-        _strings = strings;
-        _values = strings
-            .Select(kvp => new {
-                kvp.Key,
-                Value = double.TryParse(kvp.Value.Replace(',', '.').TrimStart('=').Trim(),
-                                                        CultureInfo.InvariantCulture, out double d) ? d : (double?)null
-            })
-            .Where(kvp => kvp.Value != null)
-            .ToDictionary(kvp => kvp.Key, kvp => (double)kvp.Value!);
+        _rawStrings = rawStrings.Where(kv => kv.Key != ':').ToDictionary(kv => kv.Key, kv => kv.Value);
+        Variables = new Variables(rawStrings.Where(kv => kv.Key == ':' && kv.Value.Length > 0)
+                                             .ToDictionary(kv => kv.Value[0], kv => kv.Value[1..]));
         TextCenter = textCenter;
         TextRadius = textRadius;
     }
@@ -50,28 +48,56 @@ public class ParamsText {
     public static bool IsNullOrEmpty(ParamsText? p) => p == null || !p.Keys.Any();
 
     public ParamsText LimitedTo(string keys) {
+        if (keys.Contains('=')) {
+            throw new ArgumentException(nameof(keys), "keys must not contain =, no support for limiting of Variables");
+        }
         return new ParamsText(Text, Context, LayerName, Position,
-            _strings.Where(kvp => keys.Contains(kvp.Key)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value),
+            _rawStrings.Where(kvp => keys.Contains(kvp.Key)).Select(kvp => (kvp.Key, kvp.Value)).ToList(),
             TextCenter, TextRadius);
     }
 
     public IEnumerable<char> Keys
-        => _strings.Keys;
+        => _rawStrings.Select(kv => kv.Key);
 
     public string? GetString(char key)
-        => _strings.TryGetValue(key, out string? s) ? s : null;
+        => _stringValues!.TryGetValue(key, out string? s) ? s : null;
 
     public double? GetDouble(char key)
-        => _values.TryGetValue(key, out double d) ? d : null;
+        => _doubleValues!.TryGetValue(key, out double d) ? d : null;
 
     public double GetDouble(char key, Func<string, double> errorAndNull)
-        => _values.TryGetValue(key, out double d) ? d : errorAndNull($"{key}-Wert fehlt");
+        => _doubleValues!.TryGetValue(key, out double d) ? d : errorAndNull($"{key}-Wert fehlt");
 
     public void AddError(MessageHandlerForEntities mh, string errorContext, string message) {
-        if (_uniqueErrors.Add(message)) { // Each error should be output only once ausgeben
+        if (_uniqueErrors.Add(message)) { // Each error should be output only once
             mh.AddError(errorContext, message);
         }
     }
+
+    public void InterpolateVariablesAndCreateValues(Variables variables) {
+        if (_stringValues == null) {
+            // ParamsText objects can be references by multiple segments; this is currently the case for
+            // * the ParamsText.EMPTY object
+            // * ParamsTexts for BackSweeps (shared with the corresponding forward moves)
+            _stringValues = _rawStrings.ToDictionary(kv => kv.Key, kv => variables.Interpolate(kv.Value));
+            _doubleValues = _stringValues
+                .Select(kvp => new {
+                    kvp.Key,
+                    Value = double.TryParse(kvp.Value.Replace(',', '.').Trim(),
+                                            CultureInfo.InvariantCulture, out double d) ? d : (double?)null
+                })
+                .Where(kvp => kvp.Value != null)
+                .ToDictionary(kvp => kvp.Key, kvp => (double)kvp.Value!);
+        }
+    }
+
+    internal int? GetN()
+        => _rawStrings.TryGetValue('N', out string? n)
+            && int.TryParse(n, CultureInfo.InvariantCulture, out int result) ? result : null;
+
+    internal double? GetO()
+        => _rawStrings.TryGetValue('O', out string? o)
+            && double.TryParse(o.Replace(',', '.'), CultureInfo.InvariantCulture, out double result) ? result : null;
 }
 
 public interface IParams {
@@ -114,7 +140,8 @@ public abstract class AbstractParams : IParams {
         return double.NaN;
     }
 
-    protected AbstractParams(ParamsText text, string errorContext, Action<string, string> onError) {
+    protected AbstractParams(ParamsText text, Variables superpathVariables, string errorContext, Action<string, string> onError) {
+        text.InterpolateVariablesAndCreateValues(superpathVariables);
         Text = text;
         _errorContext = errorContext;
         _onError = onError;
@@ -217,7 +244,7 @@ public class PathParams : AbstractParams {
     public override double Z_mmpmin => Text.GetDouble('Z') ?? _options.GlobalProbeRate_mmpmin;
     public override double? W_mm => Text.GetDouble('W');
 
-    public PathParams(ParamsText text, double? defaultSorNullForTplusO_mm, string errorContext, Options options, Action<string, string> onError) : base(text, errorContext, onError) {
+    public PathParams(ParamsText text, Variables superpathVariables, double? defaultSorNullForTplusO_mm, string errorContext, Options options, Action<string, string> onError) : base(text, superpathVariables, errorContext, onError) {
         _options = options;
         S_mm = Text.GetDouble('S') ?? defaultSorNullForTplusO_mm ?? T_mm + O_mm;
         A_mm = Text.GetDouble('A') ?? 4 * O_mm;
@@ -254,7 +281,7 @@ public abstract class AbstractChildParams : AbstractParams {
     public override double A_mm => _parent.A_mm;
     public override double? W_mm => _parent.W_mm;
 
-    protected AbstractChildParams(ParamsText text, string errorContext, IParams parent, Action<string, string> onError) : base(text, errorContext, onError) {
+    protected AbstractChildParams(ParamsText text, Variables superpathVariables, string errorContext, IParams parent, Action<string, string> onError) : base(text, superpathVariables, errorContext, onError) {
         _parent = parent;
     }
 }
@@ -265,19 +292,19 @@ public class ChainParams : AbstractChildParams, IParams {
     public override double? RawI_mm => Text.GetDouble('I') ?? base.RawI_mm;
     public override double? W_mm => Text.GetDouble('W') ?? base.W_mm;
 
-    public ChainParams(ParamsText text, string errorContext, IParams pathParams, Action<string, string> onError) : base(text.LimitedTo(KEYS), errorContext, pathParams, onError) {
+    public ChainParams(ParamsText text, Variables superpathVariables, string errorContext, IParams pathParams, Action<string, string> onError) : base(text.LimitedTo(KEYS), superpathVariables, errorContext, pathParams, onError) {
         CheckKeysAndValues(text, KEYS + MillParams.MILL_KEYS + MillParams.MARK_KEYS);
     }
 }
 
 public class SweepParams : AbstractChildParams {
-    public SweepParams(ParamsText text, string errorContext, IParams pathParams, Action<string, string> onError) : base(text, errorContext, pathParams, onError) {
+    public SweepParams(ParamsText text, Variables superpathVariables, string errorContext, IParams pathParams, Action<string, string> onError) : base(text, superpathVariables, errorContext, pathParams, onError) {
         CheckKeysAndValues(text, "SN");
     }
 }
 
 public class BackSweepParams : AbstractChildParams {
-    public BackSweepParams(ParamsText text, string errorContext, IParams pathParams, Action<string, string> onError) : base(text, errorContext, pathParams, onError) {
+    public BackSweepParams(ParamsText text, Variables superpathVariables, string errorContext, IParams pathParams, Action<string, string> onError) : base(text, superpathVariables, errorContext, pathParams, onError) {
         CheckKeysAndValues(text, "FBDCISTOMNPUAW>"); // Backsweeps are allowed for all sorts of objects, as they inherit their parents' full parameter set
     }
 }
@@ -292,13 +319,13 @@ public class MillParams : AbstractChildParams {
     public override double? RawP_mm => Text.GetDouble('P') ?? base.RawP_mm;
     public override double? RawU_mm => Text.GetDouble('U') ?? base.RawU_mm;
 
-    public MillParams(ParamsText text, MillType millType, string errorContext, IParams chainParams, Action<string, string> onError) : base(text.LimitedTo(
+    public MillParams(ParamsText text, Variables superpathVariables, MillType millType, string errorContext, IParams chainParams, Action<string, string> onError) : base(text.LimitedTo(
         millType switch {
             MillType.Mill => MILL_KEYS,
             MillType.Mark => MARK_KEYS,
             MillType.WithSupports => SUPPORT_KEYS,
             _ => throw new Exception("Internal error: Unexpected Milltype " + millType)
-        }), errorContext, chainParams, onError) {
+        }), superpathVariables, errorContext, chainParams, onError) {
         CheckKeysAndValues(text, MILL_KEYS + MARK_KEYS + SUPPORT_KEYS + ChainParams.KEYS);
     }
 }
@@ -315,7 +342,7 @@ public class HelixParams : AbstractChildParams {
     public override double? RawP_mm => Text.GetDouble('P') ?? base.RawP_mm;
     public override double? RawU_mm => Text.GetDouble('U') ?? base.RawU_mm;
 
-    public HelixParams(ParamsText text, MillType millType, string errorContext, IParams pathParams, Action<string, string> onError) : base(text, errorContext, pathParams, onError) {
+    public HelixParams(ParamsText text, Variables superpathVariables, MillType millType, string errorContext, IParams pathParams, Action<string, string> onError) : base(text, superpathVariables, errorContext, pathParams, onError) {
         CheckKeysAndValues(text,
                     millType switch {
                         MillType.Mill => MILL_KEYS,
@@ -333,7 +360,7 @@ public class DrillParams : AbstractChildParams {
     public override double? RawD_mm => Text.GetDouble('D') ?? base.RawD_mm;
     public override int? RawC => (int?)Text.GetDouble('C') ?? base.RawC;
 
-    public DrillParams(ParamsText text, bool isMark, string errorContext, IParams pathParams, Action<string, string> onError) : base(text, errorContext, pathParams, onError) {
+    public DrillParams(ParamsText text, Variables superpathVariables, bool isMark, string errorContext, IParams pathParams, Action<string, string> onError) : base(text, superpathVariables, errorContext, pathParams, onError) {
         CheckKeysAndValues(text, isMark ? "FDC" : "FBC");
     }
 }
@@ -342,8 +369,9 @@ public class SubpathParams : AbstractChildParams {
     public override double T_mm => Text.GetDouble('T') ?? base.T_mm;
     public override double O_mm => Text.GetDouble('O') ?? base.O_mm;
     public override string M => Text.GetString('M') ?? base.M;
+    public Variables Variables => Text.Variables;
 
-    public SubpathParams(ParamsText text, string errorContext, IParams pathParams, Action<string, string> onError) : base(text, errorContext, pathParams, onError) {
+    public SubpathParams(ParamsText text, Variables superpathVariables, string errorContext, IParams pathParams, Action<string, string> onError) : base(text, superpathVariables, errorContext, pathParams, onError) {
         CheckKeysAndValues(text, "TOMN>");
     }
 }
@@ -353,7 +381,7 @@ public class ZProbeParams : AbstractChildParams {
     public string? L => Text.GetString('L');
     public override double Z_mmpmin => Text.GetDouble('Z') ?? base.Z_mmpmin;
 
-    public ZProbeParams(ParamsText text, string errorContext, IParams pathParams, Action<string, string> onError) : base(text, errorContext, pathParams, onError) {
+    public ZProbeParams(ParamsText text, Variables superpathVariables, string errorContext, IParams pathParams, Action<string, string> onError) : base(text, superpathVariables, errorContext, pathParams, onError) {
         CheckKeysAndValues(text, "TLZ");
     }
 }

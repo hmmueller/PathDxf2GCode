@@ -5,6 +5,8 @@ using netDxf.Collections;
 using netDxf.Entities;
 using netDxf.Tables;
 using System.Collections.Generic;
+using System.IO;
+using System.Text.RegularExpressions;
 
 public class PathModel {
     private class Circle2 {
@@ -53,25 +55,98 @@ public class PathModel {
         }
 
         public bool HasTurnAt(Vector2 v) => Turns.Any(t => t.Near(v));
+
+        internal Variables CreateTestVariables() {
+            return Variables.EMPTY; // TODO - das geht nicht mehr, wenn es Modelle mit Variablen gibt!!
+        }
     }
 
-    public static Dictionary<PathName, PathModel> TransformDxf2PathModel(
-        string dxfFilePath, DrawingEntities entities, Dictionary<string, Linetype> layerLinetypes,
-        double? defaultSorNullForTplusO_mm, Options options, MessageHandlerForEntities messages, PathModelCollection subPathDefs) {
-        Dictionary<PathName, RawPathModel> models =
-            CollectSegments(entities, layerLinetypes, subPathDefs, dxfFilePath, options, messages);
-        Dictionary<PathName, PathModel> result = new();
-        foreach (var kvp in models) {
-            PathModel? m = CreatePathModel(kvp.Key, kvp.Value, defaultSorNullForTplusO_mm, dxfFilePath, options, messages);
-            if (m != null) {
-                result.Add(kvp.Key, m);
+    public class Collection {
+        private readonly Dictionary<PathName, (RawPathModel RawModel, string DxfFilePath)> _rawModels = new();
+        private readonly Dictionary<(PathName, Variables), PathModel> _models = new();
+
+        public PathModel? Load(PathName name, Variables variables, double? defaultSorNullForTplusO_mm, string currentDxfFile, Options options, string overlayTextForErrors, MessageHandlerForEntities messages, out string searchedFiles) {
+            searchedFiles = "";
+            if (!_models.ContainsKey((name, variables))) {
+                (RawPathModel? rawModel, string? dxfFilePath) = LoadRawModel(name, Path.GetDirectoryName(Path.GetFullPath(currentDxfFile)), options, overlayTextForErrors, messages, out searchedFiles);
+                if (rawModel == null) {
+                } else {
+                    PathModel? m = CreatePathModel(name, rawModel, defaultSorNullForTplusO_mm: defaultSorNullForTplusO_mm, variables, dxfFilePath!, options, messages);
+                    if (m == null) {
+                    } else {
+                        _models.Add((name, variables), m);
+                    }
+                }
             }
+            return _models.TryGetValue((name, variables), out PathModel? result) ? result : null;
         }
-        return result;
+
+        private (RawPathModel? rawModel, string? dxfFilePath) LoadRawModel(PathName name, string? currentDirectory, Options options, string overlayTextForErrors, MessageHandlerForEntities messages, out string searchedFiles) {
+            searchedFiles = "";
+            if (!_rawModels.ContainsKey(name)) {
+                foreach (var directory in options.DirAndSearchDirectories(currentDirectory)) {
+                    foreach (var f in Directory.GetFiles(directory, "*.dxf")) {
+                        if (FileNameMatchesPathName(Path.GetFileNameWithoutExtension(f), name, options.PathFilePattern, options.PathNamePattern)) {
+                            Dictionary<PathName, RawPathModel> newRawModels = LoadRawModels(f, options, messages);
+                            foreach (var kvp in newRawModels) {
+                                if (_rawModels.TryGetValue(kvp.Key, out var alreadyDefined)) {
+                                    messages.AddError(f, Messages.PathModel_PathDefinedTwice_Path_OtherFile, kvp.Key, alreadyDefined.DxfFilePath, f);
+                                } else {
+                                    _rawModels.Add(kvp.Key, (kvp.Value, f));
+                                }
+                            }
+                            searchedFiles += (searchedFiles == "" ? "" : ", ") + f;
+                        }
+                        // Continue loop, i.e. load all matching files! - we want to know whether
+                        // the path might be defined more than once.
+                    }
+                }
+            }
+            return _rawModels.TryGetValue(name, out (RawPathModel RawModel, string DxfFilePath) result) ? result : (null, null);
+        }
+
+
+        public static bool FileNameMatchesPathName(string fileName, PathName path, string pathFilePattern, string pathNamePattern) {
+            foreach (var m in Regex.Matches(fileName, $"(?<p1>{pathFilePattern})-(?<p2>{pathFilePattern})").ToArray()) {
+                string from = m.Groups["p1"].Value;
+                string to = m.Groups["p2"].Value;
+                if (PathName.CompareFileNameToPathName(from, path, pathFilePattern, pathNamePattern) <= 0
+                    && PathName.CompareFileNameToPathName(to, path, pathFilePattern, pathNamePattern) >= 0) {
+                    return true;
+                }
+            }
+            foreach (var m in Regex.Matches(fileName, pathFilePattern).ToArray()) {
+                if (PathName.CompareFileNameToPathName(m.Value, path, pathFilePattern, pathNamePattern) == 0) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private Dictionary<PathName, RawPathModel> LoadRawModels(string dxfFilePath, Options options, MessageHandlerForEntities messages) {
+            string fullDxfFilePath = Path.GetFullPath(dxfFilePath);
+
+            var modelsInDxfFile = new SortedDictionary<string, PathModel>();
+            DxfDocument? d = DxfHelper.LoadDxfDocument(fullDxfFilePath, options,
+                                                     out Dictionary<string, Linetype> layerLinetypes, messages);
+            return d == null ? new() : CollectSegments(d.Entities, layerLinetypes, this, dxfFilePath, options, messages);
+        }
+
+        public SortedDictionary<string, PathModel> LoadAllModels(string dxfFilePath, double? globalSweepHeight_mm, Options options, MessageHandlerForEntities messages) {
+            Dictionary<PathName, RawPathModel> rawModels = LoadRawModels(dxfFilePath, options, messages);
+            SortedDictionary<string, PathModel> result = new();
+            foreach (var kvp in rawModels) {
+                PathModel? model = Load(kvp.Key, kvp.Value.CreateTestVariables(), globalSweepHeight_mm, dxfFilePath, options, "???", messages, out _);
+                if (model != null) {
+                    result.Add(kvp.Key.AsString(), model);
+                }
+            }
+            return result;
+        }
     }
 
     private static Dictionary<PathName, RawPathModel> CollectSegments(DrawingEntities entities,
-            Dictionary<string, Linetype> layerLinetypes, PathModelCollection subPathDefs,
+            Dictionary<string, Linetype> layerLinetypes, Collection subPathDefs,
             string dxfFilePath, Options options, MessageHandlerForEntities messages) {
         // Path lines:
         // DASHED:     __ __ __ __ = Sweep (G00)
@@ -210,7 +285,7 @@ public class PathModel {
                     rawModel.Start ?? circle.Center.AsVector2(), dxfFilePath),
                     Messages.PathModel_MissingParams_Path, rawModel.Name.AsString());
             } else {
-                double? bitRadius_mm = rawModel.ParamsText!.GetDouble('O') / 2;
+                double? bitRadius_mm = rawModel.ParamsText!.GetO() / 2;
                 Vector2 center = circle.Center.AsVector2();
                 if (bitRadius_mm == null) {
                     messages.AddError(MessageHandlerForEntities.Context(circle, center, dxfFilePath),
@@ -239,7 +314,7 @@ public class PathModel {
         List<SubPathSegment> subPaths = new();
         foreach (var line in lines) {
             ParamsText lineText = GetText(line);
-            double order = lineText.GetDouble('N') ?? LAST_ORDER;
+            double order = lineText.GetN() ?? LAST_ORDER;
             Vector2 start = line.StartPoint.AsVector2();
             Vector2 end = line.EndPoint.AsVector2();
             RawPathModel rawModel = GetRawModel(line, start);
@@ -253,7 +328,7 @@ public class PathModel {
             ParamsText arcText = GetText(arc);
             var arcGeometry = new ArcGeometry(arc.Center.AsVector2(), arc.Radius, arc.StartAngle, arc.EndAngle, counterclockwise: true);
             RawPathModel rawModel = GetRawModel(arc, arcGeometry.Start);
-            double order = arcText.GetDouble('N') ?? LAST_ORDER;
+            double order = arcText.GetN() ?? LAST_ORDER;
 
             HandleLineOrArc(layerLinetypes, dxfFilePath, subPathDefs, options, messages, subPaths, arc, arcGeometry.Start, arcGeometry.End, arcText, rawModel, order, arcGeometry);
         }
@@ -262,7 +337,7 @@ public class PathModel {
     }
 
     private static void HandleLineOrArc(Dictionary<string, Linetype> layerLinetypes, string dxfFilePath,
-        PathModelCollection subPathDefs, Options options, MessageHandlerForEntities messages,
+        Collection subPathDefs, Options options, MessageHandlerForEntities messages,
         List<SubPathSegment> subPaths, EntityObject lineOrArc, Vector2 start, Vector2 end,
         ParamsText text, RawPathModel rawModel, double order, IMillGeometry geometry) {
         void OnError(string s) {
@@ -395,7 +470,7 @@ public class PathModel {
     }
 
     private static PathModel? CreatePathModel(PathName name, RawPathModel rawModel, double? defaultSorNullForTplusO_mm,
-        string dxfFilePath, Options options, MessageHandlerForEntities messages) {
+        Variables superpathVariables, string dxfFilePath, Options options, MessageHandlerForEntities messages) {
         if (rawModel.Start == null) {
             messages.AddError(name, Messages.PathModel_MissingStart);
         }
@@ -495,16 +570,16 @@ public class PathModel {
         void OnError(string context, string msg) {
             messages.AddError(context, msg);
         }
-        PathParams pathParams = new(rawModel.ParamsText!, defaultSorNullForTplusO_mm,
+        PathParams pathParams = new(rawModel.ParamsText!, superpathVariables, defaultSorNullForTplusO_mm,
             MessageHandlerForEntities.Context(rawModel.StartObject!, rawModel.Start.Value, dxfFilePath), options, OnError);
         {
 
             foreach (var s in segments) {
-                s.CreateParams(pathParams, dxfFilePath, OnError);
+                s.CreateParams(pathParams, superpathVariables, dxfFilePath, OnError);
             }
 
             foreach (var z in rawModel.ZProbes) {
-                z.CreateParams(pathParams, dxfFilePath, OnError);
+                z.CreateParams(pathParams, superpathVariables, dxfFilePath, OnError);
             }
         }
 

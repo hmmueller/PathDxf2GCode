@@ -2647,4 +2647,27 @@ M30
 %");
     }
 
+    [TestMethod]
+    public void TestMethod31() {
+        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s22", "8999.31P.dxf"]));
+        Compare("8999.31P_Milling.gcode", $@"%
+(PathDxf2GCode - HMMüller 2024-2025 V.{Program.VERSION})
+(8999.31P.dxf)
+F150
+...
+M30
+%");
+    }
+
+    [TestMethod]
+    public void TestMethod32() {
+        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s22", "8999.32P.dxf"]));
+        Compare("8999.32P_Milling.gcode", $@"%
+(PathDxf2GCode - HMMüller 2024-2025 V.{Program.VERSION})
+(8999.32P.dxf)
+F150
+...
+M30
+%");
+    }
 }

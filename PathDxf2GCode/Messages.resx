@@ -212,7 +212,7 @@ Options:
   <data name="Params_VMustBeGtThan0_V" xml:space="preserve">
     <value>V={0} must be &gt; 0</value>
   </data>
-  <data name="PathModelCollection_PathDefinedTwice_Path_File" xml:space="preserve">
+  <data name="PathModel_PathDefinedTwice_Path_OtherFile" xml:space="preserve">
     <value>Path {0} has already been defined in {1}</value>
   </data>
   <data name="PathModel_CircleTooSmall_D_O" xml:space="preserve">

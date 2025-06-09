@@ -4,7 +4,7 @@ using de.hmmueller.PathGCodeLibrary;
 using netDxf;
 
 public class Program {
-    public const string VERSION = "2025-06-02";
+    public const string VERSION = "2025-06-08";
 
     public static int Main(string[] args) {
         var messages = new MessageHandlerForEntities(Console.Error);
@@ -23,7 +23,7 @@ public class Program {
             messages.WriteLine(MessageHandler.ErrorPrefix + Messages.Program_NoDxfFiles);
             return 3;
         } else {
-            PathModelCollection pathModels = new();
+            PathModel.Collection pathModels = new();
 
             foreach (var dxfFilePath in options.DxfFilePaths) {
                 try {
@@ -47,16 +47,17 @@ public class Program {
         }
     }
 
-    private static void GenerateGCode(string dxfFilePath, PathModelCollection pathModels, MessageHandlerForEntities messages, Options options) {
+    private static void GenerateGCode(string dxfFilePath, PathModel.Collection pathModels, MessageHandlerForEntities messages, Options options) {
         if (!dxfFilePath.EndsWith(".dxf", StringComparison.CurrentCultureIgnoreCase)) {
             dxfFilePath += ".dxf";
         }
 
-        SortedDictionary<string, PathModel> models = pathModels.Load(dxfFilePath, 
-            options.CheckModels ? null : options.GlobalSweepHeight_mm, options, dxfFilePath, messages);
+        SortedDictionary<string, PathModel> models = pathModels.LoadAllModels(dxfFilePath, 
+            options.CheckModels ? null : options.GlobalSweepHeight_mm, options, messages);
         if (options.CheckModels) {
             foreach (var m in models) {
                 messages.WriteLine(MessageHandler.InfoPrefix + Messages.Program_Checking_Path, m.Key);
+                // TODO: Wenn ein Modell Parameter hat, welche gibt man ihm? // VORSCHLAG: Heuristik: # -> 1; a|b|c -> a; 
                 using (StreamWriter sw = StreamWriter.Null) {
                     WriteMillingGCode(m.Value, sw, dxfFilePath, messages);
                 }

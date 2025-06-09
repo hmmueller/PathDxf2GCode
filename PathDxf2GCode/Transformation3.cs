@@ -19,8 +19,8 @@ public class ZProbe {
         ParamsText = paramsText;
     }
 
-    public void CreateParams(PathParams pathParams, string dxfFileName, Action<string, string> onError) {
-        _params = new ZProbeParams(ParamsText, MessageHandlerForEntities.Context(Source, Center, dxfFileName), pathParams, onError);
+    public void CreateParams(PathParams pathParams, Variables superpathVariables, string dxfFileName, Action<string, string> onError) {
+        _params = new ZProbeParams(ParamsText, superpathVariables, MessageHandlerForEntities.Context(Source, Center, dxfFileName), pathParams, onError);
     }
 
     public double T_mm => _params!.T_mm;

@@ -64,12 +64,20 @@ public class Options : AbstractOptions {
     }
 
     /// <summary>
-    /// /p: Refexp for paths in DXF filenames and DXF texts. 
+    /// /p: Regexp for paths in DXF texts. 
     /// Underscores (_) in path names read from the DXF file are replaced with dots
-    /// (which I usually use in path names).
-    /// Groups are used for sorting.
+    /// (which I usually use in path names). Groups are used for sorting.
+    /// Default pattern is ([0-9]{4})[.]([0-9]+)([A-Z]), with three groups.
     /// </summary>
-    public string PathNamePattern { get; private set; } = "([0-9]{4})(?:[.]([0-9]+[A-Z]))?";
+    public string PathNamePattern { get; private set; } = "([0-9]{4})[.]([0-9]+)([A-Z])";
+
+    /// <summary>
+    /// /n: Regexp for paths in DXF filenames and DXF texts. 
+    /// Underscores (_) in path names read from the DXF file are replaced with dots
+    /// (which I usually use in path names). Groups are used for comparing with path names.
+    /// Default pattern is ([0-9]{4})(?:[.]([0-9]+))?, with one or two groups.
+    /// </summary>
+    public string PathFilePattern { get; private set; } = "([0-9]{4})(?:[.]([0-9]+))?";
 
     /// <summary>
     /// /dump: Flag for developer dumps
@@ -130,6 +138,9 @@ public class Options : AbstractOptions {
                                 break;
                             case "p":
                                 options.PathNamePattern = GetStringOption(ref i);
+                                break;
+                            case "n":
+                                options.PathFilePattern = GetStringOption(ref i);
                                 break;
                             case "f":
                                 options.GlobalFeedRate_mmpmin = GetDoubleOption(ref i);
