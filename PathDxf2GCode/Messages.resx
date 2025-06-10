@@ -133,12 +133,17 @@ Options:
     /v 000 Maximum speed for sweeps in mm/min; required
     /s 000 Default sweep height in mm; required
     /c     Check all paths in DXF file without writing GCode; if /c is not
-           provided the DXF file must contain only one layer path
+           provided the DXF file must contain only one path layer
     /x zzz For all texts matching this regular expression, write assigned
            DXF objects; this is helpful for debugging parameter texts
-    /d zzz Search path for references DXF files
-    /p zzz Regular expression for path names
-    /l zzz Language; default is operating system language</value>
+    /d zzz Search path for references DXF files; can be specified multiple
+           times; default is the location of the DXF file
+    /n zzz Regular expression for path names; default value is 
+           ([0-9]{4})[.]([0-9]+)([A-Z])
+    /p zzz Regular expression for path patterns in file names; default is
+           ([0-9]{4})(?:[.]([0-9]+))?
+    /l zzz Language; default is operating system language
+</value>
   </data>
   <data name="Options_LessThan0_Name_Value" xml:space="preserve">
     <value>Option value {1} for {0} ist not &gt;= 0</value>

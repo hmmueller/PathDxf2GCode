@@ -88,7 +88,7 @@ namespace de.hmmueller.PathDxf2GCode {
         ///    /v 000 Maximum speed for sweeps in mm/min; required
         ///    /s 000 Default sweep height in mm; required
         ///    /c     Check all paths in DXF file without writing GCode; if /c is not
-        ///           provided the DXF file must contain only one layer path
+        ///           provided the DXF file must contain only one path layer
         ///    /x zzz For all texts matching this regular expression, write assigned
         ///         [Rest der Zeichenfolge wurde abgeschnitten]&quot;; ähnelt.
         /// </summary>

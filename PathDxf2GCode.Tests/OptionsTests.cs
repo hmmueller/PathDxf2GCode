@@ -55,7 +55,7 @@ public class OptionsTests {
     public void CheckStringParams() {
         using StringWriter sw = new();
         MessageHandlerForEntities messages = new(sw);
-        Options? o = Options.Create(["/dDIR1", "/p([0-9]+)", "/dDIR2", "/f1", "/v1", "/s1"], messages);
+        Options? o = Options.Create(["/dDIR1", "/n([0-9]+)", "/dDIR2", "/f1", "/v1", "/s1"], messages);
         Assert.IsFalse(messages.Errors.Any(), string.Join("\r\n", messages.Errors));
         Assert.AreEqual("([0-9]+)", o!.PathNamePattern);
         CollectionAssert.AreEqual(new[] { "LOCAL", "DIR1", "DIR2" }, o.DirAndSearchDirectories("LOCAL").ToArray());
@@ -67,7 +67,7 @@ public class OptionsTests {
         MessageHandlerForEntities messages = new(sw);
         Options? o = Options.Create(["-d", "DIR1", "-p", "([0-9]+)", "-d", "DIR2", "-f1", "-v1", "/s1"], messages);
         Assert.IsFalse(messages.Errors.Any(), string.Join("\r\n", messages.Errors));
-        Assert.AreEqual("([0-9]+)", o!.PathNamePattern);
+        Assert.AreEqual("([0-9]+)", o!.PathFilePattern);
         CollectionAssert.AreEqual(new[] { "LOCAL", "DIR1", "DIR2" }, o.DirAndSearchDirectories("LOCAL").ToArray());
     }
 

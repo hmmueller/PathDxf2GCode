@@ -22,8 +22,9 @@ public class Variables {
     }
 
     internal string Interpolate(string s) {
-        bool changed = false;
+        bool changed;
         do {
+            changed = false;
             foreach (var kvp in _replacements) {
                 string v = "=" + kvp.Key;
                 if (s.Contains(v)) {
@@ -35,11 +36,9 @@ public class Variables {
         return s;
     }
 
-    internal Variables CloneWith(Dictionary<char, string> newReplacements) {
-        var r = new Dictionary<char, string>(_replacements);
-        foreach (var kvp in newReplacements) {
-            r[kvp.Key] = kvp.Value;
+    public void Interpolate(Variables variables) {
+        foreach (var kvp in _replacements) {
+            _replacements[kvp.Key] = variables.Interpolate(kvp.Value);
         }
-        return new Variables(r);
     }
 }

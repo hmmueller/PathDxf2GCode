@@ -64,7 +64,7 @@ public class Options : AbstractOptions {
     }
 
     /// <summary>
-    /// /p: Regexp for paths in DXF texts. 
+    /// /n: Regexp for paths in DXF texts. 
     /// Underscores (_) in path names read from the DXF file are replaced with dots
     /// (which I usually use in path names). Groups are used for sorting.
     /// Default pattern is ([0-9]{4})[.]([0-9]+)([A-Z]), with three groups.
@@ -72,7 +72,7 @@ public class Options : AbstractOptions {
     public string PathNamePattern { get; private set; } = "([0-9]{4})[.]([0-9]+)([A-Z])";
 
     /// <summary>
-    /// /n: Regexp for paths in DXF filenames and DXF texts. 
+    /// /p: Regexp for paths in DXF filenames.
     /// Underscores (_) in path names read from the DXF file are replaced with dots
     /// (which I usually use in path names). Groups are used for comparing with path names.
     /// Default pattern is ([0-9]{4})(?:[.]([0-9]+))?, with one or two groups.
@@ -136,10 +136,10 @@ public class Options : AbstractOptions {
                             case "x":
                                 options.ShowTextAssignments = new Regex(GetStringOption(ref i));
                                 break;
-                            case "p":
+                            case "n":
                                 options.PathNamePattern = GetStringOption(ref i);
                                 break;
-                            case "n":
+                            case "p":
                                 options.PathFilePattern = GetStringOption(ref i);
                                 break;
                             case "f":

@@ -88,6 +88,7 @@ public class ParamsText {
                 })
                 .Where(kvp => kvp.Value != null)
                 .ToDictionary(kvp => kvp.Key, kvp => (double)kvp.Value!);
+            Variables.Interpolate(variables);
         }
     }
 

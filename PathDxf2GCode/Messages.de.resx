@@ -132,14 +132,17 @@ Optionen:
     /z 000 Probe-Geschwindigkeit in mm/min; Standardwert ist /f-Wert
     /v 000 Maximalgeschwindigkeit für Leerfahrten in mm/min; Pflichtwert
     /s 000 Vorgabe für Leerfahrt-Höhe in mm; Pflichtwert
-    /c     Überprüfen aller Pfade in der DXF-Datei ohne G-Code-Ausgabe; wenn /c nicht 
-           angegeben wird, dann darf die DXF-Datei nur einen Pfad enthalten
-    /x zzz Gibt für alle auf diese Regex passenden Texte aus, welchem DXF-Objekt 
-           sie zugeordnet sind
-    /d zzz Suchpfad für referenzierte DXF-Dateien
-    /p zzz Reg.Ausdruck für Pfadbezeichnungen
-    /l zzz Meldungssprache; Standard ist Windows-Einstellung
-</value>
+    /c     Überprüfen aller Pfade in der DXF-Datei ohne G-Code-Ausgabe; wenn
+           /c nicht angegeben wird, darf die DXF-Datei nur einen Pfad enthalten
+    /x zzz Gibt für alle auf diesen regulären Ausdruck passenden Texte aus, 
+           welchem DXF-Objekt sie zugeordnet sind
+    /d zzz Suchpfad für referenzierte DXF-Dateien; mehrfache /d-Angaben sind
+           möglich; Standardwert ist das Verzeichnis der jeweiligen DXF-Datei
+    /n zzz Reg.Ausdruck für Pfadbezeichnungen in DXF-Dateien; Standardwert ist 
+           ([0-9]{4})[.]([0-9]+)([A-Z])
+    /p zzz Reg.Ausdruck für Pfadmuster in Dateinamen; Standardwert ist
+           ([0-9]{4})(?:[.]([0-9]+))?
+    /l zzz Meldungssprache; Standard ist Windows-Einstellung</value>
   </data>
   <data name="Options_LessThan0_Name_Value" xml:space="preserve">
     <value>Wert {1} für Option {0} ist nicht &gt;= 0</value>
