@@ -333,4 +333,25 @@ has assigned text '{1}'</value>
   <data name="PathSegment_DiameterGtA_Diameter_A" xml:space="preserve">
     <value>Diameter {0} of helix circle is larger than A={1}; possibly replace with arc path</value>
   </data>
+  <data name="Variables_Error_Message" xml:space="preserve">
+    <value>Error in variable definition: {0}</value>
+  </data>
+  <data name="Variables_RangeHasMoreThanTwoNumbers_Variable_Range" xml:space="preserve">
+    <value>Range for variable {0} must have format ###~### instead of '{1}'</value>
+  </data>
+  <data name="Variables_DefinitionNeitherListNorLettersNorRange_Variable_Definition" xml:space="preserve">
+    <value>Definition for variable {0} must be comma-separated list, or letters group starting with ?, or range ...~... instead of '{1}'</value>
+  </data>
+  <data name="Variables_MissingValues_Variables" xml:space="preserve">
+    <value>Missing values for variables {0}</value>
+  </data>
+  <data name="Variables_MissingDefinitions_Variables" xml:space="preserve">
+    <value>Missing definitions for variables {0}</value>
+  </data>
+  <data name="Variables_ValueDoesNotMatchDefinition_Value_Definition_Variable" xml:space="preserve">
+    <value>Value '{0}' of variable {2} does not match definition '{1}'</value>
+  </data>
+  <data name="Variables_RangeFormatError_Variable_Message" xml:space="preserve">
+    <value>Wrong number format in range for variable {0} ({1})</value>
+  </data>
 </root>

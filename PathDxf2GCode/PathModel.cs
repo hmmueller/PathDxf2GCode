@@ -55,27 +55,19 @@ public class PathModel {
         }
 
         public bool HasTurnAt(Vector2 v) => Turns.Any(t => t.Near(v));
-
-        internal Variables CreateTestVariables() {
-            return Variables.EMPTY; // TODO - das geht nicht mehr, wenn es Modelle mit Variablen gibt!!
-        }
     }
 
     public class Collection {
         private readonly Dictionary<PathName, (RawPathModel RawModel, string DxfFilePath)> _rawModels = new();
         private readonly Dictionary<(PathName, Variables), PathModel> _models = new();
 
-        public PathModel? Load(PathName name, Variables variables, double? defaultSorNullForTplusO_mm, string currentDxfFile, Options options, string overlayTextForErrors, MessageHandlerForEntities messages, out string searchedFiles) {
+        public PathModel? Load(PathName name, ActualVariables variables, double? defaultSorNullForTplusO_mm, string currentDxfFile, Options options, string overlayTextForErrors, MessageHandlerForEntities messages, out string searchedFiles) {
             searchedFiles = "";
             if (!_models.ContainsKey((name, variables))) {
                 (RawPathModel? rawModel, string? dxfFilePath) = LoadRawModel(name, Path.GetDirectoryName(Path.GetFullPath(currentDxfFile)), options, overlayTextForErrors, messages, out searchedFiles);
-                if (rawModel == null) {
-                    throw new Exception("TODO: Unexpected error in LoadRawModel for " + name);
-                } else {
+                if (rawModel != null) { // errors when rawModel==null were already registered
                     PathModel? m = CreatePathModel(name, rawModel, defaultSorNullForTplusO_mm: defaultSorNullForTplusO_mm, variables, dxfFilePath!, options, messages);
-                    if (m == null) {
-                        throw new Exception("TODO: Unexpected error in CreatePathModel for " + name);
-                    } else {
+                    if (m != null) { // errors when m==null were already registered
                         _models.Add((name, variables), m);
                     }
                 }
@@ -136,11 +128,13 @@ public class PathModel {
             return d == null ? new() : CollectSegments(d.Entities, layerLinetypes, this, dxfFilePath, options, messages);
         }
 
-        public SortedDictionary<string, PathModel> LoadAllModels(string dxfFilePath, double? globalSweepHeight_mm, Options options, MessageHandlerForEntities messages) {
+        public SortedDictionary<string, PathModel> LoadAllModels(string dxfFilePath, double? globalSweepHeight_mm, 
+            Func<ParamsText, ActualVariables> getVariables, Options options, MessageHandlerForEntities messages) {
             Dictionary<PathName, RawPathModel> rawModels = LoadRawModels(dxfFilePath, options, messages);
             SortedDictionary<string, PathModel> result = new();
             foreach (var kvp in rawModels) {
-                PathModel? model = Load(kvp.Key, kvp.Value.CreateTestVariables(), globalSweepHeight_mm, dxfFilePath, options, "???", messages, out _);
+                PathModel? model = Load(kvp.Key, getVariables(kvp.Value.ParamsText!),
+                                        globalSweepHeight_mm, dxfFilePath, options, "???", messages, out _);
                 if (model != null) {
                     result.Add(kvp.Key.AsString(), model);
                 }
@@ -259,7 +253,7 @@ public class PathModel {
                 rawModel.Turns.Add(center);
             } else if (IsStartMarker(circle)) {
                 if (rawModel.Start != null) {
-                    messages.AddError(circle, center, dxfFilePath, Messages.PathModel_TwoStarts_S1_S2, rawModel.Start.Value().F3(), center.F3());
+                    messages.AddError(circle, center, dxfFilePath, Messages.PathModel_TwoStarts_S1_S2, rawModel.Start.Value.F3(), center.F3());
                 } else {
                     rawModel.Start = center;
                     rawModel.StartObject = circle;
@@ -268,7 +262,7 @@ public class PathModel {
             } else if (IsEndMarker(circle)) { // End
                 if (rawModel.End != null) {
                     messages.AddError(circle, center, dxfFilePath,
-                        Messages.PathModel_TwoEnds_E1_E2, rawModel.End.Value().F3(), center.F3());
+                        Messages.PathModel_TwoEnds_E1_E2, rawModel.End.Value.F3(), center.F3());
                 } else {
                     rawModel.End = center;
                 }
@@ -474,7 +468,7 @@ public class PathModel {
     }
 
     private static PathModel? CreatePathModel(PathName name, RawPathModel rawModel, double? defaultSorNullForTplusO_mm,
-        Variables superpathVariables, string dxfFilePath, Options options, MessageHandlerForEntities messages) {
+        ActualVariables superpathVariables, string dxfFilePath, Options options, MessageHandlerForEntities messages) {
         if (rawModel.Start == null) {
             messages.AddError(name, Messages.PathModel_MissingStart);
         }
@@ -485,7 +479,7 @@ public class PathModel {
             return null;
         }
 
-        // A. Connect RawSegments to a long chain
+        // A. Connect RawSegments into a long chain
         // Algorithm:
         // * repeatedly extend chain at currEnd;
         // - if there is more than one un-traversed candidate, continue by order (N);

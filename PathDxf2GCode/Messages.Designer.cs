@@ -657,5 +657,68 @@ namespace de.hmmueller.PathDxf2GCode {
                 return ResourceManager.GetString("Transformation2_DifferentDistances_FromS_FromE_FromD_ToS_ToE_ToD", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Definition for variable {0} must be comma-separated list, or letters group starting with ?, or range ...~... instead of &apos;{1}&apos; ähnelt.
+        /// </summary>
+        internal static string Variables_DefinitionNeitherListNorLettersNorRange_Variable_Definition {
+            get {
+                return ResourceManager.GetString("Variables_DefinitionNeitherListNorLettersNorRange_Variable_Definition", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Error in variable definition: {0} ähnelt.
+        /// </summary>
+        internal static string Variables_Error_Message {
+            get {
+                return ResourceManager.GetString("Variables_Error_Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Missing definitions for variables {0} ähnelt.
+        /// </summary>
+        internal static string Variables_MissingDefinitions_Variables {
+            get {
+                return ResourceManager.GetString("Variables_MissingDefinitions_Variables", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Missing values for variables {0} ähnelt.
+        /// </summary>
+        internal static string Variables_MissingValues_Variables {
+            get {
+                return ResourceManager.GetString("Variables_MissingValues_Variables", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Wrong number format in range for variable {0} ({1}) ähnelt.
+        /// </summary>
+        internal static string Variables_RangeFormatError_Variable_Message {
+            get {
+                return ResourceManager.GetString("Variables_RangeFormatError_Variable_Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Range for variable {0} must have format ###~### instead of &apos;{1}&apos; ähnelt.
+        /// </summary>
+        internal static string Variables_RangeHasMoreThanTwoNumbers_Variable_Range {
+            get {
+                return ResourceManager.GetString("Variables_RangeHasMoreThanTwoNumbers_Variable_Range", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Value &apos;{0}&apos; of variable {2} does not match definition &apos;{1}&apos; ähnelt.
+        /// </summary>
+        internal static string Variables_ValueDoesNotMatchDefinition_Value_Definition_Variable {
+            get {
+                return ResourceManager.GetString("Variables_ValueDoesNotMatchDefinition_Value_Definition_Variable", resourceCulture);
+            }
+        }
     }
 }

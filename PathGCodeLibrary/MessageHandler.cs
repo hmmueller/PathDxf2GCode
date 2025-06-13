@@ -18,7 +18,11 @@ public class MessageHandler {
     }
 
     public void WriteLine(string s, params object[] pars) {
-        _error.WriteLine(s, pars);
+        if (pars.Length > 0) {
+            _error.WriteLine(s, pars);
+        } else {
+            _error.WriteLine(s); // do not interpolate {.}
+        }
     }
 
     public void WriteLine() {

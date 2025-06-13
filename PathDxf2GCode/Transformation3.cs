@@ -19,7 +19,7 @@ public class ZProbe {
         ParamsText = paramsText;
     }
 
-    public void CreateParams(PathParams pathParams, Variables superpathVariables, string dxfFileName, Action<string, string> onError) {
+    public void CreateParams(PathParams pathParams, ActualVariables superpathVariables, string dxfFileName, Action<string, string> onError) {
         _params = new ZProbeParams(ParamsText, superpathVariables, MessageHandlerForEntities.Context(Source, Center, dxfFileName), pathParams, onError);
     }
 

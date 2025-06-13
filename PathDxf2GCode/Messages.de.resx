@@ -332,4 +332,25 @@ hat zugeordneten Text '{1}'</value>
   <data name="PathSegment_DiameterGtA_Diameter_A" xml:space="preserve">
     <value>Helix-Durchmesser {0} ist größer als A={1}; möglichst durch Bogenpfad ersetzen</value>
   </data>
+  <data name="Variables_Error_Message" xml:space="preserve">
+    <value>Fehler in Variablendefinition: {0}</value>
+  </data>
+  <data name="Variables_RangeHasMoreThanTwoNumbers_Variable_Range" xml:space="preserve">
+    <value>Bereich für Variable {0} muss Format Zahl~Zahl (statt Wert '{1}') haben</value>
+  </data>
+  <data name="Variables_DefinitionNeitherListNorLettersNorRange_Variable_Definition" xml:space="preserve">
+    <value>Definition für Variable {0} muss kommaseparierte Liste oder Buchstabengruppe nach ? oder Bereich ...~... sein, statt '{1}'</value>
+  </data>
+  <data name="Variables_MissingValues_Variables" xml:space="preserve">
+    <value>Fehlende Werte für Variablen</value>
+  </data>
+  <data name="Variables_MissingDefinitions_Variables" xml:space="preserve">
+    <value>Fehlende Definitionen für Variablen {0}</value>
+  </data>
+  <data name="Variables_ValueDoesNotMatchDefinition_Value_Definition_Variable" xml:space="preserve">
+    <value>Wert '{0}' der Variablen {2} passt nicht zu Definition '{1}'</value>
+  </data>
+  <data name="Variables_RangeFormatError_Variable_Message" xml:space="preserve">
+    <value>Falsches Zahlenformat bei Bereich für Variable {0} ({1})</value>
+  </data>
 </root>

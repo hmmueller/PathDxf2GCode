@@ -52,9 +52,9 @@ public class Program {
             dxfFilePath += ".dxf";
         }
 
-        SortedDictionary<string, PathModel> models = pathModels.LoadAllModels(dxfFilePath, 
-            options.CheckModels ? null : options.GlobalSweepHeight_mm, options, messages);
         if (options.CheckModels) {
+            SortedDictionary<string, PathModel> models = pathModels.LoadAllModels(dxfFilePath,
+                null, paramsText => new FormalVariables(paramsText.VariableStrings).Example(msg => messages.AddError(dxfFilePath, msg)), options, messages);
             foreach (var m in models) {
                 messages.WriteLine(MessageHandler.InfoPrefix + Messages.Program_Checking_Path, m.Key);
                 // TODO: Wenn ein Modell Parameter hat, welche gibt man ihm? // VORSCHLAG: Heuristik: # -> 1; a|b|c -> a; 
@@ -63,6 +63,8 @@ public class Program {
                 }
             }
         } else {
+            SortedDictionary<string, PathModel> models = pathModels.LoadAllModels(dxfFilePath,
+                options.GlobalSweepHeight_mm, paramsText => ActualVariables.EMPTY, options, messages);
             if (models.Count > 1) {
                 messages.AddError(dxfFilePath, Messages.Program_MoreThanOnePathLayer_File_Paths, dxfFilePath, string.Join(", ", models.Keys));
             } else if (models.Count == 0) {

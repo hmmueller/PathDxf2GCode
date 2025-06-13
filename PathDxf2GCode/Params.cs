@@ -6,7 +6,7 @@ using netDxf.Entities;
 
 public class ParamsText {
     private readonly Dictionary<char, string> _rawStrings;
-    public readonly Variables Variables;
+    public readonly Dictionary<char, string> VariableStrings;
     public string Text { get; }
     public string Context { get; }
     public string? LayerName { get; }
@@ -39,8 +39,8 @@ public class ParamsText {
         LayerName = layerName;
         Position = position;
         _rawStrings = rawStrings.Where(kv => kv.Key != ':').ToDictionary(kv => kv.Key, kv => kv.Value);
-        Variables = new Variables(rawStrings.Where(kv => kv.Key == ':' && kv.Value.Length > 0)
-                                             .ToDictionary(kv => kv.Value[0], kv => kv.Value[1..]));
+        VariableStrings = rawStrings.Where(kv => kv.Key == ':' && kv.Value.Length > 0)
+                                             .ToDictionary(kv => kv.Value[0], kv => kv.Value[1..]);
         TextCenter = textCenter;
         TextRadius = textRadius;
     }
@@ -74,7 +74,7 @@ public class ParamsText {
         }
     }
 
-    public void InterpolateVariablesAndCreateValues(Variables variables) {
+    public void InterpolateVariablesAndCreateValues(ActualVariables variables) {
         if (_stringValues == null) {
             // ParamsText objects can be references by multiple segments; this is currently the case for
             // * the ParamsText.EMPTY object
@@ -88,7 +88,7 @@ public class ParamsText {
                 })
                 .Where(kvp => kvp.Value != null)
                 .ToDictionary(kvp => kvp.Key, kvp => (double)kvp.Value!);
-            Variables.Interpolate(variables);
+            variables.InterpolateInto(VariableStrings);
         }
     }
 
@@ -141,7 +141,7 @@ public abstract class AbstractParams : IParams {
         return double.NaN;
     }
 
-    protected AbstractParams(ParamsText text, Variables superpathVariables, string errorContext, Action<string, string> onError) {
+    protected AbstractParams(ParamsText text, ActualVariables superpathVariables, string errorContext, Action<string, string> onError) {
         text.InterpolateVariablesAndCreateValues(superpathVariables);
         Text = text;
         _errorContext = errorContext;
@@ -244,8 +244,9 @@ public class PathParams : AbstractParams {
     public override string M => GetString(Text, 'M', OnError);
     public override double Z_mmpmin => Text.GetDouble('Z') ?? _options.GlobalProbeRate_mmpmin;
     public override double? W_mm => Text.GetDouble('W');
+    public FormalVariables FormalVariables { get; }
 
-    public PathParams(ParamsText text, Variables superpathVariables, double? defaultSorNullForTplusO_mm, string errorContext, Options options, Action<string, string> onError) : base(text, superpathVariables, errorContext, onError) {
+    public PathParams(ParamsText text, ActualVariables superpathVariables, double? defaultSorNullForTplusO_mm, string errorContext, Options options, Action<string, string> onError) : base(text, superpathVariables, errorContext, onError) {
         _options = options;
         S_mm = Text.GetDouble('S') ?? defaultSorNullForTplusO_mm ?? T_mm + O_mm;
         A_mm = Text.GetDouble('A') ?? 4 * O_mm;
@@ -260,6 +261,7 @@ public class PathParams : AbstractParams {
         if (RawU_mm.HasValue && RawU_mm.Value.Le(0)) {
             Error(Messages.Params_UMustBeGtThan0_U, RawU_mm);
         }
+        FormalVariables = new FormalVariables(text.VariableStrings);
     }
 }
 
@@ -282,7 +284,7 @@ public abstract class AbstractChildParams : AbstractParams {
     public override double A_mm => _parent.A_mm;
     public override double? W_mm => _parent.W_mm;
 
-    protected AbstractChildParams(ParamsText text, Variables superpathVariables, string errorContext, IParams parent, Action<string, string> onError) : base(text, superpathVariables, errorContext, onError) {
+    protected AbstractChildParams(ParamsText text, ActualVariables superpathVariables, string errorContext, IParams parent, Action<string, string> onError) : base(text, superpathVariables, errorContext, onError) {
         _parent = parent;
     }
 }
@@ -293,19 +295,19 @@ public class ChainParams : AbstractChildParams, IParams {
     public override double? RawI_mm => Text.GetDouble('I') ?? base.RawI_mm;
     public override double? W_mm => Text.GetDouble('W') ?? base.W_mm;
 
-    public ChainParams(ParamsText text, Variables superpathVariables, string errorContext, IParams pathParams, Action<string, string> onError) : base(text.LimitedTo(KEYS), superpathVariables, errorContext, pathParams, onError) {
+    public ChainParams(ParamsText text, ActualVariables superpathVariables, string errorContext, IParams pathParams, Action<string, string> onError) : base(text.LimitedTo(KEYS), superpathVariables, errorContext, pathParams, onError) {
         CheckKeysAndValues(text, KEYS + MillParams.MILL_KEYS + MillParams.MARK_KEYS);
     }
 }
 
 public class SweepParams : AbstractChildParams {
-    public SweepParams(ParamsText text, Variables superpathVariables, string errorContext, IParams pathParams, Action<string, string> onError) : base(text, superpathVariables, errorContext, pathParams, onError) {
+    public SweepParams(ParamsText text, ActualVariables superpathVariables, string errorContext, IParams pathParams, Action<string, string> onError) : base(text, superpathVariables, errorContext, pathParams, onError) {
         CheckKeysAndValues(text, "SN");
     }
 }
 
 public class BackSweepParams : AbstractChildParams {
-    public BackSweepParams(ParamsText text, Variables superpathVariables, string errorContext, IParams pathParams, Action<string, string> onError) : base(text, superpathVariables, errorContext, pathParams, onError) {
+    public BackSweepParams(ParamsText text, ActualVariables superpathVariables, string errorContext, IParams pathParams, Action<string, string> onError) : base(text, superpathVariables, errorContext, pathParams, onError) {
         CheckKeysAndValues(text, "FBDCISTOMNPUAW>"); // Backsweeps are allowed for all sorts of objects, as they inherit their parents' full parameter set
     }
 }
@@ -320,7 +322,7 @@ public class MillParams : AbstractChildParams {
     public override double? RawP_mm => Text.GetDouble('P') ?? base.RawP_mm;
     public override double? RawU_mm => Text.GetDouble('U') ?? base.RawU_mm;
 
-    public MillParams(ParamsText text, Variables superpathVariables, MillType millType, string errorContext, IParams chainParams, Action<string, string> onError) : base(text.LimitedTo(
+    public MillParams(ParamsText text, ActualVariables superpathVariables, MillType millType, string errorContext, IParams chainParams, Action<string, string> onError) : base(text.LimitedTo(
         millType switch {
             MillType.Mill => MILL_KEYS,
             MillType.Mark => MARK_KEYS,
@@ -343,7 +345,7 @@ public class HelixParams : AbstractChildParams {
     public override double? RawP_mm => Text.GetDouble('P') ?? base.RawP_mm;
     public override double? RawU_mm => Text.GetDouble('U') ?? base.RawU_mm;
 
-    public HelixParams(ParamsText text, Variables superpathVariables, MillType millType, string errorContext, IParams pathParams, Action<string, string> onError) : base(text, superpathVariables, errorContext, pathParams, onError) {
+    public HelixParams(ParamsText text, ActualVariables superpathVariables, MillType millType, string errorContext, IParams pathParams, Action<string, string> onError) : base(text, superpathVariables, errorContext, pathParams, onError) {
         CheckKeysAndValues(text,
                     millType switch {
                         MillType.Mill => MILL_KEYS,
@@ -361,7 +363,7 @@ public class DrillParams : AbstractChildParams {
     public override double? RawD_mm => Text.GetDouble('D') ?? base.RawD_mm;
     public override int? RawC => (int?)Text.GetDouble('C') ?? base.RawC;
 
-    public DrillParams(ParamsText text, Variables superpathVariables, bool isMark, string errorContext, IParams pathParams, Action<string, string> onError) : base(text, superpathVariables, errorContext, pathParams, onError) {
+    public DrillParams(ParamsText text, ActualVariables superpathVariables, bool isMark, string errorContext, IParams pathParams, Action<string, string> onError) : base(text, superpathVariables, errorContext, pathParams, onError) {
         CheckKeysAndValues(text, isMark ? "FDC" : "FBC");
     }
 }
@@ -370,10 +372,11 @@ public class SubpathParams : AbstractChildParams {
     public override double T_mm => Text.GetDouble('T') ?? base.T_mm;
     public override double O_mm => Text.GetDouble('O') ?? base.O_mm;
     public override string M => Text.GetString('M') ?? base.M;
-    public Variables Variables => Text.Variables;
+    public ActualVariables ActualVariables { get; }
 
-    public SubpathParams(ParamsText text, Variables superpathVariables, string errorContext, IParams pathParams, Action<string, string> onError) : base(text, superpathVariables, errorContext, pathParams, onError) {
+    public SubpathParams(ParamsText text, ActualVariables superpathVariables, string errorContext, IParams pathParams, Action<string, string> onError) : base(text, superpathVariables, errorContext, pathParams, onError) {
         CheckKeysAndValues(text, "TOMN>");
+        ActualVariables = new ActualVariables(text.VariableStrings);
     }
 }
 
@@ -382,7 +385,7 @@ public class ZProbeParams : AbstractChildParams {
     public string? L => Text.GetString('L');
     public override double Z_mmpmin => Text.GetDouble('Z') ?? base.Z_mmpmin;
 
-    public ZProbeParams(ParamsText text, Variables superpathVariables, string errorContext, IParams pathParams, Action<string, string> onError) : base(text, superpathVariables, errorContext, pathParams, onError) {
+    public ZProbeParams(ParamsText text, ActualVariables superpathVariables, string errorContext, IParams pathParams, Action<string, string> onError) : base(text, superpathVariables, errorContext, pathParams, onError) {
         CheckKeysAndValues(text, "TLZ");
     }
 }

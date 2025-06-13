@@ -64,9 +64,6 @@ public static class GeometryHelpers {
     public static Vector2 AsVector2(this Vector3 a)
         => a.Z.Near(0) ? new Vector2(a.X, a.Y) : throw new ArgumentOutOfRangeException($"**** ({a}).Z != 0 - cannot convert to Vector2");
 
-    public static Vector2 Value(this Vector2? a)
-        => a ?? throw new NullReferenceException();
-
     public static Vector2 Scaled(this Vector2 a, double f)
         => a / a.Modulus() * f;
 

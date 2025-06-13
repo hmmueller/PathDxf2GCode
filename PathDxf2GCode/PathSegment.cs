@@ -39,7 +39,7 @@ public abstract class PathSegment {
     public abstract Vector2 Start { get; }
     public abstract Vector2 End { get; }
 
-    public abstract void CreateParams(PathParams pathParams, Variables superpathVariables, string dxfFileName, Action<string, string> onError);
+    public abstract void CreateParams(PathParams pathParams, ActualVariables superpathVariables, string dxfFileName, Action<string, string> onError);
 
     public static void AssertNear(Vector2 a, Vector2 b, string errorContext) {
         GeometryHelpers.Assert(a.Near(b), errorContext, $"!{a.F3()}.Near({b.F3()})");
@@ -77,7 +77,7 @@ public class MillChain : PathSegment {
     public override Vector2 End
         => _segments.Last().End;
 
-    public override void CreateParams(PathParams pathParams, Variables superpathVariables, string dxfFileName, Action<string, string> onError) {
+    public override void CreateParams(PathParams pathParams, ActualVariables superpathVariables, string dxfFileName, Action<string, string> onError) {
         // [0] looks innocent, but with branching mill chains the "first" segment may not be easily identifiable by the user ...
         _params = new ChainParams(_segments[0].ParamsText, superpathVariables,
             MessageHandlerForEntities.Context(_segments[0].Source, _segments[0].Start, dxfFileName), pathParams, onError);
@@ -287,7 +287,7 @@ public class ChainSegment : IRawSegment {
     public ChainSegment ReversedSegment()
         => new ChainSegment(_geometry.CloneReversed(), MillType, Source, ParamsText, PathModel.BACKTRACK_ORDER);
 
-    internal void CreateParams(ChainParams chainParams, Variables superpathVariables, string dxfFileName, Action<string, string> onError) {
+    internal void CreateParams(ChainParams chainParams, ActualVariables superpathVariables, string dxfFileName, Action<string, string> onError) {
         _params = new MillParams(ParamsText, superpathVariables, MillType, MessageHandlerForEntities.Context(Source, Start, dxfFileName), chainParams, onError);
 
         // Also create geometries for support bars; done here once because
@@ -360,7 +360,7 @@ public class SweepSegment : AbstractSweepSegment {
         Order = order;
     }
 
-    public override void CreateParams(PathParams pathParams, Variables superpathVariables, string dxfFileName, Action<string, string> onError) {
+    public override void CreateParams(PathParams pathParams, ActualVariables superpathVariables, string dxfFileName, Action<string, string> onError) {
         _params = new SweepParams(ParamsText, superpathVariables, MessageHandlerForEntities.Context(Source, Start, dxfFileName), pathParams, onError);
     }
 }
@@ -372,7 +372,7 @@ public class BackSweepSegment : AbstractSweepSegment {
     public BackSweepSegment(EntityObject source, ParamsText pars, Vector2 start, Vector2 end) : base(source, pars, start, end) {
     }
 
-    public override void CreateParams(PathParams pathParams, Variables superpathVariables, string dxfFileName, Action<string, string> onError) {
+    public override void CreateParams(PathParams pathParams, ActualVariables superpathVariables, string dxfFileName, Action<string, string> onError) {
         _params = new BackSweepParams(ParamsText, superpathVariables, MessageHandlerForEntities.Context(Source, Start, dxfFileName), pathParams, onError);
     }
 }
@@ -383,9 +383,6 @@ public abstract class MarkOrMillPathSegment : PathSegmentWithParamsText<IParams>
     protected MarkOrMillPathSegment(EntityObject source, ParamsText paramsText, bool isMark) : base(source, paramsText) {
         _isMark = isMark;
     }
-
-    public double Bottom_mm
-        => _isMark ? _params!.D_mm : _params!.B_mm;
 }
 
 public class HelixSegment : PathSegmentWithParamsText<HelixParams>, IRawSegment {
@@ -394,9 +391,6 @@ public class HelixSegment : PathSegmentWithParamsText<HelixParams>, IRawSegment 
     public double Radius_mm { get; }
     public MillType MillType { get; }
     private IMillGeometry[]? _supportGeometries;
-
-    public double Bottom_mm
-        => MillType == MillType.Mark ? _params!.D_mm : _params!.B_mm;
 
     public HelixSegment(EntityObject source, ParamsText pars, Vector2 center, double radius_mm, MillType millType) : base(source, pars) {
         Center = center;
@@ -418,7 +412,7 @@ public class HelixSegment : PathSegmentWithParamsText<HelixParams>, IRawSegment 
 
     public IRawSegment ReversedSegmentAfterTurn() => new BackSweepSegment(Source, ParamsText, Center, Center);
 
-    public override void CreateParams(PathParams pathParams, Variables superpathVariables, string dxfFileName, Action<string, string> onError) {
+    public override void CreateParams(PathParams pathParams, ActualVariables superpathVariables, string dxfFileName, Action<string, string> onError) {
         string errorContext = MessageHandlerForEntities.Context(Source, Center, dxfFileName);
         _params = new HelixParams(ParamsText, superpathVariables, MillType, errorContext, pathParams, onError);
         if ((2 * Radius_mm).Gt(_params.A_mm)) {
@@ -522,7 +516,7 @@ public class DrillSegment : MarkOrMillPathSegment, IRawSegment {
 
     public IRawSegment ReversedSegmentAfterTurn() => new BackSweepSegment(Source, ParamsText, Center, Center);
 
-    public override void CreateParams(PathParams pathParams, Variables superpathVariables, string dxfFileName, Action<string, string> onError) {
+    public override void CreateParams(PathParams pathParams, ActualVariables superpathVariables, string dxfFileName, Action<string, string> onError) {
         _params = new DrillParams(ParamsText, superpathVariables, _isMark, MessageHandlerForEntities.Context(Source, Center, dxfFileName), pathParams, onError);
     }
 
@@ -568,7 +562,7 @@ public class SubPathSegment : PathSegmentWithParamsText<SubpathParams>, IRawSegm
     public IRawSegment ReversedSegmentAfterTurn()
         => new BackSweepSegment(Source, ParamsText, _end, _start);
 
-    public override void CreateParams(PathParams pathParams, Variables superpathVariables, string dxfFileName, Action<string, string> onError) {
+    public override void CreateParams(PathParams pathParams, ActualVariables superpathVariables, string dxfFileName, Action<string, string> onError) {
         string errorContext = MessageHandlerForEntities.Context(Source, Start, dxfFileName);
         _params = new SubpathParams(ParamsText, superpathVariables, errorContext, pathParams, onError);
     }
@@ -591,7 +585,7 @@ public class SubPathSegment : PathSegmentWithParamsText<SubpathParams>, IRawSegm
             throw new EmitGCodeException(errorContext, string.Format(Messages.PathSegment_CallDepthGt9_Path, name));
         }
 
-        PathModel? model = LoadInEmitGCode(name, _params!.Variables, dxfFileName, messages);
+        PathModel? model = LoadInEmitGCode(name, _params!.ActualVariables, dxfFileName, messages);
 
         if (model != null) {
             if (_params!.M != model.Params.M) {
@@ -600,6 +594,7 @@ public class SubPathSegment : PathSegmentWithParamsText<SubpathParams>, IRawSegm
             if (_params.O_mm != model.Params.O_mm) {
                 messages.AddError(dxfFileName, Messages.PathSegment_DifferingO_Caller_Path_Called, _params.O_mm, model.Name, model.Params.O_mm);
             }
+            model.Params.FormalVariables.CheckActualVariables(_params.ActualVariables, msg => messages.AddError(errorContext, msg));
 
             Transformation3 compound = t.Transform3(new Transformation2(model!.Start, model.End, _start, _end));
             gcodes.AddComment($"START Subpath {name} t={compound}", 2);
@@ -610,7 +605,7 @@ public class SubPathSegment : PathSegmentWithParamsText<SubpathParams>, IRawSegm
         return currPos;
     }
 
-    private PathModel? LoadInEmitGCode(PathName name, Variables variables, string currentDxfFile, MessageHandlerForEntities messages) {
+    private PathModel? LoadInEmitGCode(PathName name, ActualVariables variables, string currentDxfFile, MessageHandlerForEntities messages) {
         PathModel? model = _models.Load(name, variables, defaultSorNullForTplusO_mm: null, currentDxfFile, _options, _overlayTextForErrors, messages, out string searchedFiles);
 
         if (model == null) {
