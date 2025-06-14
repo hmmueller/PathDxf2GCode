@@ -6377,7 +6377,7 @@ AcDbMText
  72
          1
   1
-\W1.135072;M2x20 O2 B-0.5\PT2 I1.5     :D0~2\P:X?DV :Y?VD :ZD,V\P
+\W1.135072;M2x20 O2 B-0.5\PT2 I1.5     :D0~2\P:X?DV :Y?~\P     VD :ZD,V\P
   7
 Arial
  73

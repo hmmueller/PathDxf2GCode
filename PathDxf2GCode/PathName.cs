@@ -10,8 +10,12 @@ public readonly struct PathName {
 
     public PathName(string name, string fileNameForMessages) {
         // Paths in DXF have _ instead of . (e.g. in Caddy) ., * etc. -> transform back!
-        _name = Regex.Replace(name, DxfHelper.TILDE_SUFFIX_REGEX + "$", "", RegexOptions.IgnoreCase).Replace('_', '.');
+        _name = NameWithoutTildeSuffix(name);
         _fileNameForMessages = Path.GetFileName(fileNameForMessages);
+    }
+
+    public static string NameWithoutTildeSuffix(string name) {
+        return Regex.Replace(name, DxfHelper.TILDE_SUFFIX_REGEX + "$", "", RegexOptions.IgnoreCase).Replace('_', '.');
     }
 
     public readonly string AsString()

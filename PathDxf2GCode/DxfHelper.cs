@@ -36,7 +36,7 @@ public static class DxfHelper {
     }
 
     public static bool IsOnPathLayer(this EntityObject e, string pathNamePattern, string fileNameForMessages)
-        => Regex.IsMatch(new PathName(e.Layer.Name, fileNameForMessages).AsString(), "^" + pathNamePattern + "$", RegexOptions.IgnoreCase);
+        => Regex.IsMatch(PathName.NameWithoutTildeSuffix(e.Layer.Name), "^" + pathNamePattern + "$", RegexOptions.IgnoreCase);
 
     public static PathName? AsPathReference(this string text, string pathNamePattern, string fileNameForMessages) {
         Match m = Regex.Match(text, pathNamePattern, RegexOptions.IgnoreCase);

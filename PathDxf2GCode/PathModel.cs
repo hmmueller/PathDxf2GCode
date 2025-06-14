@@ -61,12 +61,12 @@ public class PathModel {
         private readonly Dictionary<PathName, (RawPathModel RawModel, string DxfFilePath)> _rawModels = new();
         private readonly Dictionary<(PathName, Variables), PathModel> _models = new();
 
-        public PathModel? Load(PathName name, ActualVariables variables, double? defaultSorNullForTplusO_mm, string currentDxfFile, Options options, string overlayTextForErrors, MessageHandlerForEntities messages, out string searchedFiles) {
+        public PathModel? Load(PathName name, ActualVariables variables, double? defaultSorNullForTplusO_mm, string currentDxfFile, Options options, string overlayTextForErrors, MessageHandlerForEntities messages, int nestingDepth, out string searchedFiles) {
             searchedFiles = "";
             if (!_models.ContainsKey((name, variables))) {
                 (RawPathModel? rawModel, string? dxfFilePath) = LoadRawModel(name, Path.GetDirectoryName(Path.GetFullPath(currentDxfFile)), options, overlayTextForErrors, messages, out searchedFiles);
                 if (rawModel != null) { // errors when rawModel==null were already registered
-                    PathModel? m = CreatePathModel(name, rawModel, defaultSorNullForTplusO_mm: defaultSorNullForTplusO_mm, variables, dxfFilePath!, options, messages);
+                    PathModel? m = CreatePathModel(name, rawModel, defaultSorNullForTplusO_mm: defaultSorNullForTplusO_mm, variables, dxfFilePath!, options, messages, nestingDepth);
                     if (m != null) { // errors when m==null were already registered
                         _models.Add((name, variables), m);
                     }
@@ -128,13 +128,13 @@ public class PathModel {
             return d == null ? new() : CollectSegments(d.Entities, layerLinetypes, this, dxfFilePath, options, messages);
         }
 
-        public SortedDictionary<string, PathModel> LoadAllModels(string dxfFilePath, double? globalSweepHeight_mm, 
-            Func<ParamsText, ActualVariables> getVariables, Options options, MessageHandlerForEntities messages) {
+        public SortedDictionary<string, PathModel> LoadAllModels(string dxfFilePath, double? globalSweepHeight_mm,
+            Func<ParamsText, ActualVariables> getVariables, Options options, MessageHandlerForEntities messages, int nestingDepth) {
             Dictionary<PathName, RawPathModel> rawModels = LoadRawModels(dxfFilePath, options, messages);
             SortedDictionary<string, PathModel> result = new();
             foreach (var kvp in rawModels) {
                 PathModel? model = Load(kvp.Key, getVariables(kvp.Value.ParamsText!),
-                                        globalSweepHeight_mm, dxfFilePath, options, "???", messages, out _);
+                                        globalSweepHeight_mm, dxfFilePath, options, "???", messages, nestingDepth, out _);
                 if (model != null) {
                     result.Add(kvp.Key.AsString(), model);
                 }
@@ -291,14 +291,14 @@ public class PathModel {
                 } else if (circle.Radius.Near(bitRadius_mm.Value)) {
                     bool isMark = IsLineType(layerLinetypes, circle, "DIVIDE");
                     if (isMark || IsLineType(layerLinetypes, circle, "CONTINUOUS")) {
-                        rawModel.RawSegments.Add(new DrillSegment(circle, circleText, center, isMark));
+                        rawModel.RawSegments.Add(new DrillSegment.RawSegment(circle, circleText, center, isMark));
                     } else {
                         messages.AddError(circle, center, dxfFilePath, Messages.PathModel_LineTypeNotSupported_LineType, LineTypeName(layerLinetypes, circle));
                     }
                 } else if (circle.Radius > bitRadius_mm.Value) {
                     MillType? millType = MillTypeFromLineType(layerLinetypes, circle);
                     if (millType.HasValue) {
-                        rawModel.RawSegments.Add(new HelixSegment(circle, circleText, center, circle.Radius, millType.Value));
+                        rawModel.RawSegments.Add(new HelixSegment.RawSegment(circle, circleText, center, circle.Radius, millType.Value));
                     } else {
                         messages.AddError(circle, center, dxfFilePath, Messages.PathModel_LineTypeNotSupported_LineType, LineTypeName(layerLinetypes, circle));
                     }
@@ -309,7 +309,7 @@ public class PathModel {
         }
 
         // 4b. Lines
-        List<SubPathSegment> subPaths = new();
+        List<SubPathSegment.RawSegment> subPaths = new();
         foreach (var line in lines) {
             ParamsText lineText = GetText(line);
             double order = lineText.GetN() ?? LAST_ORDER;
@@ -336,22 +336,19 @@ public class PathModel {
 
     private static void HandleLineOrArc(Dictionary<string, Linetype> layerLinetypes, string dxfFilePath,
         Collection subPathDefs, Options options, MessageHandlerForEntities messages,
-        List<SubPathSegment> subPaths, EntityObject lineOrArc, Vector2 start, Vector2 end,
+        List<SubPathSegment.RawSegment> subPaths, EntityObject lineOrArc, Vector2 start, Vector2 end,
         ParamsText text, RawPathModel rawModel, double order, IMillGeometry geometry) {
-        void OnError(string s) {
-            messages.AddError(rawModel.Name.AsString(), s);
-        }
-
+       
         MillType? millType = MillTypeFromLineType(layerLinetypes, lineOrArc);
         if (millType.HasValue) {
-            rawModel.RawSegments.Add(new ChainSegment(geometry, millType.Value, lineOrArc, text, order));
+            rawModel.RawSegments.Add(new ChainSegment.RawSegment(geometry, millType.Value, lineOrArc, text, order));
         } else if (IsLineType(layerLinetypes, lineOrArc, "DASHDOT")) { // Subpath
-            var s = new SubPathSegment(lineOrArc, text, start, end, options, order, subPathDefs, dxfFilePath, OnError);
+            var s = new SubPathSegment.RawSegment(lineOrArc, text, start, end, options, order, subPathDefs, dxfFilePath);
             rawModel.RawSegments.Add(s);
             subPaths.Add(s);
         } else if (IsLineType(layerLinetypes, lineOrArc, "DASHED")
             || IsLineType(layerLinetypes, lineOrArc, "HIDDEN")) { // Sweep
-            rawModel.RawSegments.Add(new SweepSegment(lineOrArc, text, start, end, order));
+            rawModel.RawSegments.Add(new SweepSegment.RawSegment(lineOrArc, text, start, end, order));
         } else {
             messages.AddError(lineOrArc, start, dxfFilePath, Messages.PathModel_LineTypeNotSupported_LineType, LineTypeName(layerLinetypes, lineOrArc));
         }
@@ -432,25 +429,42 @@ public class PathModel {
     }
 
     private static Circle2? GetOverlapSurrounding(Text text, string dxfFilePath, MessageHandlerForEntities messages) {
+        Vector2 position = text.Position.AsVector2();
         if (text.IsBackward
             || text.IsUpsideDown
-            || !text.Rotation.Near(0)
-            || text.Alignment != TextAlignment.BaselineLeft && text.Alignment != TextAlignment.TopLeft) {
-            messages.AddError(text, text.Position.AsVector2(), dxfFilePath, Messages.PathModel_TextLayout_Text, text.Value);
+            || !text.Rotation.Near(0)) {
+            messages.AddError(text, position, dxfFilePath, Messages.PathModel_TextLayout_Text, text.Value);
             return null;
         } else {
             double guessedWidth = text.Height * text.Value.Length * 0.6;
-            Vector2 half = new Vector2(guessedWidth,
-                text.Alignment == TextAlignment.BaselineLeft ? text.Height : -text.Height) / 2;
-            return new Circle2(text.Position.AsVector2() + half, half.Modulus());
+            double guessedHeight = text.Height;
+            Vector2? offset =
+                text.Alignment switch {
+                    TextAlignment.BaselineLeft => new Vector2(guessedWidth, guessedHeight) / 2,
+                    //TextAlignment.BaselineCenter =>
+                    //TextAlignment.BaselineRight  =>
+                    //TextAlignment.MiddleLeft     =>
+                    TextAlignment.MiddleCenter => new Vector2(0, 0),
+                    //TextAlignment.MiddleRight    =>
+                    TextAlignment.TopLeft => new Vector2(guessedWidth, -guessedHeight) / 2,
+                    //TextAlignment.TopCenter      =>
+                    //TextAlignment.TopRight       =>
+                    _ => null
+                };
+            if (offset == null) {
+                messages.AddError(text, position, dxfFilePath, Messages.PathModel_TextLayout_Text, text.Value);
+                return null;
+            } else {
+                return new Circle2(position + offset.Value,
+                                   new Vector2(guessedWidth, guessedHeight).Modulus() / 2);
+            }
         }
     }
 
     private static Circle2? GetOverlapSurrounding(MText text, string dxfFilePath, MessageHandlerForEntities messages) {
-        if (!text.Rotation.Between(-1, 1) && !text.Rotation.Between(359, 361)
-            || text.AttachmentPoint != MTextAttachmentPoint.BottomLeft
-               && text.AttachmentPoint != MTextAttachmentPoint.TopLeft) {
-            messages.AddError(text, text.Position.AsVector2(), dxfFilePath, Messages.PathModel_TextLayout_Text, text.Value);
+        Vector2 position = text.Position.AsVector2();
+        if (!text.Rotation.Between(-1, 1) && !text.Rotation.Between(359, 361)) {
+            messages.AddError(text, position, dxfFilePath, Messages.PathModel_TextLayout_Text, text.Value);
             return null;
         } else {
             string[] lines = text.PlainText().Split('\n');
@@ -458,17 +472,33 @@ public class PathModel {
             double guessedWidth = text.Height * lines.Max(s => s.Length) * 0.6;
             double guessedHeight = text.Height * lines.Length;
 
-            Vector2 half = new Vector2(guessedWidth,
-                text.AttachmentPoint == MTextAttachmentPoint.BottomLeft ? guessedHeight : -guessedHeight) / 2;
+            Vector2? offset =
+                text.AttachmentPoint switch {
+                    MTextAttachmentPoint.BottomLeft => new Vector2(guessedWidth, guessedHeight) / 2,
+                    //MTextAttachmentPoint.BaselineCenter =>
+                    //MTextAttachmentPoint.BaselineRight  =>
+                    //MTextAttachmentPoint.MiddleLeft     =>
+                    MTextAttachmentPoint.MiddleCenter => new Vector2(0, 0),
+                    //MTextAttachmentPoint.MiddleRight    =>
+                    MTextAttachmentPoint.TopLeft => new Vector2(guessedWidth, -guessedHeight) / 2,
+                    //MTextAttachmentPoint.TopCenter      =>
+                    //MTextAttachmentPoint.TopRight       =>
+                    _ => null
+                };
+            if (offset == null) {
+                messages.AddError(text, position, dxfFilePath, Messages.PathModel_TextLayout_Text, text.Value);
+                return null;
+            } else {
+                // Circle should not be much larger than text
+                double radius = Math.Min(new Vector2(guessedWidth, guessedHeight).Modulus() / 2, guessedHeight * 0.7); 
 
-            double radius = Math.Min(half.Modulus(), guessedHeight * 0.7); // Circle should not be much larger than text
-
-            return new Circle2(text.Position.AsVector2() + half, radius);
+                return new Circle2(position + offset.Value, radius);
+            }
         }
     }
 
     private static PathModel? CreatePathModel(PathName name, RawPathModel rawModel, double? defaultSorNullForTplusO_mm,
-        ActualVariables superpathVariables, string dxfFilePath, Options options, MessageHandlerForEntities messages) {
+        ActualVariables superpathVariables, string dxfFilePath, Options options, MessageHandlerForEntities messages, int nestingDepth) {
         if (rawModel.Start == null) {
             messages.AddError(name, Messages.PathModel_MissingStart);
         }
@@ -542,11 +572,14 @@ public class PathModel {
             }
         }
 
-        // B. Create MillChains
+        // B. Create PathSegments
+        ILeafSegment[] bottomSegments = orderedRawSegments.Select(r => r.CreateSegment()).ToArray();
+
+        // C. Create MillChains
         List<PathSegment> segments = new();
         {
             List<ChainSegment> currChain = new();
-            foreach (var s in orderedRawSegments) {
+            foreach (var s in bottomSegments) {
                 if (s is ChainSegment c) {
                     currChain.Add(c);
                 } else {
@@ -564,14 +597,13 @@ public class PathModel {
             }
         }
 
-        // C. Create Params
+        // D. Create Params
         void OnError(string context, string msg) {
             messages.AddError(context, msg);
         }
         PathParams pathParams = new(rawModel.ParamsText!, superpathVariables, defaultSorNullForTplusO_mm,
             MessageHandlerForEntities.Context(rawModel.StartObject!, rawModel.Start.Value, dxfFilePath), options, OnError);
         {
-
             foreach (var s in segments) {
                 s.CreateParams(pathParams, superpathVariables, dxfFilePath, OnError);
             }
@@ -581,23 +613,13 @@ public class PathModel {
             }
         }
 
-        // D. Sort _zProbes
-        List<ZProbe> orderedZProbes = new();
-        {
-            Vector2 currZEnd = rawModel.Start.Value;
-            while (rawModel.ZProbes.Count > orderedZProbes.Count) {
-                ZProbe nearestZ = rawModel.ZProbes.Except(orderedZProbes).MinBy(z => (z.Center - currZEnd).Modulus())!;
-                orderedZProbes.Add(nearestZ);
-                currZEnd = nearestZ.Center;
-            }
-            int i = 51;
-            foreach (var zProbe in orderedZProbes) {
-                zProbe.SetName("#" + i++);
-            }
+        // E. Connect Subpaths to PathModels
+        foreach (var s in segments.OfType<SubPathSegment>()) {
+            s.ConnectModel(dxfFilePath, messages, nestingDepth);
         }
 
-        // Z. Finally, create PathModel
-        return new PathModel(rawModel.Name, pathParams, rawModel.Start.Value, rawModel.End.Value, segments, orderedZProbes, dxfFilePath);
+        // Z. Create PathModel
+        return new PathModel(rawModel.Name, pathParams, rawModel.Start.Value, rawModel.End.Value, segments, rawModel.ZProbes, dxfFilePath);
     }
 
     public bool IsEmpty() => !_segments.Any();
@@ -605,14 +627,12 @@ public class PathModel {
     public Transformation3 CreateTransformation()
         => new Transformation3(Start, Start + Vector2.UnitX, Vector2.Zero, Vector2.UnitX, _zProbes);
 
-    public bool HasZProbes => _zProbes.Any();
-
     public Vector3 EmitMillingGCode(Vector3 currPos, Transformation3 t, double globalS_mm,
-        List<GCode> gcodes, string dxfFileName, MessageHandlerForEntities messages, int depth) {
+        List<GCode> gcodes, string dxfFileName, MessageHandlerForEntities messages) {
 
         foreach (var s in _segments) {
             try {
-                currPos = s.EmitGCode(currPos, t, globalS_mm, gcodes, dxfFileName, messages, depth);
+                currPos = s.EmitGCode(currPos, t, globalS_mm, gcodes, dxfFileName, messages);
             } catch (EmitGCodeException ex) {
                 messages.AddError(ex.ErrorContext, ex.Message);
             }
@@ -620,29 +640,41 @@ public class PathModel {
         return currPos;
     }
 
-    public void WriteEmptyZ(StreamWriter sw) {
-        foreach (var z in _zProbes) {
-            // Line example - separators are # and =:
-            // ([77.038 191.859]/L:ZA/T=5.000) #51=
-            // <        0             > <  1  > <> < 3 >
-            sw.WriteLine((z.Center.F3() + (z.L == null ? "" : "/L:" + z.L) + "/T=" + z.T_mm.F3()).AsComment(0) + " " + z.Name + "=");
-        }
+    public static Vector3 EmitZProbingGCode(Vector3 currPos, double globalS_mm, List<GCode> gcodes, string dxfFileName, MessageHandlerForEntities messages) {
+
+        return currPos;
     }
 
-    public Vector3 EmitZProbingGCode(Vector3 currPos, double globalS_mm, List<GCode> gcodes, string dxfFileName, MessageHandlerForEntities messages) {
-        double sweepHeight = currPos.Z;
-        var t = new Transformation2(Start, Start + Vector2.UnitX, Vector2.Zero, Vector2.UnitX);
-        foreach (var z in _zProbes) {
-            currPos = GCodeHelpers.SweepFromTo(currPos, t.Transform(z.Center).AsVector3(sweepHeight), globalS_mm, gcodes);
-            try {
-                currPos = z.EmitGCode(currPos, t, gcodes, dxfFileName, messages);
-                if (!currPos.Z.Near(sweepHeight)) {
-                    throw new Exception($"Internal Error - {currPos.Z} <> {sweepHeight}");
-                }
-            } catch (EmitGCodeException ex) {
-                messages.AddError(ex.ErrorContext, ex.Message);
+    public List<(ZProbe ZProbe, Vector2 TransformedCenter)> CollectAndOrderAllZProbes() {
+        // A. Collect all zProbes
+        HashSet<(ZProbe ZProbe, Vector2 TransformedCenter)> openZProbes = CollectZProbes(new Transformation2(Start, Start + Vector2.UnitX, Vector2.Zero, Vector2.UnitX)).ToHashSet();
+
+        // B. Order them
+        List<(ZProbe ZProbe, Vector2 TransformedCenter)> orderedZProbes = new();
+        {
+            Vector2 currZEnd = Vector2.Zero;
+            while (openZProbes.Any()) {
+                (ZProbe ZProbe, Vector2 TransformedCenter) nearestZ = openZProbes.MinBy(z => (z.TransformedCenter - currZEnd).Modulus())!;
+                orderedZProbes.Add(nearestZ);
+                currZEnd = nearestZ.TransformedCenter;
+                openZProbes.Remove(nearestZ);
             }
         }
-        return currPos;
+
+        // C. Christen them
+        int i = 51;
+        foreach (var zc in orderedZProbes) {
+            zc.ZProbe.SetName("#" + i++);
+        }
+
+        return orderedZProbes;
+    }
+
+    internal IEnumerable<(ZProbe ZProbe, Vector2 TransformedCenter)> CollectZProbes(Transformation2 t) {
+        List<(ZProbe ZProbe, Vector2 TransformedCenter)> result = _zProbes.Select(z => (z, t.Transform(z.Center))).ToList();
+        foreach (var s in _segments.OfType<SubPathSegment>()) {
+            result.AddRange(s.CollectZProbes(t));
+        }
+        return result;
     }
 }

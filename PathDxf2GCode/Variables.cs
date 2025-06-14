@@ -142,9 +142,7 @@ public class ActualVariables : Variables {
         return s;
     }
 
-    public void InterpolateInto(Dictionary<char, string> variableStrings) {
-        foreach (var kvp in variableStrings) {
-            variableStrings[kvp.Key] = Interpolate(kvp.Value);
-        }
+    public Dictionary<char, string> InterpolateInto(Dictionary<char, string> variableStrings) {
+        return variableStrings.ToDictionary(kvp => kvp.Key, kvp => Interpolate(kvp.Value));
     }
 }

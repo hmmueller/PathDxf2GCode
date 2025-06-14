@@ -1,6 +1,7 @@
 ﻿namespace de.hmmueller.PathDxf2GCode;
 
 using System.Globalization;
+using System.Text.RegularExpressions;
 using netDxf;
 using netDxf.Entities;
 
@@ -17,15 +18,12 @@ public class ParamsText {
 
     public static readonly ParamsText EMPTY = new("", "", null, Vector2.Zero, Vector2.Zero, 0);
 
-    private Dictionary<char, string>? _stringValues;
-    private Dictionary<char, double>? _doubleValues;
-
     public ParamsText(string text, EntityObject? source, Vector2? position, Vector2 textCenter, double textRadius)
         : this(text, source?.CodeName + " @ " + position?.F3(), source?.Layer.Name, position ?? Vector2.Zero, textCenter, textRadius) {
     }
 
     private ParamsText(string text, string context, string? layerName, Vector2 position, Vector2 textCenter, double textRadius)
-        : this(text, context, layerName, position, text
+        : this(text, context, layerName, position, Regex.Replace(text, @"~([\r\n]\s*)+", "")
             .Split(['\n', ' '])
             .Select(s => s.Trim())
             .Where(s => !string.IsNullOrEmpty(s))
@@ -59,37 +57,23 @@ public class ParamsText {
     public IEnumerable<char> Keys
         => _rawStrings.Select(kv => kv.Key);
 
-    public string? GetString(char key)
-        => _stringValues!.TryGetValue(key, out string? s) ? s : null;
-
-    public double? GetDouble(char key)
-        => _doubleValues!.TryGetValue(key, out double d) ? d : null;
-
-    public double GetDouble(char key, Func<string, double> errorAndNull)
-        => _doubleValues!.TryGetValue(key, out double d) ? d : errorAndNull($"{key}-Wert fehlt");
-
     public void AddError(MessageHandlerForEntities mh, string errorContext, string message) {
         if (_uniqueErrors.Add(message)) { // Each error should be output only once
             mh.AddError(errorContext, message);
         }
     }
 
-    public void InterpolateVariablesAndCreateValues(ActualVariables variables) {
-        if (_stringValues == null) {
-            // ParamsText objects can be references by multiple segments; this is currently the case for
-            // * the ParamsText.EMPTY object
-            // * ParamsTexts for BackSweeps (shared with the corresponding forward moves)
-            _stringValues = _rawStrings.ToDictionary(kv => kv.Key, kv => variables.Interpolate(kv.Value));
-            _doubleValues = _stringValues
-                .Select(kvp => new {
-                    kvp.Key,
-                    Value = double.TryParse(kvp.Value.Replace(',', '.').Trim(),
-                                            CultureInfo.InvariantCulture, out double d) ? d : (double?)null
-                })
-                .Where(kvp => kvp.Value != null)
-                .ToDictionary(kvp => kvp.Key, kvp => (double)kvp.Value!);
-            variables.InterpolateInto(VariableStrings);
-        }
+    public void InterpolateVariablesAndCreateValues(ActualVariables variables, 
+        out Dictionary<char, string> stringValues, out Dictionary<char, double> doubleValues) {
+        stringValues = _rawStrings.ToDictionary(kv => kv.Key, kv => variables.Interpolate(kv.Value));
+        doubleValues = stringValues
+            .Select(kvp => new {
+                kvp.Key,
+                Value = double.TryParse(kvp.Value.Replace(',', '.').Trim(),
+                                        CultureInfo.InvariantCulture, out double d) ? d : (double?)null
+            })
+            .Where(kvp => kvp.Value != null)
+            .ToDictionary(kvp => kvp.Key, kvp => (double)kvp.Value!);
     }
 
     internal int? GetN()
@@ -132,6 +116,18 @@ public abstract class AbstractParams : IParams {
     private readonly Action<string, string> _onError;
     private readonly HashSet<string> _uniqueErrors = new();
 
+    private Dictionary<char, string>? _stringValues;
+    private Dictionary<char, double>? _doubleValues;
+
+    public string? GetString(char key)
+        => _stringValues!.TryGetValue(key, out string? s) ? s : null;
+
+    public double? GetDouble(char key)
+        => _doubleValues!.TryGetValue(key, out double d) ? d : null;
+
+    public double GetDouble(char key, Func<string, double> errorAndNull)
+        => _doubleValues!.TryGetValue(key, out double d) ? d : errorAndNull($"{key}-Wert fehlt");
+
     protected void OnError(string msg) {
         Error(msg);
     }
@@ -142,7 +138,7 @@ public abstract class AbstractParams : IParams {
     }
 
     protected AbstractParams(ParamsText text, ActualVariables superpathVariables, string errorContext, Action<string, string> onError) {
-        text.InterpolateVariablesAndCreateValues(superpathVariables);
+        text.InterpolateVariablesAndCreateValues(superpathVariables, out _stringValues, out _doubleValues);
         Text = text;
         _errorContext = errorContext;
         _onError = onError;
@@ -194,12 +190,12 @@ public abstract class AbstractParams : IParams {
         }
     }
 
-    protected static string GetString(ParamsText text, char key, Action<string> onError) {
+    protected string GetString(ParamsText text, char key, Action<string> onError) {
         string MissingOnError(string s) {
             onError(s);
             return "***Missing***";
         }
-        return text.GetString(key) ?? MissingOnError(string.Format(Messages.Params_MissingKey_Key, key));
+        return GetString(key) ?? MissingOnError(string.Format(Messages.Params_MissingKey_Key, key));
     }
 
     public abstract double F_mmpmin { get; }
@@ -229,27 +225,27 @@ public abstract class AbstractParams : IParams {
 public class PathParams : AbstractParams {
     private readonly Options _options;
 
-    public override double F_mmpmin => Text.GetDouble('F') ?? _options.GlobalFeedRate_mmpmin;
-    public override double? RawB_mm => Text.GetDouble('B');
-    public override double? RawD_mm => Text.GetDouble('D');
-    public override double? RawP_mm => Text.GetDouble('P');
-    public override double? RawU_mm => Text.GetDouble('U');
-    public override int? RawC => (int?)Text.GetDouble('C');
-    public override double? RawI_mm => Text.GetDouble('I');
+    public override double F_mmpmin => GetDouble('F') ?? _options.GlobalFeedRate_mmpmin;
+    public override double? RawB_mm => GetDouble('B');
+    public override double? RawD_mm => GetDouble('D');
+    public override double? RawP_mm => GetDouble('P');
+    public override double? RawU_mm => GetDouble('U');
+    public override int? RawC => (int?)GetDouble('C');
+    public override double? RawI_mm => GetDouble('I');
     public override double S_mm { get; }
     public override double A_mm { get; }
     public override double V_mmpmin => _options.GlobalSweepRate_mmpmin;
-    public override double T_mm => Text.GetDouble('T', OnErrorNaN);
-    public override double O_mm => Text.GetDouble('O', OnErrorNaN);
+    public override double T_mm => GetDouble('T', OnErrorNaN);
+    public override double O_mm => GetDouble('O', OnErrorNaN);
     public override string M => GetString(Text, 'M', OnError);
-    public override double Z_mmpmin => Text.GetDouble('Z') ?? _options.GlobalProbeRate_mmpmin;
-    public override double? W_mm => Text.GetDouble('W');
+    public override double Z_mmpmin => GetDouble('Z') ?? _options.GlobalProbeRate_mmpmin;
+    public override double? W_mm => GetDouble('W');
     public FormalVariables FormalVariables { get; }
 
     public PathParams(ParamsText text, ActualVariables superpathVariables, double? defaultSorNullForTplusO_mm, string errorContext, Options options, Action<string, string> onError) : base(text, superpathVariables, errorContext, onError) {
         _options = options;
-        S_mm = Text.GetDouble('S') ?? defaultSorNullForTplusO_mm ?? T_mm + O_mm;
-        A_mm = Text.GetDouble('A') ?? 4 * O_mm;
+        S_mm = GetDouble('S') ?? defaultSorNullForTplusO_mm ?? T_mm + O_mm;
+        A_mm = GetDouble('A') ?? 4 * O_mm;
 
         CheckKeysAndValues(text, "FBDCISTOMPUZAW");
         if (RawD_mm.HasValue && RawB_mm.HasValue && RawB_mm.Value.Ge(RawD_mm.Value)) {
@@ -275,7 +271,7 @@ public abstract class AbstractChildParams : AbstractParams {
     public override double? RawU_mm => _parent.RawU_mm;
     public override int? RawC => _parent.RawC;
     public override double? RawI_mm => _parent.RawI_mm;
-    public override double S_mm => Text.GetDouble('S') ?? _parent.S_mm;
+    public override double S_mm => GetDouble('S') ?? _parent.S_mm;
     public override double V_mmpmin => _parent.V_mmpmin;
     public override double T_mm => _parent.T_mm;
     public override double O_mm => _parent.O_mm;
@@ -291,9 +287,9 @@ public abstract class AbstractChildParams : AbstractParams {
 
 public class ChainParams : AbstractChildParams, IParams {
     public const string KEYS = "NICW";
-    public override int? RawC => (int?)Text.GetDouble('C') ?? base.RawC;
-    public override double? RawI_mm => Text.GetDouble('I') ?? base.RawI_mm;
-    public override double? W_mm => Text.GetDouble('W') ?? base.W_mm;
+    public override int? RawC => (int?)GetDouble('C') ?? base.RawC;
+    public override double? RawI_mm => GetDouble('I') ?? base.RawI_mm;
+    public override double? W_mm => GetDouble('W') ?? base.W_mm;
 
     public ChainParams(ParamsText text, ActualVariables superpathVariables, string errorContext, IParams pathParams, Action<string, string> onError) : base(text.LimitedTo(KEYS), superpathVariables, errorContext, pathParams, onError) {
         CheckKeysAndValues(text, KEYS + MillParams.MILL_KEYS + MillParams.MARK_KEYS);
@@ -316,11 +312,11 @@ public class MillParams : AbstractChildParams {
     public const string MILL_KEYS = "FBSN";
     public const string MARK_KEYS = "FDSN";
     public const string SUPPORT_KEYS = "FDBSNPU";
-    public override double F_mmpmin => Text.GetDouble('F') ?? base.F_mmpmin;
-    public override double? RawB_mm => Text.GetDouble('B') ?? base.RawB_mm;
-    public override double? RawD_mm => Text.GetDouble('D') ?? base.RawD_mm;
-    public override double? RawP_mm => Text.GetDouble('P') ?? base.RawP_mm;
-    public override double? RawU_mm => Text.GetDouble('U') ?? base.RawU_mm;
+    public override double F_mmpmin => GetDouble('F') ?? base.F_mmpmin;
+    public override double? RawB_mm => GetDouble('B') ?? base.RawB_mm;
+    public override double? RawD_mm => GetDouble('D') ?? base.RawD_mm;
+    public override double? RawP_mm => GetDouble('P') ?? base.RawP_mm;
+    public override double? RawU_mm => GetDouble('U') ?? base.RawU_mm;
 
     public MillParams(ParamsText text, ActualVariables superpathVariables, MillType millType, string errorContext, IParams chainParams, Action<string, string> onError) : base(text.LimitedTo(
         millType switch {
@@ -338,12 +334,12 @@ public class HelixParams : AbstractChildParams {
     public const string MARK_KEYS = "FDI";
     public const string SUPPORT_KEYS = "FDBIPU";
 
-    public override double F_mmpmin => Text.GetDouble('F') ?? base.F_mmpmin;
-    public override double? RawB_mm => Text.GetDouble('B') ?? base.RawB_mm;
-    public override double? RawD_mm => Text.GetDouble('D') ?? base.RawD_mm;
-    public override double? RawI_mm => Text.GetDouble('I') ?? base.RawI_mm;
-    public override double? RawP_mm => Text.GetDouble('P') ?? base.RawP_mm;
-    public override double? RawU_mm => Text.GetDouble('U') ?? base.RawU_mm;
+    public override double F_mmpmin => GetDouble('F') ?? base.F_mmpmin;
+    public override double? RawB_mm => GetDouble('B') ?? base.RawB_mm;
+    public override double? RawD_mm => GetDouble('D') ?? base.RawD_mm;
+    public override double? RawI_mm => GetDouble('I') ?? base.RawI_mm;
+    public override double? RawP_mm => GetDouble('P') ?? base.RawP_mm;
+    public override double? RawU_mm => GetDouble('U') ?? base.RawU_mm;
 
     public HelixParams(ParamsText text, ActualVariables superpathVariables, MillType millType, string errorContext, IParams pathParams, Action<string, string> onError) : base(text, superpathVariables, errorContext, pathParams, onError) {
         CheckKeysAndValues(text,
@@ -358,10 +354,10 @@ public class HelixParams : AbstractChildParams {
 }
 
 public class DrillParams : AbstractChildParams {
-    public override double F_mmpmin => Text.GetDouble('F') ?? base.F_mmpmin;
-    public override double? RawB_mm => Text.GetDouble('B') ?? base.RawB_mm;
-    public override double? RawD_mm => Text.GetDouble('D') ?? base.RawD_mm;
-    public override int? RawC => (int?)Text.GetDouble('C') ?? base.RawC;
+    public override double F_mmpmin => GetDouble('F') ?? base.F_mmpmin;
+    public override double? RawB_mm => GetDouble('B') ?? base.RawB_mm;
+    public override double? RawD_mm => GetDouble('D') ?? base.RawD_mm;
+    public override int? RawC => (int?)GetDouble('C') ?? base.RawC;
 
     public DrillParams(ParamsText text, ActualVariables superpathVariables, bool isMark, string errorContext, IParams pathParams, Action<string, string> onError) : base(text, superpathVariables, errorContext, pathParams, onError) {
         CheckKeysAndValues(text, isMark ? "FDC" : "FBC");
@@ -369,21 +365,21 @@ public class DrillParams : AbstractChildParams {
 }
 
 public class SubpathParams : AbstractChildParams {
-    public override double T_mm => Text.GetDouble('T') ?? base.T_mm;
-    public override double O_mm => Text.GetDouble('O') ?? base.O_mm;
-    public override string M => Text.GetString('M') ?? base.M;
+    public override double T_mm => GetDouble('T') ?? base.T_mm;
+    public override double O_mm => GetDouble('O') ?? base.O_mm;
+    public override string M => GetString('M') ?? base.M;
     public ActualVariables ActualVariables { get; }
 
     public SubpathParams(ParamsText text, ActualVariables superpathVariables, string errorContext, IParams pathParams, Action<string, string> onError) : base(text, superpathVariables, errorContext, pathParams, onError) {
         CheckKeysAndValues(text, "TOMN>");
-        ActualVariables = new ActualVariables(text.VariableStrings);
+        ActualVariables = new ActualVariables(superpathVariables.InterpolateInto(text.VariableStrings));
     }
 }
 
 public class ZProbeParams : AbstractChildParams {
-    public override double T_mm => Text.GetDouble('T') ?? base.T_mm;
-    public string? L => Text.GetString('L');
-    public override double Z_mmpmin => Text.GetDouble('Z') ?? base.Z_mmpmin;
+    public override double T_mm => GetDouble('T') ?? base.T_mm;
+    public string? L => GetString('L');
+    public override double Z_mmpmin => GetDouble('Z') ?? base.Z_mmpmin;
 
     public ZProbeParams(ParamsText text, ActualVariables superpathVariables, string errorContext, IParams pathParams, Action<string, string> onError) : base(text, superpathVariables, errorContext, pathParams, onError) {
         CheckKeysAndValues(text, "TLZ");
