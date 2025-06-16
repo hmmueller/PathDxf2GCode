@@ -18,19 +18,16 @@ public interface IRawSegment {
     double Length
         => Vector2.Distance(Start, End);
 
-    IRawSegment ReversedSegmentAfterTurn();
-
     public Vector2 OppositeEndOf(Vector2 v)
         => v.Near(Start) ? End : Start;
 
-    public void AddTo(List<IRawSegment> result, HashSet<IRawSegment> traversed, Stack<IRawSegment>? backtrackForTurns, ref Vector2 currEnd) {
+    public void AddTo(List<IRawSegment> result, HashSet<IRawSegment> traversed, ref Vector2 currEnd) {
         if (End.Near(currEnd)) {
             Reverse();
         }
         result.Add(this);
         currEnd = OppositeEndOf(currEnd);
         traversed.Add(this);
-        backtrackForTurns?.Push(this);
     }
 
     ILeafSegment CreateSegment();
@@ -97,7 +94,6 @@ public class MillChain : PathSegment {
         => _segments.Last().End;
 
     public override void CreateParams(PathParams pathParams, ActualVariables superpathVariables, string dxfFileName, Action<string, string> onError) {
-        // [0] looks innocent, but with branching mill chains the "first" segment may not be easily identifiable by the user ...
         _params = new ChainParams(_segments[0].ParamsText, superpathVariables,
             MessageHandlerForEntities.Context(_segments[0].Source, _segments[0].Start, dxfFileName), pathParams, onError);
         foreach (var s in _segments) {
@@ -298,13 +294,7 @@ public class ChainSegment : ILeafSegment {
         public void Reverse() {
             Geometry = Geometry.CloneReversed();
         }
-
-        public IRawSegment ReversedSegmentAfterTurn()
-            => ReversedSegment();
-
-        public RawSegment ReversedSegment()
-            => new RawSegment(Geometry.CloneReversed(), MillType, Source, ParamsText, PathModel.BACKTRACK_ORDER);
-
+        
         public ILeafSegment CreateSegment() => new ChainSegment(this);
     }
 
@@ -357,52 +347,26 @@ public class ChainSegment : ILeafSegment {
     }
 }
 
-public abstract class AbstractSweepSegment<TRawSegment> : PathSegmentWithParamsText<TRawSegment, IParams>, ILeafSegment
-    where TRawSegment : AbstractSweepSegment<TRawSegment>.RawSegment {
+public class SweepSegment : PathSegmentWithParamsText<SweepSegment.RawSegment, IParams>, ILeafSegment {
+    public new class RawSegment : PathSegmentWithParamsText<RawSegment, IParams>.RawSegment, IRawSegment {
+        public int Preference => 5;
 
-    public new abstract class RawSegment : PathSegmentWithParamsText<TRawSegment, IParams>.RawSegment {
         private Vector2 _start;
         private Vector2 _end;
 
         public override Vector2 Start => _start;
         public override Vector2 End => _end;
-
-        protected RawSegment(EntityObject source, ParamsText pars, Vector2 start, Vector2 end) : base(source, pars) {
-            _start = start;
-            _end = end;
-        }
+        public double Order { get; }
 
         public void Reverse() {
             (_start, _end) = (_end, _start);
         }
 
-        public abstract double Order { get; }
 
-        public int Preference => 5;
-
-        public IRawSegment ReversedSegmentAfterTurn()
-            => new BackSweepSegment.RawSegment(Source, ParamsText, End, Start);
-    }
-
-    public override Vector3 EmitGCode(Vector3 currPos, Transformation3 t, double globalS_mm,
-                                      List<GCode> gcodes, string dxfFileName, MessageHandlerForEntities messages) {
-        AssertNear(currPos.XY(), t.Transform(Start), MessageHandlerForEntities.Context(Source, Start, dxfFileName));
-
-        Vector2 target = t.Transform(End);
-        double s_mm = _params!.S_mm;
-        GCodeHelpers.SweepAndDrillSafelyFromTo(currPos, target.AsVector3(s_mm), t_mm: _params!.T_mm,
-                                               s_mm: s_mm, globalS_mm: globalS_mm, f_mmpmin: _params!.F_mmpmin,
-                                               backtracking: Raw.Order == PathModel.BACKTRACK_ORDER, t, gcodes);
-        return target.AsVector3(_params!.S_mm);
-    }
-}
-
-public class SweepSegment : AbstractSweepSegment<SweepSegment.RawSegment> {
-    public new class RawSegment : AbstractSweepSegment<RawSegment>.RawSegment, IRawSegment {
-        public override double Order { get; }
-
-        public RawSegment(EntityObject source, ParamsText pars, Vector2 start, Vector2 end, double order) : base(source, pars, start, end) {
+        public RawSegment(EntityObject source, ParamsText pars, Vector2 start, Vector2 end, double order) : base(source, pars) {
             Order = order;
+            _start = start;
+            _end = end;
         }
 
         public ILeafSegment CreateSegment() => new SweepSegment(this);
@@ -417,27 +381,17 @@ public class SweepSegment : AbstractSweepSegment<SweepSegment.RawSegment> {
     public override void CreateParams(PathParams pathParams, ActualVariables superpathVariables, string dxfFileName, Action<string, string> onError) {
         _params = new SweepParams(ParamsText, superpathVariables, MessageHandlerForEntities.Context(Source, Start, dxfFileName), pathParams, onError);
     }
-}
 
-public class BackSweepSegment : AbstractSweepSegment<BackSweepSegment.RawSegment> {
-    public new class RawSegment : AbstractSweepSegment<RawSegment>.RawSegment, IRawSegment {
-        public override double Order
-        => PathModel.BACKTRACK_ORDER;
+    public override Vector3 EmitGCode(Vector3 currPos, Transformation3 t, double globalS_mm,
+                                      List<GCode> gcodes, string dxfFileName, MessageHandlerForEntities messages) {
+        AssertNear(currPos.XY(), t.Transform(Start), MessageHandlerForEntities.Context(Source, Start, dxfFileName));
 
-        public RawSegment(EntityObject source, ParamsText pars, Vector2 start, Vector2 end) : base(source, pars, start, end) {
-        }
-
-        public ILeafSegment CreateSegment() => new BackSweepSegment(this);
-    }
-
-    protected override RawSegment Raw { get; }
-
-    private BackSweepSegment(RawSegment raw) {
-        Raw = raw;
-    }
-
-    public override void CreateParams(PathParams pathParams, ActualVariables superpathVariables, string dxfFileName, Action<string, string> onError) {
-        _params = new BackSweepParams(ParamsText, superpathVariables, MessageHandlerForEntities.Context(Source, Start, dxfFileName), pathParams, onError);
+        Vector2 target = t.Transform(End);
+        double s_mm = _params!.S_mm;
+        GCodeHelpers.SweepAndDrillSafelyFromTo(currPos, target.AsVector3(s_mm), t_mm: _params!.T_mm,
+                                               s_mm: s_mm, globalS_mm: globalS_mm, f_mmpmin: _params!.F_mmpmin,
+                                               backtracking: Raw.Order == PathModel.BACKTRACK_ORDER, t, gcodes);
+        return target.AsVector3(_params!.S_mm);
     }
 }
 
@@ -472,8 +426,6 @@ public class HelixSegment : MarkOrMillPathSegment<HelixSegment.RawSegment> {
             Radius_mm = radius_mm;
             MillType = millType;
         }
-
-        public IRawSegment ReversedSegmentAfterTurn() => new BackSweepSegment.RawSegment(Source, ParamsText, Center, Center);
 
         public ILeafSegment CreateSegment() => new HelixSegment(this);
 
@@ -597,8 +549,6 @@ public class DrillSegment : MarkOrMillPathSegment<DrillSegment.RawSegment> {
             // empty
         }
 
-        public IRawSegment ReversedSegmentAfterTurn() => new RawSegment(Source, ParamsText, Center, IsMark);
-
         public ILeafSegment CreateSegment() => new DrillSegment(this);
     }
 
@@ -653,9 +603,6 @@ public class SubPathSegment : PathSegmentWithParamsText<SubPathSegment.RawSegmen
         public void Reverse() {
             (_start, _end) = (_end, _start);
         }
-
-        public IRawSegment ReversedSegmentAfterTurn()
-            => new RawSegment(Source, ParamsText, End, Start, Options, Order, Models, _dxfFilePath);
 
         public ILeafSegment CreateSegment() => new SubPathSegment(this);
     }

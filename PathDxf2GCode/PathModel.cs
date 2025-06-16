@@ -46,15 +46,12 @@ public class PathModel {
 
         public readonly PathName Name;
         public ParamsText? ParamsText;
-        public readonly List<Vector2> Turns = new();
         public readonly List<IRawSegment> RawSegments = new();
         public readonly List<ZProbe> ZProbes = new();
 
         public RawPathModel(PathName p) {
             Name = p;
         }
-
-        public bool HasTurnAt(Vector2 v) => Turns.Any(t => t.Near(v));
     }
 
     public class Collection {
@@ -156,7 +153,6 @@ public class PathModel {
 
         // Special circles:
         // Circle with 1mm diameter und line type __ _ _ __ (PHANTOM) = Path start
-        // Circle with 1.5 mm diameter und line type __ _ _ __ (PHANTOM) = Path reversal 
         // Circle with 2mm diameter und line type  __ _ _ __ (PHANTOM) = Path end
         // Circle with 6mm diameter und line type  __ _ _ __ (PHANTOM) = ZProbe
 
@@ -191,7 +187,6 @@ public class PathModel {
         bool IsLineTypeHidden(EntityObject e) => DxfHelper.GetLinetype(e, layerLinetypes)?.Name == "HIDDEN";
         bool IsLineTypePhantomCircle(Circle c) => DxfHelper.GetLinetype(c, layerLinetypes)?.Name == "PHANTOM";
         bool IsStartMarker(Circle c) => IsLineTypePhantomCircle(c) && c.Radius.Near(0.5);
-        bool IsTurnMarker(Circle c) => IsLineTypePhantomCircle(c) && c.Radius.Near(0.75);
         bool IsEndMarker(Circle c) => IsLineTypePhantomCircle(c) && c.Radius.Near(1);
         bool IsZProbe(Circle c) => IsLineTypePhantomCircle(c) && c.Radius.Near(3);
 
@@ -207,7 +202,7 @@ public class PathModel {
         List<Line> lines = entities.Lines.Where(e => e.IsOnPathLayer(options.PathNamePattern, dxfFilePath)).ToList();
         List<Arc> arcs = entities.Arcs.Where(e => e.IsOnPathLayer(options.PathNamePattern, dxfFilePath)).ToList();
 
-        HashSet<Circle> nonTextCircles = circles.Where(e => IsLineTypeHidden(e) || IsEndMarker(e) || IsTurnMarker(e)).ToHashSet();
+        HashSet<Circle> nonTextCircles = circles.Where(e => IsLineTypeHidden(e) || IsEndMarker(e)).ToHashSet();
         HashSet<Line> nonTextLines = lines.Where(IsLineTypeHidden).ToHashSet();
         HashSet<Arc> nonTextArcs = arcs.Where(IsLineTypeHidden).ToHashSet();
 
@@ -249,9 +244,7 @@ public class PathModel {
             RawPathModel rawModel = GetOrCreateRawModel(circle);
             Vector2 center = circle.Center.AsVector2();
 
-            if (IsTurnMarker(circle)) {
-                rawModel.Turns.Add(center);
-            } else if (IsStartMarker(circle)) {
+            if (IsStartMarker(circle)) {
                 if (rawModel.Start != null) {
                     messages.AddError(circle, center, dxfFilePath, Messages.PathModel_TwoStarts_S1_S2, rawModel.Start.Value.F3(), center.F3());
                 } else {
@@ -516,7 +509,6 @@ public class PathModel {
         // - at a branch that ends with a turn return node by node and try to continue there;
         List<IRawSegment> orderedRawSegments = new();
         {
-            Stack<IRawSegment> backtrackForTurns = new();
             HashSet<IRawSegment> traversed = new();
 
             bool ExistsNonTraversed(Func<IRawSegment, bool> filter)
@@ -529,15 +521,7 @@ public class PathModel {
             while (ExistsNonTraversed(s => true)) {
                 IEnumerable<IRawSegment> candidates = FindNonTraversedAnchoredAt(currEnd);
                 if (!candidates.Any()) {
-                    if (rawModel.HasTurnAt(currEnd)) {
-                        while (backtrackForTurns.TryPop(out var s)) {
-                            s.ReversedSegmentAfterTurn().AddTo(orderedRawSegments, traversed, backtrackForTurns: null, ref currEnd);
-                            IEnumerable<IRawSegment> candidatesWhileReversing = FindNonTraversedAnchoredAt(currEnd);
-                            if (candidatesWhileReversing.Any()) {
-                                break;
-                            }
-                        }
-                    } else if (rawModel.End.Value.Near(currEnd)) {
+                    if (rawModel.End.Value.Near(currEnd)) {
                         if (ExistsNonTraversed(s => !(s is ZProbe))) {
                             IRawSegment example = rawModel.RawSegments.First(s => !traversed.Contains(s));
                             int ct = rawModel.RawSegments.Count(s => !traversed.Contains(s));
@@ -555,13 +539,13 @@ public class PathModel {
                         break;
                     }
                 } else if (!candidates.Skip(1).Any()) { // Genau einer
-                    candidates.Single().AddTo(orderedRawSegments, traversed, backtrackForTurns, ref currEnd);
+                    candidates.Single().AddTo(orderedRawSegments, traversed, ref currEnd);
                 } else {
                     candidates.OrderBy(s => s.Order)
                         .ThenBy(s => s.Preference)
                         .ThenBy(s => s.Length)
                         .First()
-                        .AddTo(orderedRawSegments, traversed, backtrackForTurns, ref currEnd);
+                        .AddTo(orderedRawSegments, traversed, ref currEnd);
                 }
             }
         }
@@ -640,10 +624,6 @@ public class PathModel {
         return currPos;
     }
 
-    public static Vector3 EmitZProbingGCode(Vector3 currPos, double globalS_mm, List<GCode> gcodes, string dxfFileName, MessageHandlerForEntities messages) {
-
-        return currPos;
-    }
 
     public List<(ZProbe ZProbe, Vector2 TransformedCenter)> CollectAndOrderAllZProbes() {
         // A. Collect all zProbes

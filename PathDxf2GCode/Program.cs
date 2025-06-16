@@ -58,6 +58,7 @@ public class Program {
                 options, messages, nestingDepth: 0);
             foreach (var m in models) {
                 messages.WriteLine(MessageHandler.InfoPrefix + Messages.Program_Checking_Path, m.Key);
+                m.Value.CollectAndOrderAllZProbes(); // ZProbes need names in Transformation3, that's how they get them.
                 using (StreamWriter sw = StreamWriter.Null) {
                     WriteMillingGCode(m.Value, sw, dxfFilePath, messages);
                 }
@@ -74,7 +75,6 @@ public class Program {
                     PathModel model = models.Single().Value;
                     List<(ZProbe ZProbe, Vector2 TransformedCenter)> orderedZProbes = model.CollectAndOrderAllZProbes();
                     if (orderedZProbes.Any()) {
-
                         Generate(dxfFilePath[..^4] + "_Probing.gcode", messages, sw => WriteZProbingGCode(model, orderedZProbes, sw, dxfFilePath, messages));
                         Generate(dxfFilePath[..^4] + "_Z.txt", messages, sw => WriteEmptyZ(orderedZProbes, sw, messages));
                         Generate(dxfFilePath[..^4] + "_Clean.gcode", messages, sw => WriteMillingGCode(model, sw, dxfFilePath, messages));
