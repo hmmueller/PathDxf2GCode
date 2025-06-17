@@ -63,7 +63,7 @@ public class ParamsText {
         }
     }
 
-    public void InterpolateVariablesAndCreateValues(ActualVariables variables, 
+    public void InterpolateVariablesAndCreateValues(ActualVariables variables,
         out Dictionary<char, string> stringValues, out Dictionary<char, double> doubleValues) {
         stringValues = _rawStrings.ToDictionary(kv => kv.Key, kv => variables.Interpolate(kv.Value));
         doubleValues = stringValues
@@ -240,6 +240,7 @@ public class PathParams : AbstractParams {
     public override string M => GetString(Text, 'M', OnError);
     public override double Z_mmpmin => GetDouble('Z') ?? _options.GlobalProbeRate_mmpmin;
     public override double? W_mm => GetDouble('W');
+    public string OutFileSuffix => GetString('R') ?? "";
     public FormalVariables FormalVariables { get; }
 
     public PathParams(ParamsText text, ActualVariables superpathVariables, double? defaultSorNullForTplusO_mm, string errorContext, Options options, Action<string, string> onError) : base(text, superpathVariables, errorContext, onError) {
@@ -247,7 +248,7 @@ public class PathParams : AbstractParams {
         S_mm = GetDouble('S') ?? defaultSorNullForTplusO_mm ?? T_mm + O_mm;
         A_mm = GetDouble('A') ?? 4 * O_mm;
 
-        CheckKeysAndValues(text, "FBDCISTOMPUZAW");
+        CheckKeysAndValues(text, "FBDCISTOMPUZAWR");
         if (RawD_mm.HasValue && RawB_mm.HasValue && RawB_mm.Value.Ge(RawD_mm.Value)) {
             Error(Messages.Params_DMustBeGtThanB_D_B, RawD_mm, B_mm);
         }

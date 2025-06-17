@@ -2126,7 +2126,7 @@ M30
     [TestMethod]
     public void TestMethod32_VariablesWithDiamonds() {
         Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s22", "8999.32P.dxf"]));
-        Compare("8999.32P_Milling.gcode", $@"%
+        Compare("8999.32P_VAR_Milling.gcode", $@"%
 (PathDxf2GCode - HMMüller 2024-2025 V.{Program.VERSION})
 (8999.32P.dxf)
 F150

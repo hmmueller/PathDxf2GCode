@@ -73,14 +73,15 @@ public class Program {
             } else {
                 if (!messages.Errors.Any()) {
                     PathModel model = models.Single().Value;
+                    string outFilePathPrefix = dxfFilePath[..^4] + model.Params.OutFileSuffix;
                     List<(ZProbe ZProbe, Vector2 TransformedCenter)> orderedZProbes = model.CollectAndOrderAllZProbes();
                     if (orderedZProbes.Any()) {
-                        Generate(dxfFilePath[..^4] + "_Probing.gcode", messages, sw => WriteZProbingGCode(model, orderedZProbes, sw, dxfFilePath, messages));
-                        Generate(dxfFilePath[..^4] + "_Z.txt", messages, sw => WriteEmptyZ(orderedZProbes, sw, messages));
-                        Generate(dxfFilePath[..^4] + "_Clean.gcode", messages, sw => WriteMillingGCode(model, sw, dxfFilePath, messages));
+                        Generate(outFilePathPrefix + "_Probing.gcode", messages, sw => WriteZProbingGCode(model, orderedZProbes, sw, dxfFilePath, messages));
+                        Generate(outFilePathPrefix + "_Z.txt", messages, sw => WriteEmptyZ(orderedZProbes, sw, messages));
+                        Generate(outFilePathPrefix + "_Clean.gcode", messages, sw => WriteMillingGCode(model, sw, dxfFilePath, messages));
                         // PathGCodeAdjustZ: _Clean.gcode + _Z.txt(man.) => _Milling.gcode
                     } else {
-                        Generate(dxfFilePath[..^4] + "_Milling.gcode", messages, sw => WriteMillingGCode(model, sw, dxfFilePath, messages));
+                        Generate(outFilePathPrefix + "_Milling.gcode", messages, sw => WriteMillingGCode(model, sw, dxfFilePath, messages));
                     }
                 }
             }
