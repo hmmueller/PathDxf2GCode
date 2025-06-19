@@ -122,7 +122,12 @@ public class PathModel {
             var modelsInDxfFile = new SortedDictionary<string, PathModel>();
             DxfDocument? d = DxfHelper.LoadDxfDocument(fullDxfFilePath, options,
                                                      out Dictionary<string, Linetype> layerLinetypes, messages);
-            return d == null ? new() : CollectSegments(d.Entities, layerLinetypes, this, dxfFilePath, options, messages);
+            try {
+                return d == null ? new() : CollectSegments(d.Entities, layerLinetypes, this, dxfFilePath, options, messages);
+            } catch (Exception ex) {
+                messages.AddError(fullDxfFilePath, ex.Message);
+                return new();
+            }
         }
 
         public SortedDictionary<string, PathModel> LoadAllModels(string dxfFilePath, double? globalSweepHeight_mm,
@@ -221,7 +226,9 @@ public class PathModel {
             if (overlappingObject == null) {
                 messages.AddError(TextObject, Position, dxfFilePath, Messages.PathModel_NoObjectFound_Text_Center_Diameter, Text, TextCircle!.Center.F3(), (TextCircle!.Radius * 2).F3());
             } else {
-                texts[overlappingObject] = new ParamsText(Text, TextObject, Position, TextCircle!.Center, TextCircle.Radius);
+                // Reverse encodings of special characters by BeckerCAD which I do not need
+                texts[overlappingObject] = new ParamsText(Text.Replace("%%c", "_D").Replace("%%d", "_G").Replace("%%p", "_+"),
+                                                          TextObject, Position, TextCircle!.Center, TextCircle.Radius);
             }
         }
 

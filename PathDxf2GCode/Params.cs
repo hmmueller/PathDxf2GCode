@@ -36,7 +36,16 @@ public class ParamsText {
         Context = context;
         LayerName = layerName;
         Position = position;
-        _rawStrings = rawStrings.Where(kv => kv.Key != ':').ToDictionary(kv => kv.Key, kv => kv.Value);
+        IEnumerable<(char Key, string Value)> nonVariableEntries = rawStrings.Where(kv => kv.Key != ':');
+        string duplicates = new string(nonVariableEntries.GroupBy(kv => kv.Key)
+            .Where(g => g.Count() > 1)
+            .Select(g => g.Key)
+            .ToArray());
+        if (duplicates != "") {
+            throw new ArgumentException(string.Format(Messages.Params_DuplicateParametersFound_Text_Duplicates, text, duplicates));
+        } else {
+            _rawStrings = nonVariableEntries.ToDictionary(kv => kv.Key, kv => kv.Value);
+        }
         VariableStrings = rawStrings.Where(kv => kv.Key == ':' && kv.Value.Length > 0)
                                              .ToDictionary(kv => kv.Value[0], kv => kv.Value[1..]);
         TextCenter = textCenter;

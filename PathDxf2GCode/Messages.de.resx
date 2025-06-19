@@ -353,4 +353,7 @@ hat zugeordneten Text '{1}'</value>
   <data name="Variables_RangeFormatError_Variable_Message" xml:space="preserve">
     <value>Falsches Zahlenformat bei Bereich für Variable {0} ({1})</value>
   </data>
+  <data name="Params_DuplicateParametersFound_Text_Duplicates" xml:space="preserve">
+    <value>Der oder die Parameter {1} kommen in '{0}' öfter als einmal vor</value>
+  </data>
 </root>

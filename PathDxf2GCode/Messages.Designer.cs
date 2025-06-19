@@ -216,6 +216,15 @@ namespace de.hmmueller.PathDxf2GCode {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die The parameter(s) {1} are specified more than once in &apos;{0}&apos; ähnelt.
+        /// </summary>
+        internal static string Params_DuplicateParametersFound_Text_Duplicates {
+            get {
+                return ResourceManager.GetString("Params_DuplicateParametersFound_Text_Duplicates", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die F={0} must be &gt; 0 ähnelt.
         /// </summary>
         internal static string Params_FMustBeGtThan0_F {

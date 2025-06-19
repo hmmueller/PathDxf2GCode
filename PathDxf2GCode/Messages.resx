@@ -354,4 +354,7 @@ has assigned text '{1}'</value>
   <data name="Variables_RangeFormatError_Variable_Message" xml:space="preserve">
     <value>Wrong number format in range for variable {0} ({1})</value>
   </data>
+  <data name="Params_DuplicateParametersFound_Text_Duplicates" xml:space="preserve">
+    <value>The parameter(s) {1} are specified more than once in '{0}'</value>
+  </data>
 </root>
