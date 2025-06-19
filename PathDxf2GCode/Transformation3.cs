@@ -55,9 +55,8 @@ public class ZProbe {
 public class Transformation3 : Transformation2 {
     private readonly (Vector2 Center, double T_mm, string Name)[] _zProbeData;
 
-    public Transformation3(Vector2 fromStart, Vector2 fromEnd, Vector2 toStart, Vector2 toEnd, IEnumerable<ZProbe> zProbes)
-        : base(fromStart, fromEnd, toStart, toEnd) {
-        _zProbeData = zProbes.Select(z => (Center: Transform(z.Center), z.T_mm, z.Name)).ToArray();
+    public Transformation3(Vector2 fromStart, Vector2 fromEnd, Vector2 toStart, Vector2 toEnd, IEnumerable<(ZProbe ZProbe, Vector2 TransformedCenter)> orderedZProbes) : base(fromStart, fromEnd, toStart, toEnd) {
+        _zProbeData = orderedZProbes.Select(z => (Center: z.TransformedCenter, z.ZProbe.T_mm, z.ZProbe.Name)).ToArray();
     }
 
     private Transformation3(Transformation2 t, (Vector2 Center, double T_mm, string Name)[] zProbes) : base(t) {

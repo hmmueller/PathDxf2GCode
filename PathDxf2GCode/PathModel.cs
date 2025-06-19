@@ -608,8 +608,8 @@ public class PathModel {
 
     public bool IsEmpty() => !_segments.Any();
 
-    public Transformation3 CreateTransformation()
-        => new Transformation3(Start, Start + Vector2.UnitX, Vector2.Zero, Vector2.UnitX, _zProbes);
+    public Transformation3 CreateTransformation(IEnumerable<(ZProbe ZProbe, Vector2 TransformedCenter)> orderedZProbes)
+        => new Transformation3(Start, Start + Vector2.UnitX, Vector2.Zero, Vector2.UnitX, orderedZProbes);
 
     public Vector3 EmitMillingGCode(Vector3 currPos, Transformation3 t, double globalS_mm,
         List<GCode> gcodes, string dxfFileName, MessageHandlerForEntities messages) {

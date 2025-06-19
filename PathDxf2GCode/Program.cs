@@ -47,6 +47,9 @@ public class Program {
         }
     }
 
+    private static readonly IEnumerable<(ZProbe ZProbe, Vector2 TransformedCenter)> NO_ZPROBES = 
+                                        Enumerable.Empty<(ZProbe ZProbe, Vector2 TransformedCenter)>();
+
     private static void GenerateGCode(string dxfFilePath, PathModel.Collection pathModels, MessageHandlerForEntities messages, Options options) {
         if (!dxfFilePath.EndsWith(".dxf", StringComparison.CurrentCultureIgnoreCase)) {
             dxfFilePath += ".dxf";
@@ -60,7 +63,7 @@ public class Program {
                 messages.WriteLine(MessageHandler.InfoPrefix + Messages.Program_Checking_Path, m.Key);
                 m.Value.CollectAndOrderAllZProbes(); // ZProbes need names in Transformation3, that's how they get them.
                 using (StreamWriter sw = StreamWriter.Null) {
-                    WriteMillingGCode(m.Value, sw, dxfFilePath, messages);
+                    WriteMillingGCode(m.Value, NO_ZPROBES, sw, dxfFilePath, messages);
                 }
             }
         } else {
@@ -78,17 +81,17 @@ public class Program {
                     if (orderedZProbes.Any()) {
                         Generate(outFilePathPrefix + "_Probing.gcode", messages, sw => WriteZProbingGCode(model, orderedZProbes, sw, dxfFilePath, messages));
                         Generate(outFilePathPrefix + "_Z.txt", messages, sw => WriteEmptyZ(orderedZProbes, sw, messages));
-                        Generate(outFilePathPrefix + "_Clean.gcode", messages, sw => WriteMillingGCode(model, sw, dxfFilePath, messages));
+                        Generate(outFilePathPrefix + "_Clean.gcode", messages, sw => WriteMillingGCode(model, orderedZProbes, sw, dxfFilePath, messages));
                         // PathGCodeAdjustZ: _Clean.gcode + _Z.txt(man.) => _Milling.gcode
                     } else {
-                        Generate(outFilePathPrefix + "_Milling.gcode", messages, sw => WriteMillingGCode(model, sw, dxfFilePath, messages));
+                        Generate(outFilePathPrefix + "_Milling.gcode", messages, sw => WriteMillingGCode(model, NO_ZPROBES, sw, dxfFilePath, messages));
                     }
                 }
             }
         }
     }
 
-    private static void WriteMillingGCode(PathModel m, StreamWriter sw, string dxfFilePath, MessageHandlerForEntities messages) {
+    private static void WriteMillingGCode(PathModel m, IEnumerable<(ZProbe ZProbe, Vector2 TransformedCenter)> orderedZProbes, StreamWriter sw, string dxfFilePath, MessageHandlerForEntities messages) {
         if (m.IsEmpty()) {
             messages.AddError(dxfFilePath, Messages.Program_NoSegmentsFound);
         } else {
@@ -100,7 +103,7 @@ public class Program {
                 Vector3 init = new(0, 0, m.Params.S_mm * (1 + 2 * GeometryHelpers.RELATIVE_EPS));
                 List<GCode> gcodes = new();
 
-                Vector3 currpos = m.EmitMillingGCode(init, m.CreateTransformation(), m.Params.S_mm, gcodes, dxfFilePath, messages);
+                Vector3 currpos = m.EmitMillingGCode(init, m.CreateTransformation(orderedZProbes), m.Params.S_mm, gcodes, dxfFilePath, messages);
 
                 gcodes.AddNonhorizontalG00($"G00 Z{init.Z.F3()}", Math.Abs(currpos.Z - init.Z));
 
