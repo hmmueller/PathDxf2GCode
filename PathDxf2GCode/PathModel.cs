@@ -27,7 +27,7 @@ public class PathModel {
     public Vector2 End { get; }
     public string DxfFilePath { get; }
     private readonly List<PathSegment> _segments;
-    private readonly IEnumerable<ZProbe> _zProbes;
+    private readonly List<ZProbe> _zProbes;
 
     private PathModel(PathName name, PathParams pars, Vector2 start, Vector2 end, List<PathSegment> segments, List<ZProbe> zProbes, string dxfFilePath) {
         Name = name;
