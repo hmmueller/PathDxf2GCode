@@ -357,4 +357,10 @@ has assigned text '{1}'</value>
   <data name="Params_DuplicateParametersFound_Text_Duplicates" xml:space="preserve">
     <value>The parameter(s) {1} are specified more than once in '{0}'</value>
   </data>
+  <data name="Params_NCannotUseVariable_Text" xml:space="preserve">
+    <value>N parameter '{0}' cannot use variable</value>
+  </data>
+  <data name="Params_OCannotUseVariable_Text" xml:space="preserve">
+    <value>O parameter '{0}' cannot use variable</value>
+  </data>
 </root>

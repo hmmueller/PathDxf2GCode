@@ -356,4 +356,10 @@ hat zugeordneten Text '{1}'</value>
   <data name="Params_DuplicateParametersFound_Text_Duplicates" xml:space="preserve">
     <value>Der oder die Parameter {1} kommen in '{0}' öfter als einmal vor</value>
   </data>
+  <data name="Params_NCannotUseVariable_Text" xml:space="preserve">
+    <value>Parameter N mit Wert '{0}' darf keine Variablen verwenden</value>
+  </data>
+  <data name="Params_OCannotUseVariable_Text" xml:space="preserve">
+    <value>Parameter O mit Wert '{0}' darf keine Variablen verwenden</value>
+  </data>
 </root>

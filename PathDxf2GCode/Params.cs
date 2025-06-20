@@ -45,6 +45,12 @@ public class ParamsText {
             throw new ArgumentException(string.Format(Messages.Params_DuplicateParametersFound_Text_Duplicates, text, duplicates));
         } else {
             _rawStrings = nonVariableEntries.ToDictionary(kv => kv.Key, kv => kv.Value);
+            if (_rawStrings.TryGetValue('N', out string? n) && n.Contains("=")) {
+                throw new ArgumentException(string.Format(Messages.Params_NCannotUseVariable_Text, n));
+            }
+            if (_rawStrings.TryGetValue('O', out string? o) && o.Contains("=")) {
+                throw new ArgumentException(string.Format(Messages.Params_OCannotUseVariable_Text, o));
+            }
         }
         VariableStrings = rawStrings.Where(kv => kv.Key == ':' && kv.Value.Length > 0)
                                              .ToDictionary(kv => kv.Value[0], kv => kv.Value[1..]);

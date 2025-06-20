@@ -252,6 +252,24 @@ namespace de.hmmueller.PathDxf2GCode {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die N parameter &apos;{0}&apos; cannot use variable ähnelt.
+        /// </summary>
+        internal static string Params_NCannotUseVariable_Text {
+            get {
+                return ResourceManager.GetString("Params_NCannotUseVariable_Text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die O parameter &apos;{0}&apos; cannot use variable ähnelt.
+        /// </summary>
+        internal static string Params_OCannotUseVariable_Text {
+            get {
+                return ResourceManager.GetString("Params_OCannotUseVariable_Text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die O={0} must be &gt; 0 ähnelt.
         /// </summary>
         internal static string Params_OMustBeGtThan0_O {
