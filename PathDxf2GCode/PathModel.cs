@@ -78,16 +78,7 @@ public class PathModel {
                 foreach (var directory in options.DirAndSearchDirectories(currentDirectory)) {
                     foreach (var f in Directory.GetFiles(directory, "*.dxf")) {
                         if (FileNameMatchesPathName(Path.GetFileNameWithoutExtension(f), name, options.PathFilePattern, options.PathNamePattern)) {
-                            Dictionary<PathName, RawPathModel> newRawModels = LoadRawModels(f, options, messages);
-                            foreach (var kvp in newRawModels) {
-                                if (_rawModels.TryGetValue(kvp.Key, out var alreadyDefined)) {
-                                    if (alreadyDefined.DxfFilePath != f) {
-                                        messages.AddError(f, Messages.PathModel_PathDefinedTwice_Path_OtherFile, kvp.Key, alreadyDefined.DxfFilePath, f);
-                                    }
-                                } else {
-                                    _rawModels.Add(kvp.Key, (kvp.Value, f));
-                                }
-                            }
+                            LoadRawModels(f, options, messages);
                             searchedFiles += (searchedFiles == "" ? "" : ", ") + f;
                         }
                         // Continue loop, i.e. load all matching files! - we want to know whether
@@ -122,11 +113,25 @@ public class PathModel {
             var modelsInDxfFile = new SortedDictionary<string, PathModel>();
             DxfDocument? d = DxfHelper.LoadDxfDocument(fullDxfFilePath, options,
                                                      out Dictionary<string, Linetype> layerLinetypes, messages);
-            try {
-                return d == null ? new() : CollectSegments(d.Entities, layerLinetypes, this, dxfFilePath, options, messages);
-            } catch (Exception ex) {
-                messages.AddError(fullDxfFilePath, ex.Message);
+            if (d == null) {
                 return new();
+            } else {
+                try {
+                    Dictionary<PathName, RawPathModel> newRawModels = CollectSegments(d.Entities, layerLinetypes, this, dxfFilePath, options, messages);
+                    foreach (var kvp in newRawModels) {
+                        if (_rawModels.TryGetValue(kvp.Key, out var alreadyDefined)) {
+                            if (alreadyDefined.DxfFilePath != fullDxfFilePath) {
+                                messages.AddError(fullDxfFilePath, Messages.PathModel_PathDefinedTwice_Path_OtherFile, kvp.Key, alreadyDefined.DxfFilePath, fullDxfFilePath);
+                            }
+                        } else {
+                            _rawModels.Add(kvp.Key, (kvp.Value, fullDxfFilePath));
+                        }
+                    }
+                    return newRawModels;
+                } catch (Exception ex) {
+                    messages.AddError(fullDxfFilePath, ex.Message);
+                    return new();
+                }
             }
         }
 

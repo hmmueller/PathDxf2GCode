@@ -342,7 +342,7 @@ hat zugeordneten Text '{1}'</value>
     <value>Definition für Variable {0} muss kommaseparierte Liste oder Buchstabengruppe nach ? oder Bereich ...~... sein, statt '{1}'</value>
   </data>
   <data name="Variables_MissingValues_Variables" xml:space="preserve">
-    <value>Fehlende Werte für Variablen</value>
+    <value>Fehlende Werte für Variablen {0}</value>
   </data>
   <data name="Variables_MissingDefinitions_Variables" xml:space="preserve">
     <value>Fehlende Definitionen für Variablen {0}</value>
