@@ -60,7 +60,7 @@ public class ArcGeometry : IMillGeometry {
     public ArcGeometry(Vector2 center, double radius_mm, double startAngle_deg, double endAngle_deg, bool counterclockwise) {
         Center = center;
         if (radius_mm.Le(0)) {
-            throw new ArgumentException(nameof(radius_mm), "<= 0 nicht erlaubt");
+            throw new ArgumentException(nameof(radius_mm), "<= 0 not allowed");
         }
         Radius_mm = radius_mm;
         StartAngle_deg = MathHelper.NormalizeAngle(startAngle_deg);

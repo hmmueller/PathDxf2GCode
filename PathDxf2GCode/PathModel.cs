@@ -162,9 +162,9 @@ public class PathModel {
         // DASHDOT:    ___ . ___ . = Subpath
 
         // Special circles:
-        // Circle with 1mm diameter und line type __ _ _ __ (PHANTOM) = Path start
-        // Circle with 2mm diameter und line type  __ _ _ __ (PHANTOM) = Path end
-        // Circle with 6mm diameter und line type  __ _ _ __ (PHANTOM) = ZProbe
+        // Circle with 1mm diameter and line type __ _ _ __ (PHANTOM) = Path start
+        // Circle with 2mm diameter and line type  __ _ _ __ (PHANTOM) = Path end
+        // Circle with 6mm diameter and line type  __ _ _ __ (PHANTOM) = ZProbe
 
         Dictionary<PathName, RawPathModel> name2Model = new();
         Dictionary<EntityObject, ParamsText> texts = new();
@@ -518,7 +518,6 @@ public class PathModel {
         // Algorithm:
         // * repeatedly extend chain at currEnd;
         // - if there is more than one un-traversed candidate, continue by order (N);
-        // - at a branch that ends with a turn return node by node and try to continue there;
         List<IRawSegment> orderedRawSegments = new();
         {
             HashSet<IRawSegment> traversed = new();
@@ -550,7 +549,7 @@ public class PathModel {
                         }
                         break;
                     }
-                } else if (!candidates.Skip(1).Any()) { // Genau einer
+                } else if (!candidates.Skip(1).Any()) { // Exactly one candidate
                     candidates.Single().AddTo(orderedRawSegments, traversed, ref currEnd);
                 } else {
                     candidates.OrderBy(s => s.Order)
@@ -614,7 +613,7 @@ public class PathModel {
             s.ConnectModel(dxfFilePath, messages, nestingDepth);
         }
 
-        // Z. Create PathModel
+        // F. Create PathModel
         return new PathModel(rawModel.Name, pathParams, rawModel.Start.Value, rawModel.End.Value, segments, rawModel.ZProbes, dxfFilePath);
     }
 

@@ -1,7 +1,6 @@
 ﻿namespace de.hmmueller.PathDxf2GCode;
 
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
 using System.Text.RegularExpressions;
 
 public readonly struct PathName {

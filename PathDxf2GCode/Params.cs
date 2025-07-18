@@ -318,12 +318,6 @@ public class SweepParams : AbstractChildParams {
     }
 }
 
-public class BackSweepParams : AbstractChildParams {
-    public BackSweepParams(ParamsText text, ActualVariables superpathVariables, string errorContext, IParams pathParams, Action<string, string> onError) : base(text, superpathVariables, errorContext, pathParams, onError) {
-        CheckKeysAndValues(text, "FBDCISTOMNPUAW>"); // Backsweeps are allowed for all sorts of objects, as they inherit their parents' full parameter set
-    }
-}
-
 public class MillParams : AbstractChildParams {
     public const string MILL_KEYS = "FBSNQ";
     public const string MARK_KEYS = "FDSNQ";
