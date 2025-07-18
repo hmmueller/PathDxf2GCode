@@ -325,14 +325,15 @@ public class BackSweepParams : AbstractChildParams {
 }
 
 public class MillParams : AbstractChildParams {
-    public const string MILL_KEYS = "FBSN";
-    public const string MARK_KEYS = "FDSN";
-    public const string SUPPORT_KEYS = "FDBSNPU";
+    public const string MILL_KEYS = "FBSNQ";
+    public const string MARK_KEYS = "FDSNQ";
+    public const string SUPPORT_KEYS = "FDBSNPUQ";
     public override double F_mmpmin => GetDouble('F') ?? base.F_mmpmin;
     public override double? RawB_mm => GetDouble('B') ?? base.RawB_mm;
     public override double? RawD_mm => GetDouble('D') ?? base.RawD_mm;
     public override double? RawP_mm => GetDouble('P') ?? base.RawP_mm;
     public override double? RawU_mm => GetDouble('U') ?? base.RawU_mm;
+    public string? Q => GetString('Q');
 
     public MillParams(ParamsText text, ActualVariables superpathVariables, MillType millType, string errorContext, IParams chainParams, Action<string, string> onError) : base(text.LimitedTo(
         millType switch {
@@ -346,9 +347,9 @@ public class MillParams : AbstractChildParams {
 }
 
 public class HelixParams : AbstractChildParams {
-    public const string MILL_KEYS = "FBI";
-    public const string MARK_KEYS = "FDI";
-    public const string SUPPORT_KEYS = "FDBIPU";
+    public const string MILL_KEYS = "FBIQ";
+    public const string MARK_KEYS = "FDIQ";
+    public const string SUPPORT_KEYS = "FDBIPUQ";
 
     public override double F_mmpmin => GetDouble('F') ?? base.F_mmpmin;
     public override double? RawB_mm => GetDouble('B') ?? base.RawB_mm;
@@ -356,6 +357,7 @@ public class HelixParams : AbstractChildParams {
     public override double? RawI_mm => GetDouble('I') ?? base.RawI_mm;
     public override double? RawP_mm => GetDouble('P') ?? base.RawP_mm;
     public override double? RawU_mm => GetDouble('U') ?? base.RawU_mm;
+    public string? Q => GetString('Q');
 
     public HelixParams(ParamsText text, ActualVariables superpathVariables, MillType millType, string errorContext, IParams pathParams, Action<string, string> onError) : base(text, superpathVariables, errorContext, pathParams, onError) {
         CheckKeysAndValues(text,
@@ -365,7 +367,6 @@ public class HelixParams : AbstractChildParams {
                         MillType.WithSupports => SUPPORT_KEYS,
                         _ => throw new Exception("Internal error: Unexpected Milltype " + millType)
                     });
-
     }
 }
 
@@ -374,9 +375,10 @@ public class DrillParams : AbstractChildParams {
     public override double? RawB_mm => GetDouble('B') ?? base.RawB_mm;
     public override double? RawD_mm => GetDouble('D') ?? base.RawD_mm;
     public override int? RawC => (int?)GetDouble('C') ?? base.RawC;
+    public string? Q => GetString('Q');
 
     public DrillParams(ParamsText text, ActualVariables superpathVariables, bool isMark, string errorContext, IParams pathParams, Action<string, string> onError) : base(text, superpathVariables, errorContext, pathParams, onError) {
-        CheckKeysAndValues(text, isMark ? "FDC" : "FBC");
+        CheckKeysAndValues(text, isMark ? "FDCQ" : "FBCQ");
     }
 }
 
