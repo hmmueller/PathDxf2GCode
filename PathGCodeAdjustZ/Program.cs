@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 using static System.FormattableString;
 
 public class Program {
-    private const string VERSION = "2025-06-02";
+    private const string VERSION = "2025-09-02";
 
     private static int Main(string[] args) {
         MessageHandler messages = new(Console.Error);

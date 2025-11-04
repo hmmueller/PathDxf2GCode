@@ -1,7 +1,6 @@
 ﻿namespace de.hmmueller.PathGCodeAdjustZ;
 
 using de.hmmueller.PathGCodeLibrary;
-using System.Diagnostics;
 using System.Globalization;
 
 public class Options : AbstractOptions {
@@ -23,62 +22,46 @@ public class Options : AbstractOptions {
         messages.WriteLine(Messages.Options_Help);
     }
 
-    public static Options? Create(string[] args, MessageHandler messages) {
-        bool doNotRun = false;
-
-        Options options = new();
-        for (int i = 0; i < args.Length; i++) {
-            string a = args[i];
-            try {
-                if (a.StartsWith('/') || a.StartsWith('-')) {
-                    if (a.Length == 1) {
-                        doNotRun = true;
-                        messages.AddError("Options", Messages.Options_MissingOptionAfter_Name, a);
-                    } else if (a[1..] == "debug") {
-                        Debugger.Launch();
-                    } else {
-                        switch (a.Substring(1, 1).ToLowerInvariant()) {
-                            case "h":
-                            case "?":
-                                doNotRun = true;
-                                break;
-                            case "m":
-                                options.MaxCorrection_mm = GetDoubleOption(args, ref i,
-                                    Messages.Options_MissingOptionAfter_Name, Messages.Options_NaN_Name_Value, 
-                                    Messages.Options_LessThan0_Name_Value);
-                                break;
-                            case "x":
-                                options.OutputPattern = GetStringOption(args, ref i, Messages.Options_MissingOptionAfter_Name);
-                                break;
-                            case "l":
-                                Thread.CurrentThread.CurrentUICulture = new CultureInfo(GetStringOption(args, ref i, Messages.Options_MissingLocale));
-                                break;
-                            default:
-                                doNotRun = true;
-                                messages.AddError("Options", Messages.Options_NotSupported_Name, a);
-                                break;
-                        }
-                    }
-                } else {
-                    options.GCodeFilePaths.Add(a);
-                }
-            } catch (Exception ex) {
-                doNotRun = true;
-                messages.WriteLine(ex.Message);
-            }
+    private static bool HandleOption(string opt, string[] args, ref int i, Options options, MessageHandler messages) {
+        switch (opt) {
+            case "m":
+                options.MaxCorrection_mm = GetDoubleOption(args, ref i,
+                    Messages.Options_MissingOptionAfter_Name, Messages.Options_NaN_Name_Value,
+                    Messages.Options_LessThan0_Name_Value);
+                return true;
+            case "x":
+                options.OutputPattern = GetStringOption(args, ref i, Messages.Options_MissingOptionAfter_Name);
+                return true;
+            case "l":
+                Thread.CurrentThread.CurrentUICulture = new CultureInfo(GetStringOption(args, ref i, Messages.Options_MissingLocale));
+                return true;
+            default:
+                return false;
         }
+    }
 
+    private static void HandleArgument(string a, Options options, MessageHandler messages) {
+        options.GCodeFilePaths.Add(a);
+    }
+
+    private static bool CheckOptions(Options options, MessageHandler messages) {
         if (options.MaxCorrection_mm <= 0) {
             messages.AddError("Options", Messages.Options_MissingM);
-            doNotRun = true;
-        }
-
-        if (doNotRun) {
-            messages.WriteLine();
-            return null;
+            return false;
         } else {
-            return options;
+            return true;
         }
+    }
+
+    public static Options? Create(string[] args, MessageHandler messages) {
+        Options options = new();
+
+        return FillOptions(args, options, messages,
+            missingOptionAfter: a => messages.AddError("Options", Messages.Options_MissingOptionAfter_Name, a),
+            unsupportedOption: a => messages.AddError("Options", Messages.Options_NotSupported_Name, a),
+            handleOption: HandleOption,
+            handleArgument: HandleArgument,
+            checkOptions: CheckOptions) ? options : null;
     }
 }
 
