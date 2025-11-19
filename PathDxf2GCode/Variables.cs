@@ -8,10 +8,10 @@ public class VariableDefinitionException : Exception {
 }
 
 public abstract class Variables {
-    protected readonly Dictionary<char, string> _assignments;
+    protected readonly IReadOnlyDictionary<char, string> _assignments;
     private readonly int _valuesHash;
 
-    public Variables(Dictionary<char, string> replacements) {
+    public Variables(IReadOnlyDictionary<char, string> replacements) {
         _assignments = replacements;
         foreach (var kvp in _assignments) {
             _valuesHash ^= kvp.Key.GetHashCode() ^ (kvp.Value.GetHashCode() >> 1);
@@ -29,7 +29,7 @@ public abstract class Variables {
 }
 
 public class FormalVariables : Variables {
-    public FormalVariables(Dictionary<char, string> replacements) : base(replacements) {
+    public FormalVariables(IReadOnlyDictionary<char, string> replacements) : base(replacements) {
     }
 
     public ActualVariables Example(Action<string> onError) {
@@ -120,7 +120,7 @@ public class FormalVariables : Variables {
 }
 
 public class ActualVariables : Variables {
-    internal Dictionary<char, string> Assignments => _assignments;
+    internal IReadOnlyDictionary<char, string> Assignments => _assignments;
 
     public static readonly ActualVariables EMPTY = new ActualVariables(new Dictionary<char, string>());
 
@@ -142,7 +142,7 @@ public class ActualVariables : Variables {
         return s;
     }
 
-    public Dictionary<char, string> InterpolateInto(Dictionary<char, string> variableStrings) {
+    public Dictionary<char, string> InterpolateInto(IReadOnlyDictionary<char, string> variableStrings) {
         return variableStrings.ToDictionary(kvp => kvp.Key, kvp => Interpolate(kvp.Value));
     }
 }

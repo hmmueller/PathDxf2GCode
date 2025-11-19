@@ -205,7 +205,6 @@ public class PathModel {
         // 2. Connect texts with objects -> Dictionary<EntityObject, string>
         // 3. Handle special circles
         // 4. Handle geometry - non-special circles, lines and arcs
-        // 5. Load subpaths at the very end (tail-recursion hopefully reduces problems)
 
         // 1. Collect all objects on path layers - circles, lines, and arcs
         List<Circle> circles = entities.Circles.Where(e => e.IsOnPathLayer(options.PathNamePattern, dxfFilePath)).ToList();
@@ -251,33 +250,41 @@ public class PathModel {
         }
 
         // 3. Handle special circles
-        foreach (var circle in circles.Where(IsLineTypePhantomCircle)) {
-            ParamsText circleText = GetText(circle);
-            RawPathModel rawModel = GetOrCreateRawModel(circle);
-            Vector2 center = circle.Center.AsVector2();
+        // 3a. (Model ParamsTexts are not fully expanded)
+        {
+            var name2RawText = new Dictionary<string, ParamsText>();
+            foreach (var circle in circles.Where(IsLineTypePhantomCircle)) {
+                ParamsText circleText = GetText(circle);
+                RawPathModel rawModel = GetOrCreateRawModel(circle);
+                Vector2 center = circle.Center.AsVector2();
 
-            if (IsStartMarker(circle)) {
-                if (rawModel.Start != null) {
-                    messages.AddError(circle, center, dxfFilePath, Messages.PathModel_TwoStarts_S1_S2, rawModel.Start.Value.F3(), center.F3());
+                if (IsStartMarker(circle)) {
+                    if (rawModel.Start != null) {
+                        messages.AddError(circle, center, dxfFilePath, Messages.PathModel_TwoStarts_S1_S2, rawModel.Start.Value.F3(), center.F3());
+                    } else {
+                        rawModel.Start = center;
+                        rawModel.StartObject = circle;
+                        name2RawText[rawModel.Name.AsString()] = rawModel.ParamsText = circleText;
+                    }
+                } else if (IsEndMarker(circle)) { // End
+                    if (rawModel.End != null) {
+                        messages.AddError(circle, center, dxfFilePath,
+                            Messages.PathModel_TwoEnds_E1_E2, rawModel.End.Value.F3(), center.F3());
+                    } else {
+                        rawModel.End = center;
+                    }
+                } else if (IsZProbe(circle)) { // ZProbe
+                    rawModel.ZProbes.Add(new ZProbe(circle, circleText, center));
                 } else {
-                    rawModel.Start = center;
-                    rawModel.StartObject = circle;
-                    rawModel.ParamsText = circleText;
+                    messages.AddError(circle, center, dxfFilePath, Messages.PathModel_NotSpecialCircle_Diameter, (2 * circle.Radius).F3());
                 }
-            } else if (IsEndMarker(circle)) { // End
-                if (rawModel.End != null) {
-                    messages.AddError(circle, center, dxfFilePath,
-                        Messages.PathModel_TwoEnds_E1_E2, rawModel.End.Value.F3(), center.F3());
-                } else {
-                    rawModel.End = center;
-                }
-            } else if (IsZProbe(circle)) { // ZProbe
-                rawModel.ZProbes.Add(new ZProbe(circle, circleText, center));
-            } else {
-                messages.AddError(circle, center, dxfFilePath, Messages.PathModel_NotSpecialCircle_Diameter, (2 * circle.Radius).F3());
+            }
+
+            // 3b. Assign model ParamsTexts
+            foreach (var rawModel in name2Model.Values) {
+                rawModel.ParamsText = rawModel.ParamsText!.Referenced(name2RawText, options.PathNamePattern, messages);
             }
         }
-
         // 4. Handle geometry - non-special circles, lines and arcs
         // 4a. Circles
         foreach (var circle in circles.Where(c => !IsLineTypePhantomCircle(c))) {

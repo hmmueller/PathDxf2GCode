@@ -362,4 +362,19 @@ hat zugeordneten Text '{1}'</value>
   <data name="Params_OCannotUseVariable_Text" xml:space="preserve">
     <value>Parameter O mit Wert '{0}' darf keine Variablen verwenden</value>
   </data>
+  <data name="Params_PathNotFoundInThisDXF_Name" xml:space="preserve">
+    <value>Pfad {0} nach @ nicht in dieser DXF-Datei gefunden</value>
+  </data>
+  <data name="Params_AtNotAllowedInReferencedPathText_Text" xml:space="preserve">
+    <value>@ darf in Pfad '{0}', der selbst mit @ referenziert wird, nicht verwendet werden</value>
+  </data>
+  <data name="Params_AtCannotUseVariable_Text" xml:space="preserve">
+    <value>@-Pfad '{0}' darf keine Variablen verwenden</value>
+  </data>
+  <data name="Params_AtCannotContainOtherParameters_Text" xml:space="preserve">
+    <value>@-Pfad {0}' darf keine anderen Parameter enthalten</value>
+  </data>
+  <data name="Params_AtPathDoesNotMatchPathNamePattern_Text_Pattern" xml:space="preserve">
+    <value>@ Pfad '{0}' passt nicht auf Pfadmuster /{1}/</value>
+  </data>
 </root>

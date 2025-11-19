@@ -7,7 +7,7 @@ using netDxf.Entities;
 
 public class ParamsText {
     private readonly Dictionary<char, string> _rawStrings;
-    public readonly Dictionary<char, string> VariableStrings;
+    public readonly IReadOnlyDictionary<char, string> VariableStrings;
     public string Text { get; }
     public string Context { get; }
     public string? LayerName { get; }
@@ -50,6 +50,9 @@ public class ParamsText {
             }
             if (_rawStrings.TryGetValue('O', out string? o) && o.Contains("=")) {
                 throw new ArgumentException(string.Format(Messages.Params_OCannotUseVariable_Text, o));
+            }
+            if (_rawStrings.TryGetValue('@', out string? a) && a.Contains("=")) {
+                throw new ArgumentException(string.Format(Messages.Params_AtCannotUseVariable_Text, a));
             }
         }
         VariableStrings = rawStrings.Where(kv => kv.Key == ':' && kv.Value.Length > 0)
@@ -98,6 +101,29 @@ public class ParamsText {
     internal double? GetO()
         => _rawStrings.TryGetValue('O', out string? o)
             && double.TryParse(o.Replace(',', '.'), CultureInfo.InvariantCulture, out double result) ? result : null;
+
+    internal ParamsText Referenced(Dictionary<string, ParamsText> modelName2RawText, 
+                                   string pathNamePattern, MessageHandlerForEntities mh) {
+        if (_rawStrings.TryGetValue('@', out string? modelName)) {
+            if (_rawStrings.Count > 1) {
+                mh.AddError(Context, Messages.Params_AtCannotContainOtherParameters_Text, Text);
+                return this;
+            } else if (!Regex.IsMatch(modelName, pathNamePattern)) {
+                mh.AddError(Context, Messages.Params_AtPathDoesNotMatchPathNamePattern_Text_Pattern, Text, pathNamePattern);
+                return this;
+            } else if (!modelName2RawText.TryGetValue(modelName, out ParamsText? referencedPathText)) {
+                mh.AddError(Context, Messages.Params_PathNotFoundInThisDXF_Name, modelName);
+                return this;
+            } else if (referencedPathText._rawStrings.TryGetValue('@', out string? innerAt)) {
+                mh.AddError(Context, Messages.Params_AtNotAllowedInReferencedPathText_Text, innerAt);
+                return this;
+            } else {
+                return referencedPathText;
+            }
+        } else {
+            return this;
+        }
+    }
 }
 
 public interface IParams {

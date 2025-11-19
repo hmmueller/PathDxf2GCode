@@ -180,6 +180,42 @@ namespace de.hmmueller.PathDxf2GCode {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die @ path &apos;{0}&apos; must not contain other parameters ähnelt.
+        /// </summary>
+        internal static string Params_AtCannotContainOtherParameters_Text {
+            get {
+                return ResourceManager.GetString("Params_AtCannotContainOtherParameters_Text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die @ path &apos;{0}&apos; cannot use variable ähnelt.
+        /// </summary>
+        internal static string Params_AtCannotUseVariable_Text {
+            get {
+                return ResourceManager.GetString("Params_AtCannotUseVariable_Text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die @ not allowed in path &apos;{0}&apos; which is itself referenced by @ ähnelt.
+        /// </summary>
+        internal static string Params_AtNotAllowedInReferencedPathText_Text {
+            get {
+                return ResourceManager.GetString("Params_AtNotAllowedInReferencedPathText_Text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die @ path &apos;{0}&apos; does not match path pattern /{1}/ ähnelt.
+        /// </summary>
+        internal static string Params_AtPathDoesNotMatchPathNamePattern_Text_Pattern {
+            get {
+                return ResourceManager.GetString("Params_AtPathDoesNotMatchPathNamePattern_Text_Pattern", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die B={0} must not be larger than T={1} ähnelt.
         /// </summary>
         internal static string Params_BMustBeLessThanT_B_T {
@@ -275,6 +311,15 @@ namespace de.hmmueller.PathDxf2GCode {
         internal static string Params_OMustBeGtThan0_O {
             get {
                 return ResourceManager.GetString("Params_OMustBeGtThan0_O", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Path {0} referenced with @ not found in this DXF file ähnelt.
+        /// </summary>
+        internal static string Params_PathNotFoundInThisDXF_Name {
+            get {
+                return ResourceManager.GetString("Params_PathNotFoundInThisDXF_Name", resourceCulture);
             }
         }
         

@@ -363,4 +363,19 @@ has assigned text '{1}'</value>
   <data name="Params_OCannotUseVariable_Text" xml:space="preserve">
     <value>O parameter '{0}' cannot use variable</value>
   </data>
+  <data name="Params_PathNotFoundInThisDXF_Name" xml:space="preserve">
+    <value>Path {0} referenced with @ not found in this DXF file</value>
+  </data>
+  <data name="Params_AtNotAllowedInReferencedPathText_Text" xml:space="preserve">
+    <value>@ not allowed in path '{0}' which is itself referenced by @</value>
+  </data>
+  <data name="Params_AtCannotUseVariable_Text" xml:space="preserve">
+    <value>@ path '{0}' cannot use variable</value>
+  </data>
+  <data name="Params_AtCannotContainOtherParameters_Text" xml:space="preserve">
+    <value>@ path '{0}' must not contain other parameters</value>
+  </data>
+  <data name="Params_AtPathDoesNotMatchPathNamePattern_Text_Pattern" xml:space="preserve">
+    <value>@ path '{0}' does not match path pattern /{1}/</value>
+  </data>
 </root>
