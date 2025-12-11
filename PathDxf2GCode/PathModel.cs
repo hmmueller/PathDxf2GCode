@@ -358,9 +358,11 @@ public class PathModel {
             var s = new SubPathSegment.RawSegment(lineOrArc, text, start, end, options, order, subPathDefs, dxfFilePath);
             rawModel.RawSegments.Add(s);
             subPaths.Add(s);
-        } else if (IsLineType(layerLinetypes, lineOrArc, "DASHED")
-            || IsLineType(layerLinetypes, lineOrArc, "HIDDEN")) { // Sweep
+        } else if (IsLineType(layerLinetypes, lineOrArc, "DASHED")) { // Sweep with params
             rawModel.RawSegments.Add(new SweepSegment.RawSegment(lineOrArc, text, start, end, order));
+        } else if (IsLineType(layerLinetypes, lineOrArc, "HIDDEN")
+            || IsLineType(layerLinetypes, lineOrArc, "DOT")) { // Sweep without params
+            rawModel.RawSegments.Add(new SweepSegment.RawSegment(lineOrArc, ParamsText.EMPTY, start, end, order));
         } else {
             messages.AddError(lineOrArc, start, dxfFilePath, Messages.PathModel_LineTypeNotSupported_LineType, LineTypeName(layerLinetypes, lineOrArc));
         }
