@@ -160,12 +160,13 @@ public class PathModel {
         // DIVIDE:     ___ . . ___ = Mill (G01/02) to mark depth (D)
         // BORDER:     __ __ . __  = Mill (G01/02) to full depth with support bars at mark depth
         // DASHDOT:    ___ . ___ . = Subpath
+        // DOT:        ........... = Sweep (G00) with subpath parameters
 
         // Special circles:
         // Circle with 1mm diameter and line type __ _ _ __ (PHANTOM) = Path start
-        // Circle with 2mm diameter and line type  __ _ _ __ (PHANTOM) = Path end
-        // Circle with 6mm diameter and line type  __ _ _ __ (PHANTOM) = ZProbe
-
+        // Circle with 2mm diameter and line type __ _ _ __ (PHANTOM) = Path end
+        // Circle with 6mm diameter and line type __ _ _ __ (PHANTOM) = ZProbe
+        // Circle with 6mm diameter and line type ......... (DOT) = Ignore
         Dictionary<PathName, RawPathModel> name2Model = new();
         Dictionary<EntityObject, ParamsText> texts = new();
 
@@ -195,10 +196,12 @@ public class PathModel {
         }
 
         bool IsLineTypeHidden(EntityObject e) => DxfHelper.GetLinetype(e, layerLinetypes)?.Name == "HIDDEN";
-        bool IsLineTypePhantomCircle(Circle c) => DxfHelper.GetLinetype(c, layerLinetypes)?.Name == "PHANTOM";
-        bool IsStartMarker(Circle c) => IsLineTypePhantomCircle(c) && c.Radius.Near(0.5);
-        bool IsEndMarker(Circle c) => IsLineTypePhantomCircle(c) && c.Radius.Near(1);
-        bool IsZProbe(Circle c) => IsLineTypePhantomCircle(c) && c.Radius.Near(3);
+        bool IsLineTypePhantom(Circle c) => DxfHelper.GetLinetype(c, layerLinetypes)?.Name == "PHANTOM";
+        bool IsLineTypeIgnore(Circle c) => DxfHelper.GetLinetype(c, layerLinetypes)?.Name == "DOT";
+        bool IsStartMarker(Circle c) => IsLineTypePhantom(c) && c.Radius.Near(0.5);
+        bool IsEndMarker(Circle c) => IsLineTypePhantom(c) && c.Radius.Near(1);
+        bool IsZProbe(Circle c) => IsLineTypePhantom(c) && c.Radius.Near(3);
+        bool IsIgnoredZProbe(Circle c) => IsLineTypeIgnore(c) && c.Radius.Near(3);
 
         // Algorithm:
         // 1. Collect all objects on path layers - circles, lines, arcs, and texts
@@ -253,7 +256,7 @@ public class PathModel {
         // 3a. (Model ParamsTexts are not fully expanded)
         {
             var name2RawText = new Dictionary<string, ParamsText>();
-            foreach (var circle in circles.Where(IsLineTypePhantomCircle)) {
+            foreach (var circle in circles.Where(IsLineTypePhantom)) {
                 ParamsText circleText = GetText(circle);
                 RawPathModel rawModel = GetOrCreateRawModel(circle);
                 Vector2 center = circle.Center.AsVector2();
@@ -275,6 +278,8 @@ public class PathModel {
                     }
                 } else if (IsZProbe(circle)) { // ZProbe
                     rawModel.ZProbes.Add(new ZProbe(circle, circleText, center));
+                } else if (IsIgnoredZProbe(circle)) { // ignored ZProbe
+                    // ignore it
                 } else {
                     messages.AddError(circle, center, dxfFilePath, Messages.PathModel_NotSpecialCircle_Diameter, (2 * circle.Radius).F3());
                 }
@@ -287,7 +292,7 @@ public class PathModel {
         }
         // 4. Handle geometry - non-special circles, lines and arcs
         // 4a. Circles
-        foreach (var circle in circles.Where(c => !IsLineTypePhantomCircle(c))) {
+        foreach (var circle in circles.Where(c => !IsLineTypePhantom(c) && !IsLineTypeIgnore(c))) {
             ParamsText circleText = GetText(circle);
             RawPathModel rawModel = GetRawModel(circle, circle.Center.AsVector2());
             if (ParamsText.IsNullOrEmpty(rawModel.ParamsText)) {
