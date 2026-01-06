@@ -4,12 +4,12 @@ using de.hmmueller.PathGCodeLibrary;
 using netDxf;
 
 public class Program {
-    public const string VERSION = "2025-11-18";
+    public const string VERSION = "2026-01-06";
 
     public static int Main(string[] args) {
         var messages = new MessageHandlerForEntities(Console.Error);
 
-        messages.WriteLine(MessageHandler.InfoPrefix + "PathDxf2GCode (c) HMMüller 2024-2025 V.{0}", VERSION);
+        messages.WriteLine(MessageHandler.InfoPrefix + "PathDxf2GCode (c) HMMüller 2024-2026 V.{0}", VERSION);
         messages.WriteLine();
 
         Options? options = Options.Create(args, messages);
