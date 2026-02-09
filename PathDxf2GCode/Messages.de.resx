@@ -243,6 +243,9 @@ Optionen:
   <data name="PathModel_MissingStart" xml:space="preserve">
     <value>Start-Markierung fehlt</value>
   </data>
+  <data name="PathModel_MissingParamsText" xml:space="preserve">
+    <value>Parametertext fehlt; evtl. nicht korrekte Start-Markierung</value>
+  </data>
   <data name="PathModel_NoMoreSegmentsFound_P" xml:space="preserve">
     <value>Keine weiteren Segmente ab Punkt {0} gefunden</value>
   </data>

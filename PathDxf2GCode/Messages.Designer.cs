@@ -441,6 +441,15 @@ namespace de.hmmueller.PathDxf2GCode {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Parameters text missing; maybe incorrect start marker ähnelt.
+        /// </summary>
+        internal static string PathModel_MissingParamsText {
+            get {
+                return ResourceManager.GetString("PathModel_MissingParamsText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Path definition {0} not found; maybe start marker is not of line type PHANTOM(__ _ _ __) ähnelt.
         /// </summary>
         internal static string PathModel_MissingPathDefinition_PathName {

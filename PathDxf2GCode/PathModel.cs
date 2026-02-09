@@ -287,7 +287,11 @@ public class PathModel {
 
             // 3b. Assign model ParamsTexts
             foreach (var rawModel in name2Model.Values) {
-                rawModel.ParamsText = rawModel.ParamsText!.Referenced(name2RawText, options.PathNamePattern, messages);
+                if (rawModel.ParamsText == null) {
+                    messages.AddError(rawModel.Name, Messages.PathModel_MissingParamsText);
+                } else {
+                    rawModel.ParamsText = rawModel.ParamsText!.Referenced(name2RawText, options.PathNamePattern, messages);
+                }
             }
         }
         // 4. Handle geometry - non-special circles, lines and arcs
