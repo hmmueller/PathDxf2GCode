@@ -150,6 +150,14 @@ public class PathModel {
         }
     }
 
+    private static string? LineTypeName(Dictionary<string, Linetype> layerLinetypes, EntityObject eo) {
+        return DxfHelper.GetLinetype(eo, layerLinetypes)?.Name;
+    }
+
+    private static bool IsLineType(Dictionary<string, Linetype> layerLinetypes, EntityObject eo, string prefix) {
+        return LineTypeName(layerLinetypes, eo)?.StartsWith(prefix) ?? false;
+    }
+
     private static Dictionary<PathName, RawPathModel> CollectSegments(DrawingEntities entities,
             Dictionary<string, Linetype> layerLinetypes, Collection subPathDefs,
             string dxfFilePath, Options options, MessageHandlerForEntities messages) {
@@ -195,12 +203,15 @@ public class PathModel {
                      : name2Model[p] = new RawPathModel(p);
         }
 
-        bool IsLineTypeHidden(EntityObject e) => DxfHelper.GetLinetype(e, layerLinetypes)?.Name == "HIDDEN";
-        bool IsLineTypePhantom(Circle c) => DxfHelper.GetLinetype(c, layerLinetypes)?.Name == "PHANTOM";
-        bool IsLineTypeIgnore(Circle c) => DxfHelper.GetLinetype(c, layerLinetypes)?.Name == "DOT";
+        bool IsLineTypeHidden(EntityObject e) => LineTypeName(layerLinetypes, e) == "HIDDEN";
+        bool IsLineTypePhantom(Circle c) => LineTypeName(layerLinetypes, c) == "PHANTOM";
+        bool IsLineTypeIgnore(Circle c) => LineTypeName(layerLinetypes, c) == "DOT";
+        bool IsLineTypeDashdot(EntityObject e) => LineTypeName(layerLinetypes, e) == "DASHDOT";
+
+        bool IsSpecialCircle(Circle c) => IsLineTypePhantom(c) || IsLineTypeIgnore(c) || IsLineTypeDashdot(c);
         bool IsStartMarker(Circle c) => IsLineTypePhantom(c) && c.Radius.Near(0.5);
         bool IsEndMarker(Circle c) => IsLineTypePhantom(c) && c.Radius.Near(1);
-        bool IsZProbe(Circle c) => IsLineTypePhantom(c) && c.Radius.Near(3);
+        bool IsZProbe(Circle c) => (IsLineTypePhantom(c) || IsLineTypeDashdot(c)) && c.Radius.Near(3);
         bool IsIgnoredZProbe(Circle c) => IsLineTypeIgnore(c) && c.Radius.Near(3);
 
         // Algorithm:
@@ -256,7 +267,7 @@ public class PathModel {
         // 3a. (Model ParamsTexts are not fully expanded)
         {
             var name2RawText = new Dictionary<string, ParamsText>();
-            foreach (var circle in circles.Where(IsLineTypePhantom)) {
+            foreach (var circle in circles.Where(IsSpecialCircle)) {
                 ParamsText circleText = GetText(circle);
                 RawPathModel rawModel = GetOrCreateRawModel(circle);
                 Vector2 center = circle.Center.AsVector2();
@@ -294,9 +305,10 @@ public class PathModel {
                 }
             }
         }
+
         // 4. Handle geometry - non-special circles, lines and arcs
         // 4a. Circles
-        foreach (var circle in circles.Where(c => !IsLineTypePhantom(c) && !IsLineTypeIgnore(c))) {
+        foreach (var circle in circles.Where(c => !IsSpecialCircle(c))) {
             ParamsText circleText = GetText(circle);
             RawPathModel rawModel = GetRawModel(circle, circle.Center.AsVector2());
             if (ParamsText.IsNullOrEmpty(rawModel.ParamsText)) {
@@ -329,6 +341,27 @@ public class PathModel {
             }
         }
 
+        void HandleLineOrArc(List<SubPathSegment.RawSegment> subPaths, EntityObject lineOrArc, Vector2 start, Vector2 end,
+            ParamsText text, RawPathModel rawModel, double order, IMillGeometry geometry) {
+
+            MillType? millType = MillTypeFromLineType(layerLinetypes, lineOrArc);
+            if (millType.HasValue) {
+                rawModel.RawSegments.Add(new ChainSegment.RawSegment(geometry, millType.Value, lineOrArc, text, order));
+            } else if (IsLineType(layerLinetypes, lineOrArc, "DASHDOT")) { // Subpath
+                var s = new SubPathSegment.RawSegment(lineOrArc, text, start, end, options, order, subPathDefs, dxfFilePath);
+                rawModel.RawSegments.Add(s);
+                subPaths.Add(s);
+            } else if (IsLineType(layerLinetypes, lineOrArc, "DASHED")) { // Sweep with params
+                rawModel.RawSegments.Add(new SweepSegment.RawSegment(lineOrArc, text, start, end, order));
+            } else if (IsLineType(layerLinetypes, lineOrArc, "HIDDEN")
+                || IsLineType(layerLinetypes, lineOrArc, "DOT")) { // Sweep without params
+                rawModel.RawSegments.Add(new SweepSegment.RawSegment(lineOrArc, ParamsText.EMPTY, start, end, order));
+            } else {
+                messages.AddError(lineOrArc, start, dxfFilePath, Messages.PathModel_LineTypeNotSupported_LineType, LineTypeName(layerLinetypes, lineOrArc));
+            }
+        }
+
+
         // 4b. Lines
         List<SubPathSegment.RawSegment> subPaths = new();
         foreach (var line in lines) {
@@ -339,7 +372,7 @@ public class PathModel {
             RawPathModel rawModel = GetRawModel(line, start);
             LineGeometry geometry = new(start, end);
 
-            HandleLineOrArc(layerLinetypes, dxfFilePath, subPathDefs, options, messages, subPaths, line, start, end, lineText, rawModel, order, geometry);
+            HandleLineOrArc(subPaths, line, start, end, lineText, rawModel, order, geometry);
         }
 
         // 4c. Arcs
@@ -349,36 +382,10 @@ public class PathModel {
             RawPathModel rawModel = GetRawModel(arc, arcGeometry.Start);
             double order = arcText.GetN() ?? LAST_ORDER;
 
-            HandleLineOrArc(layerLinetypes, dxfFilePath, subPathDefs, options, messages, subPaths, arc, arcGeometry.Start, arcGeometry.End, arcText, rawModel, order, arcGeometry);
+            HandleLineOrArc(subPaths, arc, arcGeometry.Start, arcGeometry.End, arcText, rawModel, order, arcGeometry);
         }
 
         return name2Model;
-    }
-
-    private static void HandleLineOrArc(Dictionary<string, Linetype> layerLinetypes, string dxfFilePath,
-        Collection subPathDefs, Options options, MessageHandlerForEntities messages,
-        List<SubPathSegment.RawSegment> subPaths, EntityObject lineOrArc, Vector2 start, Vector2 end,
-        ParamsText text, RawPathModel rawModel, double order, IMillGeometry geometry) {
-       
-        MillType? millType = MillTypeFromLineType(layerLinetypes, lineOrArc);
-        if (millType.HasValue) {
-            rawModel.RawSegments.Add(new ChainSegment.RawSegment(geometry, millType.Value, lineOrArc, text, order));
-        } else if (IsLineType(layerLinetypes, lineOrArc, "DASHDOT")) { // Subpath
-            var s = new SubPathSegment.RawSegment(lineOrArc, text, start, end, options, order, subPathDefs, dxfFilePath);
-            rawModel.RawSegments.Add(s);
-            subPaths.Add(s);
-        } else if (IsLineType(layerLinetypes, lineOrArc, "DASHED")) { // Sweep with params
-            rawModel.RawSegments.Add(new SweepSegment.RawSegment(lineOrArc, text, start, end, order));
-        } else if (IsLineType(layerLinetypes, lineOrArc, "HIDDEN")
-            || IsLineType(layerLinetypes, lineOrArc, "DOT")) { // Sweep without params
-            rawModel.RawSegments.Add(new SweepSegment.RawSegment(lineOrArc, ParamsText.EMPTY, start, end, order));
-        } else {
-            messages.AddError(lineOrArc, start, dxfFilePath, Messages.PathModel_LineTypeNotSupported_LineType, LineTypeName(layerLinetypes, lineOrArc));
-        }
-    }
-
-    private static bool IsLineType(Dictionary<string, Linetype> layerLinetypes, EntityObject eo, string prefix) {
-        return LineTypeName(layerLinetypes, eo)?.StartsWith(prefix) ?? false;
     }
 
     private static MillType? MillTypeFromLineType(Dictionary<string, Linetype> layerLinetypes, EntityObject eo) {
@@ -386,10 +393,6 @@ public class PathModel {
             : IsLineType(layerLinetypes, eo, "DIVIDE") ? MillType.Mark
             : IsLineType(layerLinetypes, eo, "BORDER") ? MillType.WithSupports
             : null;
-    }
-
-    private static string? LineTypeName(Dictionary<string, Linetype> layerLinetypes, EntityObject eo) {
-        return DxfHelper.GetLinetype(eo, layerLinetypes)?.Name;
     }
 
     private static EntityObject? NearestOverlappingCircle(IEnumerable<Circle> circles, Circle2 textCircle, string text, string layerName) {
@@ -513,7 +516,7 @@ public class PathModel {
                 return null;
             } else {
                 // Circle should not be much larger than text
-                double radius = Math.Min(new Vector2(guessedWidth, guessedHeight).Modulus() / 2, guessedHeight * 0.7); 
+                double radius = Math.Min(new Vector2(guessedWidth, guessedHeight).Modulus() / 2, guessedHeight * 0.7);
 
                 return new Circle2(position + offset.Value, radius);
             }
