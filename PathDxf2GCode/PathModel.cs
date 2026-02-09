@@ -434,14 +434,9 @@ public class PathModel {
         return distance <= textCircle.Radius;
     }
 
-    private static double DistanceToArcCircle(Vector2 textCenter, Arc arc) {
-        Vector2 arcCenter = arc.Center.AsVector2();
-        Vector2 arcCenter2textCenter = textCenter - arcCenter;
-        Vector2 projOfTextCenterToArc = arcCenter + arcCenter2textCenter * (arc.Radius / arcCenter2textCenter.Modulus());
-
-        bool projIsInArc = (Vector2.Angle(arcCenter2textCenter) * MathHelper.RadToDeg).AngleIsInArc(arc.StartAngle, arc.EndAngle);
-        return projIsInArc ? (projOfTextCenterToArc - textCenter).Modulus() : double.PositiveInfinity;
-    }
+    private static double DistanceToArcCircle(Vector2 textCenter, Arc arc)
+        => GeometryHelpers.DistanceToArcProjection(textCenter, arc.Center.AsVector2(), arc.Radius,
+                                        arc.StartAngle * MathHelper.DegToRad, arc.EndAngle * MathHelper.DegToRad);
 
     private static EntityObject? NearestOverlapping<T>(IEnumerable<T> objects, Circle2 textCircle, string text,
         string layerName, Func<T, bool> textCircleOverLaps, Func<Vector2, T, T, bool> isNearerThan) where T : EntityObject {

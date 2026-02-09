@@ -82,6 +82,13 @@ public static class GeometryHelpers {
     public static Vector3 AsVector3(this Vector2 a, double z)
         => new(a.X, a.Y, z);
 
+    public static double DistanceToArcProjection(Vector2 p, Vector2 arcCenter, double arcRadius, double arcStartAngle_rad, double arcEndAngle_rad) {
+        Vector2 arcCenter2p = p - arcCenter;
+        Vector2 projOfPToArc = arcCenter + arcCenter2p * (arcRadius / arcCenter2p.Modulus());
+
+        bool projIsInArc = Vector2.Angle(arcCenter2p).AngleIsInArc(arcStartAngle_rad, arcEndAngle_rad);
+        return projIsInArc ? (projOfPToArc - p).Modulus() : double.PositiveInfinity;
+    }
     #endregion
 
     #region Vector3
