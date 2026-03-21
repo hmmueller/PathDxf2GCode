@@ -4,7 +4,7 @@ using de.hmmueller.PathGCodeLibrary;
 using netDxf;
 
 public class Program {
-    public const string VERSION = "2026-02-09";
+    public const string VERSION = "2026-03-21";
 
     public static int Main(string[] args) {
         var messages = new MessageHandlerForEntities(Console.Error);
@@ -47,8 +47,8 @@ public class Program {
         }
     }
 
-    private static readonly IEnumerable<(ZProbe ZProbe, Vector2 TransformedCenter)> NO_ZPROBES = 
-                                        Enumerable.Empty<(ZProbe ZProbe, Vector2 TransformedCenter)>();
+    private static readonly IEnumerable<(ZProbe ZProbe, Vector2 TransformedCenter, double H_mm)> NO_ZPROBES = 
+                                        Enumerable.Empty<(ZProbe ZProbe, Vector2 TransformedCenter, double H_mm)>();
 
     private static void GenerateGCode(string dxfFilePath, PathModel.Collection pathModels, MessageHandlerForEntities messages, Options options) {
         if (!dxfFilePath.EndsWith(".dxf", StringComparison.CurrentCultureIgnoreCase)) {
@@ -77,7 +77,7 @@ public class Program {
                 if (!messages.Errors.Any()) {
                     PathModel model = models.Single().Value;
                     string outFilePathPrefix = dxfFilePath[..^4] + model.Params.OutFileSuffix;
-                    List<(ZProbe ZProbe, Vector2 TransformedCenter)> orderedZProbes = model.CollectAndOrderAllZProbes();
+                    List<(ZProbe ZProbe, Vector2 TransformedCenter, double H_mm)> orderedZProbes = model.CollectAndOrderAllZProbes();
                     if (orderedZProbes.Any()) {
                         Generate(outFilePathPrefix + "_Probing.gcode", messages, sw => WriteZProbingGCode(model, orderedZProbes, sw, dxfFilePath, messages));
                         Generate(outFilePathPrefix + "_Z.txt", messages, sw => WriteEmptyZ(orderedZProbes, sw, messages));
@@ -91,7 +91,7 @@ public class Program {
         }
     }
 
-    private static void WriteMillingGCode(PathModel m, IEnumerable<(ZProbe ZProbe, Vector2 TransformedCenter)> orderedZProbes, StreamWriter sw, string dxfFilePath, MessageHandlerForEntities messages) {
+    private static void WriteMillingGCode(PathModel m, IEnumerable<(ZProbe ZProbe, Vector2 TransformedCenter, double H_mm)> orderedZProbes, StreamWriter sw, string dxfFilePath, MessageHandlerForEntities messages) {
         if (m.IsEmpty()) {
             messages.AddError(dxfFilePath, Messages.Program_NoSegmentsFound);
         } else {
@@ -103,7 +103,7 @@ public class Program {
                 Vector3 init = new(0, 0, m.Params.S_mm * (1 + 2 * GeometryHelpers.RELATIVE_EPS));
                 List<GCode> gcodes = new();
 
-                Vector3 currpos = m.EmitMillingGCode(init, m.CreateTransformation(orderedZProbes), m.Params.S_mm, gcodes, dxfFilePath, messages);
+                Vector3 currpos = m.EmitMillingGCode(init, 0, m.CreateTransformation(orderedZProbes), m.Params.S_mm, gcodes, dxfFilePath, messages);
 
                 gcodes.AddNonhorizontalG00($"G00 Z{init.Z.F3()}", Math.Abs(currpos.Z - init.Z));
 
@@ -173,7 +173,7 @@ public class Program {
         sw.WriteLine("%");
     }
     
-    private static void WriteZProbingGCode(PathModel m, IEnumerable<(ZProbe ZProbe, Vector2 TransformedCenter)> orderedZProbes, StreamWriter sw, string dxfFilePath, MessageHandlerForEntities messages) {
+    private static void WriteZProbingGCode(PathModel m, IEnumerable<(ZProbe ZProbe, Vector2 TransformedCenter, double H_mm)> orderedZProbes, StreamWriter sw, string dxfFilePath, MessageHandlerForEntities messages) {
         if (!messages.Errors.Any()) {
             // See http://www.linuxcnc.org/docs/html/gcode/overview.html#_g_code_best_practices
             Vector3 init = new(0, 0, m.Params.S_mm);
@@ -189,12 +189,12 @@ public class Program {
         }
     }
 
-    private static Vector3 EmitZProbingGCode(Vector3 currPos, IEnumerable<(ZProbe ZProbe, Vector2 TransformedCenter)> orderedZProbes, double globalS_mm, List<GCode> gcodes, string dxfFileName, MessageHandlerForEntities messages) {
+    private static Vector3 EmitZProbingGCode(Vector3 currPos, IEnumerable<(ZProbe ZProbe, Vector2 TransformedCenter, double H_mm)> orderedZProbes, double globalS_mm, List<GCode> gcodes, string dxfFileName, MessageHandlerForEntities messages) {
         double sweepHeight = currPos.Z;
         foreach (var zc in orderedZProbes) {
             currPos = GCodeHelpers.SweepFromTo(currPos, zc.TransformedCenter.AsVector3(sweepHeight), globalS_mm, gcodes);
             try {
-                currPos = zc.ZProbe.EmitGCode(currPos, zc.TransformedCenter, gcodes, dxfFileName, messages);
+                currPos = zc.ZProbe.EmitGCode(currPos, zc.ZProbe.TH_mm(zc.H_mm), zc.TransformedCenter, gcodes, dxfFileName, messages);
                 if (!currPos.Z.Near(sweepHeight)) {
                     throw new Exception($"Internal Error - {currPos.Z} <> {sweepHeight}");
                 }
@@ -205,14 +205,14 @@ public class Program {
         return currPos;
     }
 
-    private static void WriteEmptyZ(IEnumerable<(ZProbe ZProbe, Vector2 TransformedCenter)> orderedZProbes, StreamWriter sw, MessageHandlerForEntities messages) {
+    private static void WriteEmptyZ(IEnumerable<(ZProbe ZProbe, Vector2 TransformedCenter, double H_mm)> orderedZProbes, StreamWriter sw, MessageHandlerForEntities messages) {
         if (!messages.Errors.Any()) {
             foreach (var zc in orderedZProbes) {
                 ZProbe z = zc.ZProbe;
                 // Line example - separators are # and =:
                 // ([77.038 191.859]/L:ZA/T=5.000) #51=
                 // <        0             > <  1  > <> < 3 >
-                sw.WriteLine((z.Center.F3() + (z.L == null ? "" : "/L:" + z.L) + "/T=" + z.T_mm.F3()).AsComment(0) + " " + z.Name + "=");
+                sw.WriteLine((z.Center.F3() + (z.L == null ? "" : "/L:" + z.L) + "/T=" + z.TH_mm(zc.H_mm).F3()).AsComment(0) + " " + z.Name + "=");
             }
         }
     }

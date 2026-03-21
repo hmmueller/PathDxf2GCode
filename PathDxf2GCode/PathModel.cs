@@ -635,15 +635,15 @@ public class PathModel {
 
     public bool IsEmpty() => !_segments.Any();
 
-    public Transformation3 CreateTransformation(IEnumerable<(ZProbe ZProbe, Vector2 TransformedCenter)> orderedZProbes)
+    public Transformation3 CreateTransformation(IEnumerable<(ZProbe ZProbe, Vector2 TransformedCenter, double H_mm)> orderedZProbes)
         => new Transformation3(Start, Start + Vector2.UnitX, Vector2.Zero, Vector2.UnitX, orderedZProbes);
 
-    public Vector3 EmitMillingGCode(Vector3 currPos, Transformation3 t, double globalS_mm,
+    public Vector3 EmitMillingGCode(Vector3 currPos, double h_mm, Transformation3 t, double globalS_mm,
         List<GCode> gcodes, string dxfFileName, MessageHandlerForEntities messages) {
 
         foreach (var s in _segments) {
             try {
-                currPos = s.EmitGCode(currPos, t, globalS_mm, gcodes, dxfFileName, messages);
+                currPos = s.EmitGCode(currPos, h_mm, t, globalS_mm, gcodes, dxfFileName, messages);
             } catch (EmitGCodeException ex) {
                 messages.AddError(ex.ErrorContext, ex.Message);
             }
@@ -652,16 +652,16 @@ public class PathModel {
     }
 
 
-    public List<(ZProbe ZProbe, Vector2 TransformedCenter)> CollectAndOrderAllZProbes() {
+    public List<(ZProbe ZProbe, Vector2 TransformedCenter, double H_mm)> CollectAndOrderAllZProbes() {
         // A. Collect all zProbes
-        HashSet<(ZProbe ZProbe, Vector2 TransformedCenter)> openZProbes = CollectZProbes(new Transformation2(Start, Start + Vector2.UnitX, Vector2.Zero, Vector2.UnitX)).ToHashSet();
+        HashSet<(ZProbe ZProbe, Vector2 TransformedCenter, double)> openZProbes = CollectZProbes(new Transformation2(Start, Start + Vector2.UnitX, Vector2.Zero, Vector2.UnitX), h_mm: 0).ToHashSet();
 
         // B. Order them
-        List<(ZProbe ZProbe, Vector2 TransformedCenter)> orderedZProbes = new();
+        List<(ZProbe ZProbe, Vector2 TransformedCenter, double H_mm)> orderedZProbes = new();
         {
             Vector2 currZEnd = Vector2.Zero;
             while (openZProbes.Any()) {
-                (ZProbe ZProbe, Vector2 TransformedCenter) nearestZ = openZProbes.MinBy(z => (z.TransformedCenter - currZEnd).Modulus())!;
+                (ZProbe ZProbe, Vector2 TransformedCenter, double H_mm) nearestZ = openZProbes.MinBy(z => (z.TransformedCenter - currZEnd).Modulus())!;
                 orderedZProbes.Add(nearestZ);
                 currZEnd = nearestZ.TransformedCenter;
                 openZProbes.Remove(nearestZ);
@@ -677,10 +677,10 @@ public class PathModel {
         return orderedZProbes;
     }
 
-    internal IEnumerable<(ZProbe ZProbe, Vector2 TransformedCenter)> CollectZProbes(Transformation2 t) {
-        List<(ZProbe ZProbe, Vector2 TransformedCenter)> result = _zProbes.Select(z => (z, t.Transform(z.Center))).ToList();
+    internal IEnumerable<(ZProbe ZProbe, Vector2 TransformedCenter, double H_mm)> CollectZProbes(Transformation2 t, double h_mm) {
+        List<(ZProbe ZProbe, Vector2 TransformedCenter, double H_mm)> result = _zProbes.Select(z => (z, t.Transform(z.Center), h_mm)).ToList();
         foreach (var s in _segments.OfType<SubPathSegment>()) {
-            result.AddRange(s.CollectZProbes(t));
+            result.AddRange(s.CollectZProbes(t, h_mm + s.H_mm));
         }
         return result;
     }

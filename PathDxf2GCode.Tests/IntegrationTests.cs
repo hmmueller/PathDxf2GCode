@@ -142,6 +142,7 @@ M30
 %");
     }
 
+
     [TestMethod]
     public void TestMethod05_TestScale1To3() {
         Assert.AreNotEqual(0, Program.Main(["/f150", "/v500", "/s15", "8999.05P.dxf"]));
@@ -418,6 +419,64 @@ G00 Z5.000
   (Bohrungen:       2 mm   ca.  1 min)
   (Leerfahrten:    49 mm   ca.  1 min)
   (Summe:         225 mm   ca.  2 min)
+  (Befehlszahl: 14)
+M30
+%");
+    }
+
+    [TestMethod]
+    public void TestMethod11_SubpathWithHeight() {
+        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s15", "/x", "O2", "8999.11P_H2.dxf"]));
+        Compare("8999.11P_H2_Milling.gcode", $@"%
+(PathDxf2GCode - HMMüller 2024-2025 V.{Program.VERSION})
+(8999.11P_H2.dxf)
+F150
+G17 G21 G40 G49 G54 G80 G90 G94
+T1
+(SweepSafelyTo [0.000 0.000 5.000])
+G00 Z5.000
+G00 X0.000 Y0.000
+  (Model 8999.11P[8999.11P_H2.dxf])
+  (SweepAndDrillSafelyFromTo [0.000 0.000 5.000] [20.000 0.000 5.000] s=5.000 bt=False)
+    (DrillOrPullZFromTo 5.000 5.000)
+G00 Z5.000
+G00 X20.000 Y0.000
+  (START Subpath 8998.2P[8998.dxf] t=[ [120.000 170.000]=>[20.000 0.000] / [120.000 100.000]=>[20.000 70.000] ])
+  (SweepAndDrillSafelyFromTo [20.000 0.000 5.000] [20.000 0.000 1.800] s=5.000 bt=False)
+    (DrillOrPullZFromTo 5.000 1.800)
+G00 Z3.000
+G01 Z1.800
+  (MillLine s=[20.000 0.000] e=[0.000 20.000] fr=1.800 to=1.800 bt=False)
+G01 F150.000 X0.000 Y20.000 Z1.800
+  (SweepAndDrillSafelyFromTo [0.000 20.000 1.800] [0.000 20.000 1.800] s=5.000 bt=False)
+  (MillLine s=[0.000 20.000] e=[0.000 50.000] fr=1.800 to=1.800 bt=False)
+G01 F150.000 X0.000 Y50.000 Z1.800
+  (SweepAndDrillSafelyFromTo [0.000 50.000 1.800] [0.000 50.000 1.800] s=5.000 bt=False)
+  (MillLine s=[0.000 50.000] e=[20.000 70.000] fr=1.800 to=1.800 bt=False)
+G01 F150.000 X20.000 Y70.000 Z1.800
+  (SweepAndDrillSafelyFromTo [20.000 70.000 1.800] [20.000 70.000 1.700] s=5.000 bt=False)
+    (DrillOrPullZFromTo 1.800 1.700)
+G01 Z1.700
+  (MillLine s=[20.000 70.000] e=[0.000 50.000] fr=1.700 to=1.700 bt=False)
+G01 F150.000 X0.000 Y50.000 Z1.700
+  (SweepAndDrillSafelyFromTo [0.000 50.000 1.700] [0.000 50.000 1.700] s=5.000 bt=False)
+  (MillLine s=[0.000 50.000] e=[0.000 20.000] fr=1.700 to=1.700 bt=False)
+G01 F150.000 X0.000 Y20.000 Z1.700
+  (SweepAndDrillSafelyFromTo [0.000 20.000 1.700] [0.000 20.000 1.700] s=5.000 bt=False)
+  (MillLine s=[0.000 20.000] e=[20.000 0.000] fr=1.700 to=1.700 bt=False)
+G01 F150.000 X20.000 Y0.000 Z1.700
+  (SweepAndDrillSafelyFromTo [20.000 0.000 1.700] [20.000 70.000 5.000] s=5.000 bt=False)
+    (DrillOrPullZFromTo 1.700 5.000)
+G00 Z5.000
+; G00 X20.000 Y70.000
+  (END Subpath 8998.2P[8998.dxf] t=[ [120.000 170.000]=>[20.000 0.000] / [120.000 100.000]=>[20.000 70.000] ])
+  (SweepAndDrillSafelyFromTo [20.000 70.000 5.000] [0.000 70.000 5.000] s=5.000 bt=False)
+G00 X0.000 Y70.000
+G00 Z5.000
+  (Fräslänge:     173 mm   ca.  2 min)
+  (Bohrungen:       2 mm   ca.  1 min)
+  (Leerfahrten:    45 mm   ca.  1 min)
+  (Summe:         221 mm   ca.  2 min)
   (Befehlszahl: 14)
 M30
 %");

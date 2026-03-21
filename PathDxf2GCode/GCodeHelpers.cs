@@ -28,44 +28,44 @@ public static class GCodeHelpers {
         gcodes.Add(new DrillGCode(g, dist_mm, f_mmpmin));
     }
 
-    public static void DrillOrPullZFromTo(Vector2 pos, double currZ, double targetZ, double t_mm,
+    public static void DrillOrPullZFromTo(Vector2 pos, double currZ, double targetZ, double th_mm,
                                           double f_mmpmin, Transformation3 zCorr, List<GCode> gcodes) {
         if (targetZ.Near(currZ)) {
             // schon dort
         } else {
             gcodes.AddComment($"DrillOrPullZFromTo {currZ.F3()} {targetZ.F3()}", 4);
-            if (targetZ > t_mm || targetZ > currZ) {
+            if (targetZ > th_mm || targetZ > currZ) {
                 gcodes.AddNonhorizontalG00($"G00 Z{zCorr.Expr(targetZ, pos)}", Math.Abs(currZ -targetZ));
             } else {
-                if (currZ > t_mm) {
-                    gcodes.AddNonhorizontalG00($"G00 Z{zCorr.Expr(t_mm, pos)}", Math.Abs(currZ- t_mm));
+                if (currZ > th_mm) {
+                    gcodes.AddNonhorizontalG00($"G00 Z{zCorr.Expr(th_mm, pos)}", Math.Abs(currZ- th_mm));
                 }
-                if (!targetZ.Near(t_mm)) {
+                if (!targetZ.Near(th_mm)) {
                     // From t_mm downwards, we drill; TODO: deep holes could be drilled with G81
-                    gcodes.AddDrill($"G01 Z{zCorr.Expr(targetZ, pos)}", Math.Abs(t_mm - targetZ), f_mmpmin);
+                    gcodes.AddDrill($"G01 Z{zCorr.Expr(targetZ, pos)}", Math.Abs(th_mm - targetZ), f_mmpmin);
                 }
             }
         }
     }
 
-    public static Vector3 DrillOrPullZFromTo(Vector3 currPos, Vector3 target, double t_mm, double f_mmpmin,
+    public static Vector3 DrillOrPullZFromTo(Vector3 currPos, Vector3 target, double th_mm, double f_mmpmin,
                                              Transformation3 zCorr, List<GCode> gcodes) {
-        DrillOrPullZFromTo(currPos.XY(), currPos.Z, target.Z, t_mm, f_mmpmin, zCorr, gcodes);
+        DrillOrPullZFromTo(currPos.XY(), currPos.Z, target.Z, th_mm, f_mmpmin, zCorr, gcodes);
         return target;
     }
 
-    public static Vector3 SweepAndDrillSafelyFromTo(Vector3 from, Vector3 to, double t_mm, double s_mm,
+    public static Vector3 SweepAndDrillSafelyFromTo(Vector3 from, Vector3 to, double th_mm, double s_mm,
             double globalS_mm, double f_mmpmin, bool backtracking,
             Transformation3 zCorr, List<GCode> gcodes) {
         gcodes.AddComment($"SweepAndDrillSafelyFromTo {from.F3()} {to.F3()} s={s_mm.F3()} bt={backtracking}", 2);
         Vector2 fromXY = from.XY();
         Vector2 toXY = to.XY();
         if (fromXY.Near(toXY)) {
-            DrillOrPullZFromTo(fromXY, from.Z, to.Z, t_mm, f_mmpmin, zCorr, gcodes);
+            DrillOrPullZFromTo(fromXY, from.Z, to.Z, th_mm, f_mmpmin, zCorr, gcodes);
         } else {
-            DrillOrPullZFromTo(fromXY, from.Z, s_mm, t_mm, f_mmpmin, zCorr, gcodes);
+            DrillOrPullZFromTo(fromXY, from.Z, s_mm, th_mm, f_mmpmin, zCorr, gcodes);
             SweepFromTo(fromXY.AsVector3(s_mm), to, globalS_mm, gcodes);
-            DrillOrPullZFromTo(toXY, s_mm, to.Z, t_mm, f_mmpmin, zCorr, gcodes);
+            DrillOrPullZFromTo(toXY, s_mm, to.Z, th_mm, f_mmpmin, zCorr, gcodes);
         }
         return to;
     }

@@ -11,7 +11,7 @@ public interface IMillGeometry {
     bool Equals(IMillGeometry g);
     Vector3 EmitGCode(Vector3 currPos, Transformation3 t, double globalS_mm,
                       List<GCode> gcodes, double fromZ_mm, double toZ_mm,
-                      double t_mm, double f_mmpmin, bool backtracking);
+                      double th_mm, double f_mmpmin, bool backtracking);
     IMillGeometry Section(double from_mm, double lg_mm);
 }
 
@@ -38,9 +38,9 @@ public class LineGeometry : IMillGeometry {
 
     public Vector3 EmitGCode(Vector3 currPos, Transformation3 t, double globalS_mm,
                                       List<GCode> gcodes, double fromZ_mm, double toZ_mm,
-                                      double t_mm, double f_mmpmin, bool backtracking) {
+                                      double th_mm, double f_mmpmin, bool backtracking) {
         LineGeometry l = Transform(t);
-        currPos = GCodeHelpers.DrillOrPullZFromTo(currPos, l.Start.AsVector3(fromZ_mm), t_mm, f_mmpmin, t, gcodes);
+        currPos = GCodeHelpers.DrillOrPullZFromTo(currPos, l.Start.AsVector3(fromZ_mm), th_mm, f_mmpmin, t, gcodes);
         gcodes.AddComment($"MillLine s={l.Start.F3()} e={l.End.F3()} fr={fromZ_mm.F3()} to={toZ_mm.F3()} bt={backtracking}", 2);
 
         gcodes.AddMill($"G01 F{f_mmpmin.F3()} X{l.End.X.F3()} Y{l.End.Y.F3()} Z{t.Expr(toZ_mm, l.Start)}",
@@ -96,9 +96,9 @@ public class ArcGeometry : IMillGeometry {
 
     public Vector3 EmitGCode(Vector3 currPos, Transformation3 t, double globalS_mm,
                                       List<GCode> gcodes, double fromZ_mm, double toZ_mm,
-                                      double t_mm, double f_mmpmin, bool backtracking) {
+                                      double th_mm, double f_mmpmin, bool backtracking) {
         ArcGeometry a = Transform(t);
-        currPos = GCodeHelpers.DrillOrPullZFromTo(currPos, a.Start.AsVector3(fromZ_mm), t_mm, f_mmpmin, t, gcodes);
+        currPos = GCodeHelpers.DrillOrPullZFromTo(currPos, a.Start.AsVector3(fromZ_mm), th_mm, f_mmpmin, t, gcodes);
 
         gcodes.AddComment($"MillArc l={a.Center.F3()} r={Radius_mm.F3()} a0={a.StartAngle_deg.F3()} a1={a.EndAngle_deg.F3()} fr={fromZ_mm.F3()} to={toZ_mm.F3()} p0={a.Start.F3()} p1={a.End.F3()} bt={backtracking}", 2);
         string g = Counterclockwise ? "G03" : "G02";
@@ -164,7 +164,7 @@ public static class MillGeometryHelper {
 
     private enum SupportStep { Up, Bar, Down, Between }
 
-    public static Vector3 MillSupportsStart2End(this IMillGeometry[] supportGeometries, Vector3 currPos, double millingBottom_mm, double globalS_mm, Transformation3 t, List<GCode> gcodes, string errorContext, IParams pars, bool backtracking) {
+    public static Vector3 MillSupportsStart2End(this IMillGeometry[] supportGeometries, Vector3 currPos, double millingBottom_mm, double h_mm, double globalS_mm, Transformation3 t, List<GCode> gcodes, string errorContext, IParams pars, bool backtracking) {
         SupportStep step = SupportStep.Bar;
         foreach (var sg in supportGeometries ) {
             gcodes.AddComment("Support." + step, 2);
@@ -183,14 +183,14 @@ public static class MillGeometryHelper {
                         SupportStep.Between => pars.B_mm,
                         _ => throw new EmitGCodeException(errorContext, "Invalid step")
                     }),
-                    t_mm: pars.T_mm, f_mmpmin: pars.F_mmpmin, backtracking);
+                    th_mm: h_mm + pars.T_mm, f_mmpmin: pars.F_mmpmin, backtracking);
             step = step == SupportStep.Between ? SupportStep.Up : step + 1;
         }
 
         return currPos;
     }
 
-    public static Vector3 MillSupportsEnd2Start(this IMillGeometry[] supportGeometries, Vector3 currPos, double millingBottom_mm, double globalS_mm, Transformation3 t, List<GCode> gcodes, string errorContext, IParams pars, bool backtracking) {
+    public static Vector3 MillSupportsEnd2Start(this IMillGeometry[] supportGeometries, Vector3 currPos, double millingBottom_mm, double h_mm, double globalS_mm, Transformation3 t, List<GCode> gcodes, string errorContext, IParams pars, bool backtracking) {
         SupportStep step = SupportStep.Bar;
         foreach (var sg in supportGeometries.Reverse()) {
             gcodes.AddComment("Support." + step, 2);
@@ -209,7 +209,7 @@ public static class MillGeometryHelper {
                         SupportStep.Between => pars.B_mm,
                         _ => throw new EmitGCodeException(errorContext, "Invalid step")
                     }),
-                    t_mm: pars.T_mm, f_mmpmin: pars.F_mmpmin, backtracking);
+                    th_mm: h_mm + pars.T_mm, f_mmpmin: pars.F_mmpmin, backtracking);
             step = step == SupportStep.Between ? SupportStep.Up : step + 1;
         }
 

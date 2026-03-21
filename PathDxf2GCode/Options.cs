@@ -98,6 +98,7 @@ public class Options : AbstractOptions {
         }
 
         double GetDoubleOption(ref int i) {
+            // TODO: Should be call to AbstractOptions.GetDoubleOption
             string a = args[i][2..];
             string v = GetStringOption(ref i).Replace(',', '.');
             double result;
@@ -109,6 +110,7 @@ public class Options : AbstractOptions {
             return result >= 0 ? result : throw FormatException(Messages.Options_LessThan0_Name_Value, v, a);
         }
 
+        // TODO: Should be call to AbstractOptions.FillOptions
         Options options = new();
         for (int i = 0; i < args.Length; i++) {
             string a = args[i];

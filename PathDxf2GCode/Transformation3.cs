@@ -23,23 +23,23 @@ public class ZProbe {
         _params = new ZProbeParams(ParamsText, superpathVariables, MessageHandlerForEntities.Context(Source, Center, dxfFileName), pathParams, onError);
     }
 
-    public double T_mm => _params!.T_mm;
+    public double TH_mm(double h_mm) => _params!.T_mm + _params.H_mm + h_mm;
     public string? L => _params!.L;
 
     public string Name => _name ?? throw new NullReferenceException("SetName was not called");
 
-    public Vector3 EmitGCode(Vector3 currPos, Vector2 transformedCenter,
+    public Vector3 EmitGCode(Vector3 currPos, double h_mm, Vector2 transformedCenter,
                              List<GCode> gcodes, string dxfFileName, MessageHandlerForEntities messages) {
         PathSegment.AssertNear(currPos.XY(), transformedCenter, MessageHandlerForEntities.Context(Source, Center, dxfFileName));
 
         double o_mm = _params!.O_mm;
-        gcodes.AddNonhorizontalG00($"G00 Z{(T_mm + o_mm).F3()}", currPos.Z - T_mm - o_mm); // Go down quickly to T+O
+        gcodes.AddNonhorizontalG00($"G00 Z{(TH_mm(h_mm) + o_mm).F3()}", currPos.Z - TH_mm(h_mm) - o_mm); // Go down quickly to T+O
 
         gcodes.Add($"G38.3 Z0 F{_params!.Z_mmpmin.F3()}"); // Slow Z probe - I have to place the probe below the lowering router bit!
         gcodes.Add("G04 P4"); // Wait 4s to allow reading the value
         // The previous two statements are currently not added to the statistics; maybe later.
 
-        gcodes.AddNonhorizontalG00($"G00 Z{currPos.Z.F3()}", currPos.Z - T_mm); // Return to previous Z height
+        gcodes.AddNonhorizontalG00($"G00 Z{currPos.Z.F3()}", currPos.Z - TH_mm(h_mm)); // Return to previous Z height
 
         return currPos;
     }
@@ -53,10 +53,10 @@ public class ZProbe {
 }
 
 public class Transformation3 : Transformation2 {
-    private readonly (Vector2 Center, double T_mm, string Name)[] _zProbeData;
+    private readonly (Vector2 Center, double TH_mm, string Name)[] _zProbeData;
 
-    public Transformation3(Vector2 fromStart, Vector2 fromEnd, Vector2 toStart, Vector2 toEnd, IEnumerable<(ZProbe ZProbe, Vector2 TransformedCenter)> orderedZProbes) : base(fromStart, fromEnd, toStart, toEnd) {
-        _zProbeData = orderedZProbes.Select(z => (Center: z.TransformedCenter, z.ZProbe.T_mm, z.ZProbe.Name)).ToArray();
+    public Transformation3(Vector2 fromStart, Vector2 fromEnd, Vector2 toStart, Vector2 toEnd, IEnumerable<(ZProbe ZProbe, Vector2 TransformedCenter, double H_mm)> orderedZProbes) : base(fromStart, fromEnd, toStart, toEnd) {
+        _zProbeData = orderedZProbes.Select(z => (Center: z.TransformedCenter, z.ZProbe.TH_mm(z.H_mm), z.ZProbe.Name)).ToArray();
     }
 
     private Transformation3(Transformation2 t, (Vector2 Center, double T_mm, string Name)[] zProbes) : base(t) {
@@ -72,7 +72,7 @@ public class Transformation3 : Transformation2 {
                 .Select(z => (
                     Weight: 1 / ((z.Center - xy).Modulus() + 1e-3), // 1e-3 avoids /0; but is small enough so that
                                           // typical distances to ZProbes (on the order of mm) are not distorted.
-                    z.T_mm,
+                    z.TH_mm,
                     z.Name))
                 .OrderByDescending(wt => wt.Weight)
                 .Take(4)                  // Limited to the 4 nearest ZProbes to limit expression length.
