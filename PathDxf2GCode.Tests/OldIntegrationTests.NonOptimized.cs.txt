@@ -38,7 +38,7 @@ public class IntegrationTests {
     public void TestMethod01() {
         Assert.AreEqual(0, Program.Main(["/f150", "/v500", "8999.1P.dxf"]));
         Compare("8999.1P_Milling.gcode", $@"%
-(PathDxf2GCode - HMMüller 2024-2025 V.{Program.VERSION})
+(PathDxf2GCode - HMMüller 2024-2026 V.{Program.VERSION})
 (8999.1P.dxf)
 F150
 G17 G21 G40 G49 G54 G80 G90 G94
@@ -78,7 +78,7 @@ M2
         Assert.AreEqual(0, Program.Main(["/f150", "/v500", "8999.2P.dxf"]));
         
         Compare("8999.2P_Milling.gcode", $@"%
-(PathDxf2GCode - HMMüller 2024-2025 V.{Program.VERSION})
+(PathDxf2GCode - HMMüller 2024-2026 V.{Program.VERSION})
 (8999.2P.dxf)
 F150
 G17 G21 G40 G49 G54 G80 G90 G94
@@ -138,7 +138,7 @@ M2
     public void TestMethod08() {
         Assert.AreEqual(0, Program.Main(["/f150", "/v500", "8999.8P.dxf"]));
         Compare("8999.8P_Milling.gcode", $@"%
-(PathDxf2GCode - HMMüller 2024-2025 V.{Program.VERSION})
+(PathDxf2GCode - HMMüller 2024-2026 V.{Program.VERSION})
 (8999.8P.dxf)
 F150
 G17 G21 G40 G49 G54 G80 G90 G94
@@ -198,7 +198,7 @@ M2
     public void TestMethod09() {
         Assert.AreEqual(0, Program.Main(["/f150", "/v500", "8999.9P.dxf"]));
         Compare("8999.9P_Milling.gcode", $@"%
-(PathDxf2GCode - HMMüller 2024-2025 V.{Program.VERSION})
+(PathDxf2GCode - HMMüller 2024-2026 V.{Program.VERSION})
 (8999.9P.dxf)
 F150
 G17 G21 G40 G49 G54 G80 G90 G94
@@ -288,7 +288,7 @@ M2
     public void TestMethod10() {
         Assert.AreEqual(0, Program.Main(["/f150", "/v500", "8999.10P.dxf"]));
         Compare("8999.10P_Milling.gcode", $@"%
-(PathDxf2GCode - HMMüller 2024-2025 V.{Program.VERSION})
+(PathDxf2GCode - HMMüller 2024-2026 V.{Program.VERSION})
 (8999.10P.dxf)
 F150
 G17 G21 G40 G49 G54 G80 G90 G94
@@ -328,7 +328,7 @@ M2
     public void TestMethod11() {
         Assert.AreEqual(0, Program.Main(["/f150", "/v500", "8999.11P.dxf"]));
         Compare("8999.11P_Milling.gcode", $@"%
-(PathDxf2GCode - HMMüller 2024-2025 V.{Program.VERSION})
+(PathDxf2GCode - HMMüller 2024-2026 V.{Program.VERSION})
 (8999.11P.dxf)
 F150
 G17 G21 G40 G49 G54 G80 G90 G94
@@ -388,7 +388,7 @@ M2
     public void TestMethod12() {
         Assert.AreEqual(0, Program.Main(["/f150", "/v500", "8999.12P.dxf"]));
         Compare("8999.12P_Milling.gcode", $@"%
-(PathDxf2GCode - HMMüller 2024-2025 V.{Program.VERSION})
+(PathDxf2GCode - HMMüller 2024-2026 V.{Program.VERSION})
 (8999.12P.dxf)
 F150
 G17 G21 G40 G49 G54 G80 G90 G94
@@ -428,7 +428,7 @@ M2
     public void TestMethod13() {
         Assert.AreEqual(0, Program.Main(["/f150", "/v500", "8999.13P.dxf"]));
         Compare("8999.13P_Milling.gcode", $@"%
-(PathDxf2GCode - HMMüller 2024-2025 V.{Program.VERSION})
+(PathDxf2GCode - HMMüller 2024-2026 V.{Program.VERSION})
 (8999.13P.dxf)
 F150
 G17 G21 G40 G49 G54 G80 G90 G94
@@ -699,7 +699,7 @@ M2
     public void TestMethod14() { // Löcher
         Assert.AreEqual(0, Program.Main(["/f150", "/v500", "8999.14P.dxf"]));
         Compare("8999.14P_Milling.gcode", $@"%
-(PathDxf2GCode - HMMüller 2024-2025 V.{Program.VERSION})
+(PathDxf2GCode - HMMüller 2024-2026 V.{Program.VERSION})
 (8999.14P.dxf)
 F150
 G17 G21 G40 G49 G54 G80 G90 G94
@@ -1141,7 +1141,7 @@ M2
     public void TestMethod15() {
         Assert.AreEqual(0, Program.Main(["/f150", "/v500", "8999.15P.dxf"]));
         Compare("8999.15P_Milling.gcode", $@"%
-(PathDxf2GCode - HMMüller 2024-2025 V.{Program.VERSION})
+(PathDxf2GCode - HMMüller 2024-2026 V.{Program.VERSION})
 (8999.15P.dxf)
 F150
 G17 G21 G40 G49 G54 G80 G90 G94
@@ -1244,7 +1244,7 @@ M2
     //    public void TestMethod16() { // Turns
     //        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "8999.16P.dxf"]));
     //        Compare("8999.16P_Milling.gcode", $@"%
-    //(PathDxf2GCode - HMMüller 2024-2025 V.{Program.VERSION})
+    //(PathDxf2GCode - HMMüller 2024-2026 V.{Program.VERSION})
     //(8999.16P.dxf)
     //F150
     //G17 G21 G40 G49 G54 G80 G90 G94

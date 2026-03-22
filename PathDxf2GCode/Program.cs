@@ -4,7 +4,7 @@ using de.hmmueller.PathGCodeLibrary;
 using netDxf;
 
 public class Program {
-    public const string VERSION = "2026-03-21";
+    public const string VERSION = "2026-03-22";
 
     public static int Main(string[] args) {
         var messages = new MessageHandlerForEntities(Console.Error);
@@ -147,7 +147,7 @@ public class Program {
 
     private static void WritePrologue(Vector3 init, StreamWriter sw, string dxfFilePath) {
         sw.WriteLine("%");
-        sw.WriteLine($"PathDxf2GCode - HMMüller 2024-2025 V.{VERSION}".AsComment(0));
+        sw.WriteLine($"PathDxf2GCode - HMMüller 2024-2026 V.{VERSION}".AsComment(0));
 
         // UGS does not like the following command, therefore I removed it.
         //sw.WriteLine($"O{Path.GetFileNameWithoutExtension(dxfFilePath)} {dxfFilePath.AsComment(0)}");
@@ -194,7 +194,7 @@ public class Program {
         foreach (var zc in orderedZProbes) {
             currPos = GCodeHelpers.SweepFromTo(currPos, zc.TransformedCenter.AsVector3(sweepHeight), globalS_mm, gcodes);
             try {
-                currPos = zc.ZProbe.EmitGCode(currPos, zc.ZProbe.TH_mm(zc.H_mm), zc.TransformedCenter, gcodes, dxfFileName, messages);
+                currPos = zc.ZProbe.EmitGCode(currPos, zc.H_mm, zc.TransformedCenter, gcodes, dxfFileName, messages);
                 if (!currPos.Z.Near(sweepHeight)) {
                     throw new Exception($"Internal Error - {currPos.Z} <> {sweepHeight}");
                 }
