@@ -1,7 +1,6 @@
 ﻿namespace de.hmmueller.PathDxf2GCode;
 
 using de.hmmueller.PathGCodeLibrary;
-using System.Diagnostics;
 using System.Globalization;
 using System.Text.RegularExpressions;
 
@@ -91,110 +90,83 @@ public class Options : AbstractOptions {
     }
 
     public static Options? Create(string[] args, MessageHandlerForEntities messages) {
-        bool doNotRun = false;
+        Options options = new();
 
+        return FillOptions(args, options, messages,
+            missingOptionAfter: a => messages.AddError("Options", Messages.Options_MissingOptionAfter_Name, a),
+            unsupportedOption: a => messages.AddError("Options", Messages.Options_NotSupported_Name, a),
+            handleOption: HandleOption,
+            handleArgument: HandleArgument,
+            checkOptions: CheckOptions) ? options : null;
+    }
+
+    private static bool HandleOption(string opt, string[] args, ref int i, Options options, MessageHandler messages) {
         string GetStringOption(ref int i) {
             return AbstractOptions.GetStringOption(args, ref i, Messages.Options_MissingValue_Name);
         }
 
         double GetDoubleOption(ref int i) {
-            // TODO: Should be call to AbstractOptions.GetDoubleOption
-            string a = args[i][2..];
-            string v = GetStringOption(ref i).Replace(',', '.');
-            double result;
-            try {
-                result = double.Parse(v, CultureInfo.InvariantCulture);
-            } catch (FormatException) {
-                throw FormatException(Messages.Options_NaN_Name_Value, v, a);
-            }
-            return result >= 0 ? result : throw FormatException(Messages.Options_LessThan0_Name_Value, v, a);
+            return AbstractOptions.GetDoubleOption(args, ref i, Messages.Options_MissingOptionAfter_Name,
+                                                   Messages.Options_NaN_Name_Value, Messages.Options_LessThan0_Name_Value);
         }
 
-        // TODO: Should be call to AbstractOptions.FillOptions
-        Options options = new();
-        for (int i = 0; i < args.Length; i++) {
-            string a = args[i];
-            try {
-                if (a.StartsWith('/') || a.StartsWith('-')) {
-                    if (a.Length == 1) {
-                        doNotRun = true;
-                        messages.AddError("Options", Messages.Options_MissingOptionAfter_Name, a);
-                    } else if (a[1..] == "debug") {
-                        Debugger.Launch();
-                    } else if (a[1..] == "dump") {
-                        options.Dump = true;
-                    } else {
-                        switch (a.Substring(1, 1).ToLowerInvariant()) {
-                            case "h":
-                            case "?":
-                                doNotRun = true;
-                                break;
-                            case "d":
-                                options._searchDirectories.Add(GetStringOption(ref i));
-                                break;
-                            case "c":
-                                options.CheckModels = true;
-                                break;
-                            case "x":
-                                options.ShowTextAssignments = new Regex(GetStringOption(ref i));
-                                break;
-                            case "n":
-                                options.PathNamePattern = GetStringOption(ref i);
-                                break;
-                            case "p":
-                                options.PathFilePattern = GetStringOption(ref i);
-                                break;
-                            case "f":
-                                options.GlobalFeedRate_mmpmin = GetDoubleOption(ref i);
-                                break;
-                            case "z":
-                                options.GlobalProbeRate_mmpmin = GetDoubleOption(ref i);
-                                break;
-                            case "v":
-                                options.GlobalSweepRate_mmpmin = GetDoubleOption(ref i);
-                                break;
-                            case "s":
-                                options.GlobalSweepHeight_mm = GetDoubleOption(ref i);
-                                break;
-                            case "l":
-                                Thread.CurrentThread.CurrentUICulture = new CultureInfo(GetStringOption(ref i));
-                                break;
-                            default:
-                                doNotRun = true;
-                                messages.AddError("Options", Messages.Options_NotSupported_Name, a);
-                                break;
-                        }
-                    }
-                } else {
-                    options._dxfFilePaths.Add(a);
-                }
-            } catch (Exception ex) {
-                doNotRun = true;
-                messages.AddError("Options", ex.Message);
-            }
+        switch (opt) {
+            case "d":
+                options._searchDirectories.Add(GetStringOption(ref i));
+                return true;
+            case "c":
+                options.CheckModels = true;
+                return true;
+            case "x":
+                options.ShowTextAssignments = new Regex(GetStringOption(ref i));
+                return true;
+            case "n":
+                options.PathNamePattern = GetStringOption(ref i);
+                return true;
+            case "p":
+                options.PathFilePattern = GetStringOption(ref i);
+                return true;
+            case "f":
+                options.GlobalFeedRate_mmpmin = GetDoubleOption(ref i);
+                return true;
+            case "z":
+                options.GlobalProbeRate_mmpmin = GetDoubleOption(ref i);
+                return true;
+            case "v":
+                options.GlobalSweepRate_mmpmin = GetDoubleOption(ref i);
+                return true;
+            case "s":
+                options.GlobalSweepHeight_mm = GetDoubleOption(ref i);
+                return true;
+            case "l":
+                Thread.CurrentThread.CurrentUICulture = new CultureInfo(GetStringOption(ref i));
+                return true;
+            default:
+                return false;
         }
+    }
 
+    private static void HandleArgument(string a, Options options, MessageHandler messages) {
+        options._dxfFilePaths.Add(a);
+    }
+
+    private static bool CheckOptions(Options options, MessageHandler messages) {
+        bool result = true;
         if (options.GlobalFeedRate_mmpmin <= 0) {
             messages.AddError("Options", Messages.Options_MissingF);
-            doNotRun = true;
+            result = false;
         }
         if (options.GlobalSweepRate_mmpmin <= 0) {
             messages.AddError("Options", Messages.Options_MissingV);
-            doNotRun = true;
+            result = false;
         }
         if (options.GlobalSweepHeight_mm <= 0) {
             messages.AddError("Options", Messages.Options_MissingS);
-            doNotRun = true;
+            result = false;
         }
         if (options.GlobalProbeRate_mmpmin <= 0) {
             options.GlobalProbeRate_mmpmin = options.GlobalFeedRate_mmpmin;
         }
-
-        if (doNotRun) {
-            messages.WriteLine();
-            return null;
-        } else {
-            return options;
-        }
+        return result;
     }
 }
