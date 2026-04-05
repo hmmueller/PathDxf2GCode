@@ -134,8 +134,9 @@ public class ActualVariables : Variables {
             foreach (var kvp in _assignments) {
                 string v = "=" + kvp.Key;
                 if (s.Contains(v)) {
-                    s = s.Replace(v, kvp.Value);
-                    changed = true;
+                    string t = s.Replace(v, kvp.Value);
+                    changed = s != t;
+                    s = t;
                 }
             }
         } while (changed);
