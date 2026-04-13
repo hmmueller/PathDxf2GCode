@@ -442,42 +442,44 @@ G00 X0.000 Y0.000
 G00 Z5.000
 G00 X20.000 Y0.000
   (START Subpath 8998.2P[8998.dxf] t=[ [120.000 170.000]=>[20.000 0.000] / [120.000 100.000]=>[20.000 70.000] ])
-  (SweepAndDrillSafelyFromTo [20.000 0.000 5.000] [20.000 0.000 1.800] s=5.000 bt=False)
+  (SweepAndDrillSafelyFromTo [20.000 0.000 5.000] [20.000 0.000 1.800] s=7.000 bt=False)
     (DrillOrPullZFromTo 5.000 1.800)
 G00 Z3.000
 G01 Z1.800
   (MillLine s=[20.000 0.000] e=[0.000 20.000] fr=1.800 to=1.800 bt=False)
 G01 F150.000 X0.000 Y20.000 Z1.800
-  (SweepAndDrillSafelyFromTo [0.000 20.000 1.800] [0.000 20.000 1.800] s=5.000 bt=False)
+  (SweepAndDrillSafelyFromTo [0.000 20.000 1.800] [0.000 20.000 1.800] s=7.000 bt=False)
   (MillLine s=[0.000 20.000] e=[0.000 50.000] fr=1.800 to=1.800 bt=False)
 G01 F150.000 X0.000 Y50.000 Z1.800
-  (SweepAndDrillSafelyFromTo [0.000 50.000 1.800] [0.000 50.000 1.800] s=5.000 bt=False)
+  (SweepAndDrillSafelyFromTo [0.000 50.000 1.800] [0.000 50.000 1.800] s=7.000 bt=False)
   (MillLine s=[0.000 50.000] e=[20.000 70.000] fr=1.800 to=1.800 bt=False)
 G01 F150.000 X20.000 Y70.000 Z1.800
-  (SweepAndDrillSafelyFromTo [20.000 70.000 1.800] [20.000 70.000 1.700] s=5.000 bt=False)
+  (SweepAndDrillSafelyFromTo [20.000 70.000 1.800] [20.000 70.000 1.700] s=7.000 bt=False)
     (DrillOrPullZFromTo 1.800 1.700)
 G01 Z1.700
   (MillLine s=[20.000 70.000] e=[0.000 50.000] fr=1.700 to=1.700 bt=False)
 G01 F150.000 X0.000 Y50.000 Z1.700
-  (SweepAndDrillSafelyFromTo [0.000 50.000 1.700] [0.000 50.000 1.700] s=5.000 bt=False)
+  (SweepAndDrillSafelyFromTo [0.000 50.000 1.700] [0.000 50.000 1.700] s=7.000 bt=False)
   (MillLine s=[0.000 50.000] e=[0.000 20.000] fr=1.700 to=1.700 bt=False)
 G01 F150.000 X0.000 Y20.000 Z1.700
-  (SweepAndDrillSafelyFromTo [0.000 20.000 1.700] [0.000 20.000 1.700] s=5.000 bt=False)
+  (SweepAndDrillSafelyFromTo [0.000 20.000 1.700] [0.000 20.000 1.700] s=7.000 bt=False)
   (MillLine s=[0.000 20.000] e=[20.000 0.000] fr=1.700 to=1.700 bt=False)
 G01 F150.000 X20.000 Y0.000 Z1.700
-  (SweepAndDrillSafelyFromTo [20.000 0.000 1.700] [20.000 70.000 5.000] s=5.000 bt=False)
-    (DrillOrPullZFromTo 1.700 5.000)
-G00 Z5.000
-; G00 X20.000 Y70.000
+  (SweepAndDrillSafelyFromTo [20.000 0.000 1.700] [20.000 70.000 7.000] s=7.000 bt=False)
+    (DrillOrPullZFromTo 1.700 7.000)
+G00 Z7.000
+G00 X20.000 Y70.000
   (END Subpath 8998.2P[8998.dxf] t=[ [120.000 170.000]=>[20.000 0.000] / [120.000 100.000]=>[20.000 70.000] ])
-  (SweepAndDrillSafelyFromTo [20.000 70.000 5.000] [0.000 70.000 5.000] s=5.000 bt=False)
+  (SweepAndDrillSafelyFromTo [20.000 70.000 7.000] [0.000 70.000 5.000] s=5.000 bt=False)
+    (DrillOrPullZFromTo 7.000 5.000)
+G00 Z5.000
 G00 X0.000 Y70.000
 G00 Z5.000
   (Fräslänge:     173 mm   ca.  2 min)
   (Bohrungen:       2 mm   ca.  1 min)
-  (Leerfahrten:    45 mm   ca.  1 min)
-  (Summe:         221 mm   ca.  2 min)
-  (Befehlszahl: 14)
+  (Leerfahrten:   119 mm   ca.  1 min)
+  (Summe:         295 mm   ca.  2 min)
+  (Befehlszahl: 16)
 M30
 %");
     }

@@ -251,7 +251,7 @@ public class MillChain : PathSegment {
             }
 
             // Create Gcode
-            double s_mm = _params!.S_mm;
+            double s_mm = h_mm + _params!.S_mm;
             foreach (var e in sortedEdges) {
                 currPos = GCodeHelpers.SweepAndDrillSafelyFromTo(from: currPos,
                     to: e.Milled == EdgeMilled.Start2End ? e.Start(t) : e.End(t),
@@ -394,11 +394,12 @@ public class SweepSegment : PathSegmentWithParamsText<SweepSegment.RawSegment, I
         AssertNear(currPos.XY(), t.Transform(Start), MessageHandlerForEntities.Context(Source, Start, dxfFileName));
 
         Vector2 target = t.Transform(End);
-        double s_mm = _params!.S_mm;
-        GCodeHelpers.SweepAndDrillSafelyFromTo(currPos, target.AsVector3(s_mm), th_mm: h_mm + _params!.T_mm,
+        double s_mm = h_mm + _params!.S_mm;
+        Vector3 target3 = target.AsVector3(s_mm);
+        GCodeHelpers.SweepAndDrillSafelyFromTo(currPos, target3, th_mm: h_mm + _params!.T_mm,
                                                s_mm: s_mm, globalS_mm: globalS_mm, f_mmpmin: _params!.F_mmpmin,
                                                backtracking: Raw.Order == PathModel.BACKTRACK_ORDER, t, gcodes);
-        return target.AsVector3(_params!.S_mm);
+        return target3;
     }
 }
 
@@ -592,7 +593,6 @@ public class SubPathSegment : PathSegmentWithParamsText<SubPathSegment.RawSegmen
         public int Preference => 3;
 
         public readonly PathModel.Collection Models;
-        private readonly string _dxfFilePath;
 
         public Options Options { get; }
 
@@ -606,7 +606,6 @@ public class SubPathSegment : PathSegmentWithParamsText<SubPathSegment.RawSegmen
             _start = start;
             _end = end;
             Models = models;
-            _dxfFilePath = dxfFilePath;
             Options = options;
             Order = order;
         }
