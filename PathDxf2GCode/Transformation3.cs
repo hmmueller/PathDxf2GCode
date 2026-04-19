@@ -45,8 +45,9 @@ public class ZProbe {
     }
 
     internal void SetName(string name) {
-        if (_name != null) {
-            throw new Exception("Internal error - name of ZProbe already set");
+        if (_name != null && _name != name) {
+            // The name will be set multiple times to the same when it is used in multiple superpaths
+            throw new Exception($"Internal error - name of ZProbe already set to '{_name}', cannot be set to '{name}'");
         }
         _name = name;
     }
