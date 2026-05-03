@@ -102,7 +102,7 @@ public class ParamsText {
         => _rawStrings.TryGetValue('O', out string? o)
             && double.TryParse(o.Replace(',', '.'), CultureInfo.InvariantCulture, out double result) ? result : null;
 
-    internal ParamsText Referenced(Dictionary<string, ParamsText> modelName2RawText, 
+    internal ParamsText Referenced(Dictionary<string, ParamsText> modelName2RawText,
                                    string pathNamePattern, MessageHandlerForEntities mh) {
         if (_rawStrings.TryGetValue('@', out string? modelName)) {
             if (_rawStrings.Count > 1) {
@@ -279,6 +279,7 @@ public class PathParams : AbstractParams {
     public override double T_mm => GetDouble('T', OnErrorNaN);
     public override double O_mm => GetDouble('O', OnErrorNaN);
     public override string M => GetString(Text, 'M', OnError);
+    public string? E => GetString('E');
     public override double Z_mmpmin => GetDouble('Z') ?? _options.GlobalProbeRate_mmpmin;
     public override double? W_mm => GetDouble('W');
     public string OutFileSuffix => GetString('R') ?? "";
@@ -289,7 +290,7 @@ public class PathParams : AbstractParams {
         S_mm = GetDouble('S') ?? defaultSorNullForTplusO_mm ?? T_mm + O_mm;
         A_mm = GetDouble('A') ?? 4 * O_mm;
 
-        CheckKeysAndValues(text, "FBDCISTOMPUZAWR");
+        CheckKeysAndValues(text, "FBDCISTOMPUZAWRE");
         if (RawD_mm.HasValue && RawB_mm.HasValue && RawB_mm.Value.Ge(RawD_mm.Value)) {
             Error(Messages.Params_DMustBeGtThanB_D_B, RawD_mm, B_mm);
         }
@@ -407,11 +408,21 @@ public class SubpathParams : AbstractChildParams {
     public override double O_mm => GetDouble('O') ?? base.O_mm;
     public override string M => GetString('M') ?? base.M;
     public double H_mm => GetDouble('H') ?? 0;
+    public Regex? ParentE { get; }
 
     public ActualVariables ActualVariables { get; }
 
-    public SubpathParams(ParamsText text, ActualVariables superpathVariables, string errorContext, IParams pathParams, Action<string, string> onError) : base(text, superpathVariables, errorContext, pathParams, onError) {
+    public SubpathParams(ParamsText text, ActualVariables superpathVariables, string errorContext, PathParams pathParams, Action<string, string> onError) : base(text, superpathVariables, errorContext, pathParams, onError) {
         CheckKeysAndValues(text, "THOMN>");
+        if (pathParams.E == null) {
+            ParentE = null;
+        } else {
+            try {
+                ParentE = new Regex(pathParams.E);
+            } catch (ArgumentException ex) {
+                Error(Messages.Params_InvalidRegexInPath_E_Message, pathParams.E, ex.Message);
+            }
+        }
         ActualVariables = new ActualVariables(superpathVariables.InterpolateInto(text.VariableStrings));
     }
 }

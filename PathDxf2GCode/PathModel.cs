@@ -626,7 +626,7 @@ public class PathModel {
 
         // E. Connect Subpaths to PathModels
         foreach (var s in segments.OfType<SubPathSegment>()) {
-            s.ConnectModel(dxfFilePath, messages, nestingDepth);
+            s.ConnectModel(rawModel.Name, dxfFilePath, messages, nestingDepth);
         }
 
         // F. Create PathModel

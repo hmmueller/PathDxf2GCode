@@ -16,6 +16,11 @@ public class Options : AbstractOptions {
     private readonly List<string> _dxfFilePaths = new();
 
     /// <summary>
+    /// Restrictions on allowed subpaths.
+    /// </summary>    
+    private readonly List<(Regex Parent, Regex Child)> _subPathRestrictions = new();
+
+    /// <summary>
     /// /f: Milling speed für G01, G02, G03
     /// TODO: https://diymachining.com/grbl-feed-rate/ 
     /// </summary>
@@ -61,6 +66,13 @@ public class Options : AbstractOptions {
             yield return d;
         }
     }
+
+    /// <summary>
+    /// /e: Check whether the child subpath matches the specified regex for the first parent subpath regex found in 
+    /// the list of subpath restrictions. If no parent subpath regex matches, the restriction is considered to be ok.
+    /// </summary>
+    public bool SubPathRestrictionOk(string parent, string child)
+        => _subPathRestrictions.FirstOrDefault(pc => pc.Parent.IsMatch(parent)).Child?.IsMatch(child) ?? true;
 
     /// <summary>
     /// /n: Regexp for paths in DXF texts. 
@@ -125,6 +137,19 @@ public class Options : AbstractOptions {
                 return true;
             case "p":
                 options.PathFilePattern = GetStringOption(ref i);
+                return true;
+            case "e":
+                string e = GetStringOption(ref i);
+                string[] e2 = e.Split(':', 2);
+                if (e2.Length != 2) {
+                    messages.AddError("Options", Messages.Options_NotTwoPartsInSubPathRestriction_Value, e);
+                } else {
+                    try {
+                        options._subPathRestrictions.Add((new Regex(e2[0]), new Regex(e2[1])));
+                    } catch (ArgumentException ex) {
+                        messages.AddError("Options", Messages.Options_InvalidRegexInSubPathRestriction_Value_Message, e, ex.Message);
+                    }
+                }
                 return true;
             case "f":
                 options.GlobalFeedRate_mmpmin = GetDoubleOption(ref i);

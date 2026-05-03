@@ -19,7 +19,7 @@ namespace de.hmmueller.PathDxf2GCode {
     // -Klasse über ein Tool wie ResGen oder Visual Studio automatisch generiert.
     // Um einen Member hinzuzufügen oder zu entfernen, bearbeiten Sie die .ResX-Datei und führen dann ResGen
     // mit der /str-Option erneut aus, oder Sie erstellen Ihr VS-Projekt neu.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "18.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Messages {
@@ -99,6 +99,15 @@ namespace de.hmmueller.PathDxf2GCode {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die /e value {0} is not of format regex:regex ({1}) ähnelt.
+        /// </summary>
+        internal static string Options_InvalidRegexInSubPathRestriction_Value_Message {
+            get {
+                return ResourceManager.GetString("Options_InvalidRegexInSubPathRestriction_Value_Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Option value {1} for {0} ist not &gt;= 0 ähnelt.
         /// </summary>
         internal static string Options_LessThan0_Name_Value {
@@ -167,6 +176,15 @@ namespace de.hmmueller.PathDxf2GCode {
         internal static string Options_NotSupported_Name {
             get {
                 return ResourceManager.GetString("Options_NotSupported_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die /e value {0}:{1} contains invalid regular expression ({2}) ähnelt.
+        /// </summary>
+        internal static string Options_NotTwoPartsInSubPathRestriction_Value {
+            get {
+                return ResourceManager.GetString("Options_NotTwoPartsInSubPathRestriction_Value", resourceCulture);
             }
         }
         
@@ -275,6 +293,15 @@ namespace de.hmmueller.PathDxf2GCode {
         internal static string Params_IMustBeGtThan0_I {
             get {
                 return ResourceManager.GetString("Params_IMustBeGtThan0_I", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die E={0} is not a valid regular expression ({1}) ähnelt.
+        /// </summary>
+        internal static string Params_InvalidRegexInPath_E_Message {
+            get {
+                return ResourceManager.GetString("Params_InvalidRegexInPath_E_Message", resourceCulture);
             }
         }
         
@@ -628,6 +655,15 @@ namespace de.hmmueller.PathDxf2GCode {
         internal static string PathSegment_PathNotFound_Name_Files {
             get {
                 return ResourceManager.GetString("PathSegment_PathNotFound_Name_Files", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Subpath {0} forbidden by restriction for {1} ähnelt.
+        /// </summary>
+        internal static string PathSegment_SubpathDoesNotMatchRestrictions_Path_Parent {
+            get {
+                return ResourceManager.GetString("PathSegment_SubpathDoesNotMatchRestrictions_Path_Parent", resourceCulture);
             }
         }
         

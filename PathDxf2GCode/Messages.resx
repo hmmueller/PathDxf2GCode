@@ -169,6 +169,12 @@ Options:
   <data name="Options_NotSupported_Name" xml:space="preserve">
     <value>Option {0} not supported</value>
   </data>
+  <data name="Options_NotTwoPartsInSubPathRestriction_Value" xml:space="preserve">
+    <value>/e value {0}:{1} contains invalid regular expression ({2})</value>
+  </data>
+  <data name="Options_InvalidRegexInSubPathRestriction_Value_Message" xml:space="preserve">
+    <value>/e value {0} is not of format regex:regex ({1})</value>
+  </data>
   <data name="Params_BMustBeLessThanT_B_T" xml:space="preserve">
     <value>B={0} must not be larger than T={1}</value>
   </data>
@@ -243,6 +249,9 @@ Options:
   </data>
   <data name="PathModel_MissingStart" xml:space="preserve">
     <value>Start marker missing</value>
+  </data>
+  <data name="PathSegment_SubpathDoesNotMatchRestrictions_Path_Parent" xml:space="preserve">
+    <value>Subpath {0} forbidden by restriction for {1}</value>
   </data>
   <data name="PathModel_MissingParamsText" xml:space="preserve">
     <value>Parameters text missing; maybe incorrect start marker</value>
@@ -380,5 +389,8 @@ has assigned text '{1}'</value>
   </data>
   <data name="Params_AtPathDoesNotMatchPathNamePattern_Text_Pattern" xml:space="preserve">
     <value>@ path '{0}' does not match path pattern /{1}/</value>
+  </data>
+  <data name="Params_InvalidRegexInPath_E_Message" xml:space="preserve">
+    <value>E={0} is not a valid regular expression ({1})</value>
   </data>
 </root>

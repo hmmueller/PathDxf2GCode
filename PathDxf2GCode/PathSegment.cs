@@ -633,14 +633,21 @@ public class SubPathSegment : PathSegmentWithParamsText<SubPathSegment.RawSegmen
         _params = new SubpathParams(ParamsText, superpathVariables, errorContext, pathParams, onError);
     }
 
-    public void ConnectModel(string dxfFileName, MessageHandlerForEntities messages, int nestingDepth) {
+    public void ConnectModel(PathName parentName, string dxfFileName, MessageHandlerForEntities messages, int nestingDepth) {
         string errorContext = MessageHandlerForEntities.Context(Source, Start, dxfFileName);
 
         string? path = _params!.GetString('>');
+
         PathName name;
         if (path == null) {
             throw new EmitGCodeException(errorContext, Messages.PathSegment_GtMissing);
         } else {
+            if (_params.ParentE == null
+                ? !Options.SubPathRestrictionOk(parentName.AsString(), path)
+                : !_params.ParentE.IsMatch(path)) {
+                messages.AddError(Source, End, dxfFileName, Messages.PathSegment_SubpathDoesNotMatchRestrictions_Path_Parent, path, parentName.AsString());
+            }
+
             name = path.AsPathReference(Options.PathNamePattern, dxfFileName)
                 ?? throw new EmitGCodeException(errorContext,
                             string.Format(Messages.PathSegment_InvalidPathName_Dir_Path, '>', path));
