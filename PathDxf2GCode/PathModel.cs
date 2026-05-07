@@ -140,7 +140,8 @@ public class PathModel {
             Dictionary<PathName, RawPathModel> rawModels = LoadRawModels(dxfFilePath, options, messages);
             SortedDictionary<string, PathModel> result = new();
             foreach (var kvp in rawModels) {
-                PathModel? model = Load(kvp.Key, getVariables(kvp.Key, kvp.Value.ParamsText!),
+                PathModel? model = Load(kvp.Key, 
+                                        kvp.Value.ParamsText == null ? ActualVariables.EMPTY : getVariables(kvp.Key, kvp.Value.ParamsText),
                                         globalSweepHeight_mm, dxfFilePath, options, "???", messages, nestingDepth, out _);
                 if (model != null) {
                     result.Add(kvp.Key.AsString(), model);
