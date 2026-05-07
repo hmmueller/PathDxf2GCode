@@ -136,11 +136,11 @@ public class PathModel {
         }
 
         public SortedDictionary<string, PathModel> LoadAllModels(string dxfFilePath, double? globalSweepHeight_mm,
-            Func<ParamsText, ActualVariables> getVariables, Options options, MessageHandlerForEntities messages, int nestingDepth) {
+            Func<PathName, ParamsText, ActualVariables> getVariables, Options options, MessageHandlerForEntities messages, int nestingDepth) {
             Dictionary<PathName, RawPathModel> rawModels = LoadRawModels(dxfFilePath, options, messages);
             SortedDictionary<string, PathModel> result = new();
             foreach (var kvp in rawModels) {
-                PathModel? model = Load(kvp.Key, getVariables(kvp.Value.ParamsText!),
+                PathModel? model = Load(kvp.Key, getVariables(kvp.Key, kvp.Value.ParamsText!),
                                         globalSweepHeight_mm, dxfFilePath, options, "???", messages, nestingDepth, out _);
                 if (model != null) {
                     result.Add(kvp.Key.AsString(), model);

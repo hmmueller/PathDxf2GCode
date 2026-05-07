@@ -4,7 +4,7 @@ using de.hmmueller.PathGCodeLibrary;
 using netDxf;
 
 public class Program {
-    public const string VERSION = "2026-05-03";
+    public const string VERSION = "2026-05-07";
 
     public static int Main(string[] args) {
         var messages = new MessageHandlerForEntities(Console.Error);
@@ -57,7 +57,8 @@ public class Program {
 
         if (options.CheckModels) {
             SortedDictionary<string, PathModel> models = pathModels.LoadAllModels(dxfFilePath, globalSweepHeight_mm: null,
-                paramsText => new FormalVariables(paramsText.VariableStrings).Example(msg => messages.AddError(dxfFilePath, msg)), 
+                (pathName, paramsText) => new FormalVariables(pathName.ToString(), paramsText.VariableStrings)
+                                            .Example((pathName, msg) => messages.AddError(pathName, msg)), 
                 options, messages, nestingDepth: 0);
             foreach (var m in models) {
                 messages.WriteLine(MessageHandler.InfoPrefix + Messages.Program_Checking_Path, m.Key);
@@ -68,7 +69,7 @@ public class Program {
             }
         } else {
             SortedDictionary<string, PathModel> models = pathModels.LoadAllModels(dxfFilePath,
-                options.GlobalSweepHeight_mm, paramsText => ActualVariables.EMPTY, options, messages, nestingDepth: 0);
+                options.GlobalSweepHeight_mm, (pathName, paramsText) => ActualVariables.EMPTY, options, messages, nestingDepth: 0);
             if (models.Count > 1) {
                 messages.AddError(dxfFilePath, Messages.Program_MoreThanOnePathLayer_File_Paths, dxfFilePath, string.Join(", ", models.Keys));
             } else if (models.Count == 0) {

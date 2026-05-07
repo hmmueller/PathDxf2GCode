@@ -300,7 +300,7 @@ public class PathParams : AbstractParams {
         if (RawU_mm.HasValue && RawU_mm.Value.Le(0)) {
             Error(Messages.Params_UMustBeGtThan0_U, RawU_mm);
         }
-        FormalVariables = new FormalVariables(text.VariableStrings);
+        FormalVariables = new FormalVariables(errorContext, text.VariableStrings);
     }
 }
 

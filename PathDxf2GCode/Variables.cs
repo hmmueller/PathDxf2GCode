@@ -29,15 +29,18 @@ public abstract class Variables {
 }
 
 public class FormalVariables : Variables {
-    public FormalVariables(IReadOnlyDictionary<char, string> replacements) : base(replacements) {
+    private readonly string _errorContext;
+
+    public FormalVariables(string errorContext, IReadOnlyDictionary<char, string> replacements) : base(replacements) {
+        _errorContext = errorContext;
     }
 
-    public ActualVariables Example(Action<string> onError) {
+    public ActualVariables Example(Action<string, string> onError) {
         int k = 0;
         try {
             return new ActualVariables(_assignments.ToDictionary(kvp => kvp.Key, kvp => Parse(kvp.Key, kvp.Value).Example(ref k)));
         } catch (VariableDefinitionException ex) {
-            onError(string.Format(Messages.Variables_Error_Message, ex.Message));
+            onError(_errorContext, string.Format(Messages.Variables_Error_Message, ex.Message));
             return ActualVariables.EMPTY;
         }
     }
