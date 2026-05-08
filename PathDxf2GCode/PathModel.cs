@@ -454,7 +454,7 @@ public class PathModel {
         Vector2 position = text.Position.AsVector2();
         if (text.IsBackward
             || text.IsUpsideDown
-            || !text.Rotation.Near(0)) {
+            || (text.Alignment != TextAlignment.MiddleCenter && !text.Rotation.Near(0))) {
             messages.AddError(text, position, dxfFilePath, Messages.PathModel_TextLayout_Text, text.Value);
             return null;
         } else {
@@ -485,7 +485,7 @@ public class PathModel {
 
     private static Circle2? GetOverlapSurrounding(MText text, string dxfFilePath, MessageHandlerForEntities messages) {
         Vector2 position = text.Position.AsVector2();
-        if (!text.Rotation.Between(-1, 1) && !text.Rotation.Between(359, 361)) {
+        if (text.AttachmentPoint != MTextAttachmentPoint.MiddleCenter && !text.Rotation.Between(-1, 1) && !text.Rotation.Between(359, 361)) {
             messages.AddError(text, position, dxfFilePath, Messages.PathModel_TextLayout_Text, text.Value);
             return null;
         } else {

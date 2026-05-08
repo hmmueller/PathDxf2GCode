@@ -273,7 +273,7 @@ hat zugeordneten Text '{1}'</value>
     <value>Text-Layername '{0}' weicht von Element-Layername '{1}' ab</value>
   </data>
   <data name="PathModel_TextLayout_Text" xml:space="preserve">
-    <value>Text {0} muss unrotiert mit Anker unten links oder oben links sein</value>
+    <value>Text {0} muss Anker in der Mitte haben oder unrotiert mit Anker unten links oder oben links sein</value>
   </data>
   <data name="PathModel_TwoEnds_E1_E2" xml:space="preserve">
     <value>Zwei Endpunkte definiert: {0} und {1}</value>

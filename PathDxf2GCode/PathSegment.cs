@@ -40,7 +40,9 @@ public abstract class PathSegment {
     public abstract void CreateParams(PathParams pathParams, ActualVariables superpathVariables, string dxfFileName, Action<string, string> onError);
 
     public static void AssertNear(Vector2 a, Vector2 b, string errorContext) {
-        GeometryHelpers.Assert(a.Near(b), errorContext, $"!{a.F3()}.Near({b.F3()})");
+        // relativeEps experimentally set to 8e-5; for a coordinate value of 300, this would allow an offset of
+        // about 1/40 mm. For the moment and my purposes, this is ok for me.
+        GeometryHelpers.Assert(a.Near(b, 8e-5), errorContext, $"!{a.F3()}.Near({b.F3()})");
     }
 
     public abstract Vector3 EmitGCode(Vector3 currPos, double h_mm, Transformation3 zCorr,

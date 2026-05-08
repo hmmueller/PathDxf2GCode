@@ -551,7 +551,7 @@ namespace de.hmmueller.PathDxf2GCode {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Text {0} must be unrotated, with anchor at bottom left or top left ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Text {0} must have anchor at center, or be unrotated, with anchor at bottom left or top left ähnelt.
         /// </summary>
         internal static string PathModel_TextLayout_Text {
             get {

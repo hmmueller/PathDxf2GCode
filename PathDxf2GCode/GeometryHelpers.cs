@@ -58,6 +58,9 @@ public static class GeometryHelpers {
     public static bool Near(this Vector2 d, Vector2 e)
         => Vector2.SquareDistance(d, e).Near(0);
 
+    public static bool Near(this Vector2 d, Vector2 e, double relativeEps)
+        => Vector2.SquareDistance(d, e).Near(0, relativeEps);
+
     public static bool AbsNear(this Vector2 d, Vector2 e, double absoluteEps)
         => Vector2.Distance(d, e).AbsNear(0, absoluteEps);
 
