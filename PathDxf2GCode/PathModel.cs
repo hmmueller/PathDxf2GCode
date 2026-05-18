@@ -625,8 +625,11 @@ public class PathModel {
             }
         }
 
-        // E. Connect Subpaths to PathModels
+        // E. Check and connect Subpaths to PathModels
         foreach (var s in segments.OfType<SubPathSegment>()) {
+            if (pathParams.T_mm < s.T_mm) {
+                messages.AddError(rawModel.StartObject!, rawModel.Start.Value, dxfFilePath, Messages.PathModel_TLessThanSubpathT_PathT_SubpathT_SubpathName, pathParams.T_mm.F3(), s.T_mm.F3(), s.TargetName);
+            }
             s.ConnectModel(rawModel.Name, dxfFilePath, messages, nestingDepth);
         }
 

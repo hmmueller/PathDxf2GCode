@@ -294,6 +294,9 @@ has assigned text '{1}'</value>
   <data name="PathSegment_DifferingO_Caller_Path_Called" xml:space="preserve">
     <value>O={0} at subpath {1} is different from O={2} in referenced path</value>
   </data>
+  <data name="PathSegment_DifferingT_Caller_Path_Called" xml:space="preserve">
+    <value>T={0} at subpath {1} is different from T={2} in referenced path</value>
+  </data>
   <data name="PathSegment_DistanceDiffers_CallerDist_ModelName_CalledDist" xml:space="preserve">
     <value>Subpath size {0} is not equal to size {2} in referenced path {1}</value>
   </data>
@@ -392,5 +395,8 @@ has assigned text '{1}'</value>
   </data>
   <data name="Params_InvalidRegexInPath_E_Message" xml:space="preserve">
     <value>E={0} is not a valid regular expression ({1})</value>
+  </data>
+  <data name="PathModel_TLessThanSubpathT_PathT_SubpathT_SubpathName" xml:space="preserve">
+    <value>T={0} at path is less than T={1} at subpath{2}</value>
   </data>
 </root>

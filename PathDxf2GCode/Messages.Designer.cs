@@ -560,6 +560,15 @@ namespace de.hmmueller.PathDxf2GCode {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die T={0} at path is less than T={1} at subpath{2} ähnelt.
+        /// </summary>
+        internal static string PathModel_TLessThanSubpathT_PathT_SubpathT_SubpathName {
+            get {
+                return ResourceManager.GetString("PathModel_TLessThanSubpathT_PathT_SubpathT_SubpathName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Two end markers defined at {0} and {1} ähnelt.
         /// </summary>
         internal static string PathModel_TwoEnds_E1_E2 {
@@ -619,6 +628,15 @@ namespace de.hmmueller.PathDxf2GCode {
         internal static string PathSegment_DifferingO_Caller_Path_Called {
             get {
                 return ResourceManager.GetString("PathSegment_DifferingO_Caller_Path_Called", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die T={0} at subpath {1} is different from T={2} in referenced path ähnelt.
+        /// </summary>
+        internal static string PathSegment_DifferingT_Caller_Path_Called {
+            get {
+                return ResourceManager.GetString("PathSegment_DifferingT_Caller_Path_Called", resourceCulture);
             }
         }
         

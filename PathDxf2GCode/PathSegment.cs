@@ -626,7 +626,11 @@ public class SubPathSegment : PathSegmentWithParamsText<SubPathSegment.RawSegmen
     }
 
     private Options Options => Raw.Options;
+
     public double H_mm => _params!.H_mm;
+    public double T_mm => _params!.T_mm;
+
+    public string TargetName => _params!.GetString('>') ?? "<missing>";
 
     private PathModel? _targetModel;
 
@@ -676,8 +680,11 @@ public class SubPathSegment : PathSegmentWithParamsText<SubPathSegment.RawSegmen
             if (_params!.M != _targetModel.Params.M) {
                 messages.AddError(dxfFileName, Messages.PathSegment_DifferingM_Caller_Path_Called, _params.M, _targetModel.Name, _targetModel.Params.M);
             }
-            if (_params.O_mm != _targetModel.Params.O_mm) {
+            if (!_params.O_mm.Near(_targetModel.Params.O_mm)) {
                 messages.AddError(dxfFileName, Messages.PathSegment_DifferingO_Caller_Path_Called, _params.O_mm, _targetModel.Name, _targetModel.Params.O_mm);
+            }
+            if (!_params.T_mm.Near(_targetModel.Params.T_mm)) {
+                messages.AddError(dxfFileName, Messages.PathSegment_DifferingT_Caller_Path_Called, _params.T_mm, _targetModel.Name, _targetModel.Params.T_mm);
             }
             _targetModel.Params.FormalVariables.CheckActualVariables(_params.ActualVariables, msg => messages.AddError(errorContext, msg));
         }

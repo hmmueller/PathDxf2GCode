@@ -422,7 +422,7 @@ namespace de.hmmueller.PathDxf2GCode {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die M={0} an Subpfad {1} weicht von M={2} in referenziertem Modell ab ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die M={0} an Teilpfad {1} weicht von M={2} in referenziertem Modell ab ähnelt.
         /// </summary>
         internal static string PathSegment_DifferingM_Caller_Path_Called {
             get {
@@ -431,7 +431,7 @@ namespace de.hmmueller.PathDxf2GCode {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die O={0} an Subpfad {1} weicht von O={2} in referenziertem Modell ab ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die O={0} an Teilpfad {1} weicht von O={2} in referenziertem Modell ab ähnelt.
         /// </summary>
         internal static string PathSegment_DifferingO_Caller_Path_Called {
             get {
@@ -440,7 +440,7 @@ namespace de.hmmueller.PathDxf2GCode {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Distanz {0} ist nicht gleich Distanz in Subpfad-Konstruktion {1} ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Distanz {0} ist nicht gleich Distanz in Teilpfad-Konstruktion {1} ähnelt.
         /// </summary>
         internal static string PathSegment_DistanceDiffers_CallerDist_CalledDist {
             get {

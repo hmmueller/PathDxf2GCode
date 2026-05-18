@@ -250,7 +250,7 @@ Optionen:
     <value>Start-Markierung fehlt</value>
   </data>
   <data name="PathSegment_SubpathDoesNotMatchRestrictions_Path_Parent" xml:space="preserve">
-    <value>Subpfad {0} nicht erlaubt in Pfad {1}</value>
+    <value>Teilpfad {0} nicht erlaubt in Pfad {1}</value>
   </data>
   <data name="PathModel_MissingParamsText" xml:space="preserve">
     <value>Parametertext fehlt; evtl. nicht korrekte Start-Markierung</value>
@@ -285,16 +285,19 @@ hat zugeordneten Text '{1}'</value>
     <value>{0} Segmente (u.a. dieses hier) wurden nicht erreicht - evtl. fehlt N-Auszeichnung</value>
   </data>
   <data name="PathSegment_CallDepthGt9_Path" xml:space="preserve">
-    <value>Mehr als 9 verschachtelte Subpfade bei Einbettung von {0}</value>
+    <value>Mehr als 9 verschachtelte Teilpfade bei Einbettung von {0}</value>
   </data>
   <data name="PathSegment_DifferingM_Caller_Path_Called" xml:space="preserve">
-    <value>M={0} an Subpfad {1} weicht von M={2} in referenziertem Modell ab</value>
+    <value>M={0} an Teilpfad {1} weicht von M={2} in referenziertem Modell ab</value>
   </data>
   <data name="PathSegment_DifferingO_Caller_Path_Called" xml:space="preserve">
-    <value>O={0} an Subpfad {1} weicht von O={2} in referenziertem Modell ab</value>
+    <value>O={0} an Teilpfad {1} weicht von O={2} in referenziertem Modell ab</value>
+  </data>
+  <data name="PathSegment_DifferingT_Caller_Path_Called" xml:space="preserve">
+    <value>T={0} an Teilpfad {1} weicht von T={2} in referenziertem Modell ab</value>
   </data>
   <data name="PathSegment_DistanceDiffers_CallerDist_ModelName_CalledDist" xml:space="preserve">
-    <value>Subpath-Länge {0} ist nicht gleich Länge {2} des referenzierten Subpfads {1}</value>
+    <value>Teilpfad-Länge {0} ist nicht gleich Länge {2} des referenzierten Teilpfads {1}</value>
   </data>
   <data name="PathSegment_GtMissing" xml:space="preserve">
     <value>&gt;... fehlt</value>
@@ -391,5 +394,8 @@ hat zugeordneten Text '{1}'</value>
   </data>
   <data name="Params_InvalidRegexInPath_E_Message" xml:space="preserve">
     <value>E={0} ist kein gültiger regulärer Ausdruck ({1})</value>
+  </data>
+  <data name="PathModel_TLessThanSubpathT_PathT_SubpathT_SubpathName" xml:space="preserve">
+    <value>T={0} an Pfad ist kleiner als T={1} an Teilpfad {2}</value>
   </data>
 </root>
