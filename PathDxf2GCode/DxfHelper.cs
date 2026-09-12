@@ -10,8 +10,6 @@ using netDxf.Header;
 using de.hmmueller.PathGCodeLibrary;
 
 public static class DxfHelper {
-    public const string TILDE_SUFFIX_REGEX = "(~[a-z]+)?";
-
     public static DxfDocument? LoadDxfDocument(string dxfFilePath, Options options,
             out Dictionary<string, Linetype> layerLinetypes, MessageHandlerForEntities messages) {
         messages.Write(MessageHandler.InfoPrefix + Messages.DxfHelper_ReadingFile__FileName, dxfFilePath);
@@ -36,7 +34,7 @@ public static class DxfHelper {
     }
 
     public static bool IsOnPathLayer(this EntityObject e, string pathNamePattern, string fileNameForMessages)
-        => Regex.IsMatch(PathName.NameWithoutTildeSuffix(e.Layer.Name), "^" + pathNamePattern + "$", RegexOptions.IgnoreCase);
+        => Regex.IsMatch(PathName.NameWithoutCommentAndTildeSuffix(e.Layer.Name), "^" + pathNamePattern + "$", RegexOptions.IgnoreCase);
 
     public static PathName? AsPathReference(this string text, string pathNamePattern, string fileNameForMessages) {
         Match m = Regex.Match(text, pathNamePattern, RegexOptions.IgnoreCase);

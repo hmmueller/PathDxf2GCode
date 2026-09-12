@@ -4,17 +4,22 @@ using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 
 public readonly struct PathName {
+    private const string TILDE_SUFFIX_REGEX = "(~[a-z]+)?$";
+    private const string HASH_SUFFIX_REGEX = @"(\s#.*)?$";
+
     private readonly string _name;
     private readonly string _fileNameForMessages;
 
     public PathName(string name, string fileNameForMessages) {
         // Paths in DXF have _ instead of . (e.g. in Caddy) ., * etc. -> transform back!
-        _name = NameWithoutTildeSuffix(name);
+        _name = NameWithoutCommentAndTildeSuffix(name);
         _fileNameForMessages = Path.GetFileName(fileNameForMessages);
     }
 
-    public static string NameWithoutTildeSuffix(string name) {
-        return Regex.Replace(name, DxfHelper.TILDE_SUFFIX_REGEX + "$", "", RegexOptions.IgnoreCase).Replace('_', '.');
+    public static string NameWithoutCommentAndTildeSuffix(string name) {
+        return Regex.Replace(Regex.Replace(name, HASH_SUFFIX_REGEX, "", RegexOptions.IgnoreCase),
+                             TILDE_SUFFIX_REGEX, "", RegexOptions.IgnoreCase)                    
+                    .Replace('_', '.');
     }
 
     public readonly string AsString()
