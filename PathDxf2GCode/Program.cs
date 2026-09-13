@@ -4,7 +4,7 @@ using de.hmmueller.PathGCodeLibrary;
 using netDxf;
 
 public class Program {
-    public const string VERSION = "2026-09-12";
+    public const string VERSION = "2026-09-12a";
 
     public static int Main(string[] args) {
         var messages = new MessageHandlerForEntities(Console.Error);
@@ -56,15 +56,19 @@ public class Program {
         }
 
         if (options.CheckModels) {
-            SortedDictionary<string, PathModel> models = pathModels.LoadAllModels(dxfFilePath, globalSweepHeight_mm: null,
-                (pathName, paramsText) => new FormalVariables(pathName.ToString(), paramsText.VariableStrings)
-                                            .Example((pathName, msg) => messages.AddError(pathName, msg)), 
-                options, messages, nestingDepth: 0);
-            foreach (var m in models) {
-                messages.WriteLine(MessageHandler.InfoPrefix + Messages.Program_Checking_Path, m.Key);
-                m.Value.CollectAndOrderAllZProbes(); // ZProbes need names in Transformation3, that's how they get them.
-                using (StreamWriter sw = StreamWriter.Null) {
-                    WriteMillingGCode(m.Value, NO_ZPROBES, sw, dxfFilePath, messages);
+            for (int k = 0; k < 20; k++) {
+                SortedDictionary<string, PathModel> models = pathModels.LoadAllModels(dxfFilePath, globalSweepHeight_mm: null,
+                    (pathName, paramsText) => new FormalVariables(pathName.ToString(), paramsText.VariableStrings)
+                                                .Example(k, (pathName, msg) => messages.AddError(pathName, msg)),
+                    options, messages, nestingDepth: 0);
+                foreach (var m in models) {
+                    if (k == 0) {
+                        messages.WriteLine(MessageHandler.InfoPrefix + Messages.Program_Checking_Path, m.Key);
+                    }
+                    m.Value.CollectAndOrderAllZProbes(); // ZProbes need names in Transformation3, that's how they get them.
+                    using (StreamWriter sw = StreamWriter.Null) {
+                        WriteMillingGCode(m.Value, NO_ZPROBES, sw, dxfFilePath, false, messages);
+                    }
                 }
             }
         } else {
@@ -82,17 +86,17 @@ public class Program {
                     if (orderedZProbes.Any()) {
                         Generate(outFilePathPrefix + "_Probing.gcode", messages, sw => WriteZProbingGCode(model, orderedZProbes, sw, dxfFilePath, messages));
                         Generate(outFilePathPrefix + "_Z.txt", messages, sw => WriteEmptyZ(orderedZProbes, sw, messages));
-                        Generate(outFilePathPrefix + "_Clean.gcode", messages, sw => WriteMillingGCode(model, orderedZProbes, sw, dxfFilePath, messages));
+                        Generate(outFilePathPrefix + "_Clean.gcode", messages, sw => WriteMillingGCode(model, orderedZProbes, sw, dxfFilePath, true, messages));
                         // PathGCodeAdjustZ: _Clean.gcode + _Z.txt(man.) => _Milling.gcode
                     } else {
-                        Generate(outFilePathPrefix + "_Milling.gcode", messages, sw => WriteMillingGCode(model, NO_ZPROBES, sw, dxfFilePath, messages));
+                        Generate(outFilePathPrefix + "_Milling.gcode", messages, sw => WriteMillingGCode(model, NO_ZPROBES, sw, dxfFilePath, true, messages));
                     }
                 }
             }
         }
     }
 
-    private static void WriteMillingGCode(PathModel m, IEnumerable<(ZProbe ZProbe, Vector2 TransformedCenter, double H_mm)> orderedZProbes, StreamWriter sw, string dxfFilePath, MessageHandlerForEntities messages) {
+    private static void WriteMillingGCode(PathModel m, IEnumerable<(ZProbe ZProbe, Vector2 TransformedCenter, double H_mm)> orderedZProbes, StreamWriter sw, string dxfFilePath, bool writeStatistics, MessageHandlerForEntities messages) {
         if (m.IsEmpty()) {
             messages.AddError(dxfFilePath, Messages.Program_NoSegmentsFound);
         } else {
@@ -114,27 +118,28 @@ public class Program {
                 sw.WriteLine($"Model {m.Name}".AsComment(2));
                 WriteGCodes(gcodes, sw);
 
-                // See http://www.linuxcnc.org/docs/html/gcode/overview.html#_g_code_best_practices
-                Statistics stats = new(m.Params.V_mmpmin);
-                foreach (var g in gcodes) {
-                    g.AddToStatistics(stats);
+                if (writeStatistics) {
+                    // See http://www.linuxcnc.org/docs/html/gcode/overview.html#_g_code_best_practices
+                    Statistics stats = new(m.Params.V_mmpmin);
+                    foreach (var g in gcodes) {
+                        g.AddToStatistics(stats);
+                    }
+
+                    static string AsMin(TimeSpan t) => $"ca.{Math.Ceiling(t.TotalMinutes),3:F0}";
+                    void WriteStat(string s, string name) {
+                        string m = string.Format(s, name);
+                        messages.Write(m + ";");
+                        sw.WriteLine(m.AsComment(2));
+                    }
+
+                    WriteStat($"  {{0,-12}} {stats.MillLength_mm,5:F0} mm   {AsMin(stats.RoughMillTime)} min", Messages.Program_MillingLength);
+                    WriteStat($"  {{0,-12}} {stats.DrillLength_mm,5:F0} mm   {AsMin(stats.RoughDrillTime)} min", Messages.Program_DrillingLength);
+                    messages.WriteLine();
+                    WriteStat($"  {{0,-12}} {stats.SweepLength_mm,5:F0} mm   {AsMin(stats.RoughSweepTime)} min", Messages.Program_SweepLength);
+                    WriteStat($"  {{0,-12}} {stats.TotalLength_mm,5:F0} mm   {AsMin(stats.TotalTime)} min", Messages.Program_SumLength);
+                    WriteStat($"  {{0,-12}} {stats.CommandCount}", Messages.Program_CommandCount);
+                    messages.WriteLine();
                 }
-
-                static string AsMin(TimeSpan t) => $"ca.{Math.Ceiling(t.TotalMinutes),3:F0}";
-                void WriteStat(string s, string name) {
-                    string m = string.Format(s, name);
-                    messages.Write(m + ";");
-                    sw.WriteLine(m.AsComment(2));
-                }
-
-                WriteStat($"  {{0,-12}} {stats.MillLength_mm,5:F0} mm   {AsMin(stats.RoughMillTime)} min", Messages.Program_MillingLength);
-                WriteStat($"  {{0,-12}} {stats.DrillLength_mm,5:F0} mm   {AsMin(stats.RoughDrillTime)} min", Messages.Program_DrillingLength);
-                messages.WriteLine();
-                WriteStat($"  {{0,-12}} {stats.SweepLength_mm,5:F0} mm   {AsMin(stats.RoughSweepTime)} min", Messages.Program_SweepLength);
-                WriteStat($"  {{0,-12}} {stats.TotalLength_mm,5:F0} mm   {AsMin(stats.TotalTime)} min", Messages.Program_SumLength);
-                WriteStat($"  {{0,-12}} {stats.CommandCount}", Messages.Program_CommandCount);
-                messages.WriteLine();
-
                 WriteEpilogue(sw);
             }
         }

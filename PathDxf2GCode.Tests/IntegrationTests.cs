@@ -2281,7 +2281,7 @@ M30
 
     [TestMethod]
     public void TestMethod34_CheckSubpathsWithVariables() {
-        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s8", "/c", "8998.31-8998.34P.dxf"]));
+        Assert.AreEqual(1, Program.Main(["/f150", "/v500", "/s8", "/c", "8998.31-8998.34P.dxf"]));
     }
 
     [TestMethod]

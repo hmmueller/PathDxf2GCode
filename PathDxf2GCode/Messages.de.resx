@@ -250,7 +250,7 @@ Optionen:
     <value>Start-Markierung fehlt</value>
   </data>
   <data name="PathSegment_SubpathDoesNotMatchRestrictions_Path_Parent" xml:space="preserve">
-    <value>Teilpfad {0} nicht erlaubt in Pfad {1}</value>
+    <value>Teilpfad {0} wegen Subpfadeinschränkung nicht erlaubt in Pfad {1}</value>
   </data>
   <data name="PathModel_MissingParamsText" xml:space="preserve">
     <value>Parametertext fehlt; evtl. nicht korrekte Start-Markierung</value>

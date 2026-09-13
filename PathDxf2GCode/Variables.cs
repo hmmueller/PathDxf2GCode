@@ -35,8 +35,7 @@ public class FormalVariables : Variables {
         _errorContext = errorContext;
     }
 
-    public ActualVariables Example(Action<string, string> onError) {
-        int k = 0;
+    public ActualVariables Example(int k, Action<string, string> onError) {
         try {
             return new ActualVariables(_assignments.ToDictionary(kvp => kvp.Key, kvp => Parse(kvp.Key, kvp.Value).Example(ref k)));
         } catch (VariableDefinitionException ex) {
