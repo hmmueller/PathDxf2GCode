@@ -401,4 +401,7 @@ hat zugeordneten Text '{1}'</value>
   <data name="PathModel_TLessThanSubpathT_PathT_SubpathT_SubpathName" xml:space="preserve">
     <value>T={0} an Pfad ist kleiner als T={1} an Teilpfad {2}</value>
   </data>
+  <data name="Program_CheckingForOtherVariables" xml:space="preserve">
+    <value>Überprüfung mit anderen Variablenwerten</value>
+  </data>
 </root>

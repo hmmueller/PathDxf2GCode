@@ -35,6 +35,15 @@ public class FormalVariables : Variables {
         _errorContext = errorContext;
     }
 
+    public int MaxSize(Action<string, string> onError) {
+        try {
+            return _assignments.Select(kvp => Parse(kvp.Key, kvp.Value).Size).DefaultIfEmpty(0).Max();
+        } catch (VariableDefinitionException ex) {
+            onError(_errorContext, string.Format(Messages.Variables_Error_Message, ex.Message));
+            return 0;
+        }
+    }
+
     public ActualVariables Example(int k, Action<string, string> onError) {
         try {
             return new ActualVariables(_assignments.ToDictionary(kvp => kvp.Key, kvp => Parse(kvp.Key, kvp.Value).Example(ref k)));
@@ -46,6 +55,7 @@ public class FormalVariables : Variables {
 
     private interface IDefinition {
         bool Accepts(string v);
+        int Size { get; }
         string Example(ref int k);
     }
 
@@ -57,6 +67,8 @@ public class FormalVariables : Variables {
         }
 
         public bool Accepts(string v) => _alternatives.Contains(v);
+
+        public int Size => _alternatives.Length;
 
         public string Example(ref int k) => _alternatives[k++ % _alternatives.Length];
     }
@@ -73,7 +85,13 @@ public class FormalVariables : Variables {
             => double.TryParse(v.Replace(',', '.'), CultureInfo.InvariantCulture, out double d)
                 && d >= _from && d <= _to;
 
-        public string Example(ref int k) => (k++ % 2 == 0 ? _from : _to).ToString(CultureInfo.InvariantCulture);
+        public int Size => 3;
+
+        public string Example(ref int k) => ((k++ % 3) switch {
+            0 => _from,
+            1 => _to,
+            _ => (_from + _to) / 2
+        }).ToString(CultureInfo.InvariantCulture);
     }
 
     private IDefinition Parse(char name, string def) {

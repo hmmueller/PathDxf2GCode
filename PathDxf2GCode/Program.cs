@@ -4,7 +4,7 @@ using de.hmmueller.PathGCodeLibrary;
 using netDxf;
 
 public class Program {
-    public const string VERSION = "2026-09-12a";
+    public const string VERSION = "2026-09-12b";
 
     public static int Main(string[] args) {
         var messages = new MessageHandlerForEntities(Console.Error);
@@ -47,7 +47,7 @@ public class Program {
         }
     }
 
-    private static readonly IEnumerable<(ZProbe ZProbe, Vector2 TransformedCenter, double H_mm)> NO_ZPROBES = 
+    private static readonly IEnumerable<(ZProbe ZProbe, Vector2 TransformedCenter, double H_mm)> NO_ZPROBES =
                                         Enumerable.Empty<(ZProbe ZProbe, Vector2 TransformedCenter, double H_mm)>();
 
     private static void GenerateGCode(string dxfFilePath, PathModel.Collection pathModels, MessageHandlerForEntities messages, Options options) {
@@ -56,22 +56,45 @@ public class Program {
         }
 
         if (options.CheckModels) {
-            for (int k = 0; k < 20; k++) {
-                SortedDictionary<string, PathModel> models = pathModels.LoadAllModels(dxfFilePath, globalSweepHeight_mm: null,
-                    (pathName, paramsText) => new FormalVariables(pathName.ToString(), paramsText.VariableStrings)
-                                                .Example(k, (pathName, msg) => messages.AddError(pathName, msg)),
-                    options, messages, nestingDepth: 0);
-                foreach (var m in models) {
-                    if (k == 0) {
-                        messages.WriteLine(MessageHandler.InfoPrefix + Messages.Program_Checking_Path, m.Key);
-                    }
-                    m.Value.CollectAndOrderAllZProbes(); // ZProbes need names in Transformation3, that's how they get them.
-                    using (StreamWriter sw = StreamWriter.Null) {
-                        WriteMillingGCode(m.Value, NO_ZPROBES, sw, dxfFilePath, false, messages);
-                    }
+            void OnError(string pathName, string msg) => messages.AddError(pathName, msg);
+
+            void CheckModel(PathModel m) {
+                m.CollectAndOrderAllZProbes(); // ZProbes need names in Transformation3, that's how they get them.
+                using (StreamWriter sw = StreamWriter.Null) {
+                    WriteMillingGCode(m, NO_ZPROBES, sw, dxfFilePath, false, messages);
                 }
             }
+
+            int maxVariants = 0;
+            {
+                ActualVariables CreateAndRememberSizeOfExamples(PathName pathName, ParamsText paramsText) {
+                    var fv = new FormalVariables(pathName.ToString(), paramsText.VariableStrings);
+                    maxVariants = Math.Max(maxVariants, fv.MaxSize(OnError));
+                    return fv.Example(0, OnError);
+                }
+
+                SortedDictionary<string, PathModel> models = pathModels.LoadAllModels(dxfFilePath, globalSweepHeight_mm: null,
+                    CreateAndRememberSizeOfExamples, options, messages, nestingDepth: 0);
+                foreach (var m in models) {
+                    messages.WriteLine(MessageHandler.InfoPrefix + Messages.Program_Checking_Path, m.Key);
+                    CheckModel(m.Value);
+                }
+            }
+
+            // Additional checks for more variable assignments
+            for (int k = 1; k < maxVariants; k++) {
+                SortedDictionary<string, PathModel> models = pathModels.LoadAllModels(dxfFilePath, globalSweepHeight_mm: null,
+                    (pathName, paramsText) => new FormalVariables(pathName.ToString(), paramsText.VariableStrings).Example(k, OnError),
+                    options, messages, nestingDepth: 0);
+                messages.WriteLine(MessageHandler.InfoPrefix + Messages.Program_CheckingForOtherVariables);
+
+                foreach (var m in models) {
+                    CheckModel(m.Value);
+                }
+            }
+
         } else {
+            
             SortedDictionary<string, PathModel> models = pathModels.LoadAllModels(dxfFilePath,
                 options.GlobalSweepHeight_mm, (pathName, paramsText) => ActualVariables.EMPTY, options, messages, nestingDepth: 0);
             if (models.Count > 1) {
@@ -178,7 +201,7 @@ public class Program {
         sw.WriteLine("M30");
         sw.WriteLine("%");
     }
-    
+
     private static void WriteZProbingGCode(PathModel m, IEnumerable<(ZProbe ZProbe, Vector2 TransformedCenter, double H_mm)> orderedZProbes, StreamWriter sw, string dxfFilePath, MessageHandlerForEntities messages) {
         if (!messages.Errors.Any()) {
             // See http://www.linuxcnc.org/docs/html/gcode/overview.html#_g_code_best_practices

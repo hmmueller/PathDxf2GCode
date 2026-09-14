@@ -704,6 +704,15 @@ namespace de.hmmueller.PathDxf2GCode {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Checking for other variable assignments ähnelt.
+        /// </summary>
+        internal static string Program_CheckingForOtherVariables {
+            get {
+                return ResourceManager.GetString("Program_CheckingForOtherVariables", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Command count: ähnelt.
         /// </summary>
         internal static string Program_CommandCount {

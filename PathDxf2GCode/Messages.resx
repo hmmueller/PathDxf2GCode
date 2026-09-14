@@ -402,4 +402,7 @@ has assigned text '{1}'</value>
   <data name="PathModel_TLessThanSubpathT_PathT_SubpathT_SubpathName" xml:space="preserve">
     <value>T={0} at path is less than T={1} at subpath{2}</value>
   </data>
+  <data name="Program_CheckingForOtherVariables" xml:space="preserve">
+    <value>Checking for other variable assignments</value>
+  </data>
 </root>
