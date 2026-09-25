@@ -56,13 +56,7 @@ public static class GeometryHelpers {
     #region Vector2
 
     public static bool Near(this Vector2 d, Vector2 e)
-        => Vector2.SquareDistance(d, e).Near(0);
-
-    public static bool Near(this Vector2 d, Vector2 e, double relativeEps)
-        => Vector2.SquareDistance(d, e).Near(0, relativeEps);
-
-    public static bool AbsNear(this Vector2 d, Vector2 e, double absoluteEps)
-        => Vector2.Distance(d, e).AbsNear(0, absoluteEps);
+        => Vector2.SquareDistance(d, e).AbsNear(0, Math.Max(d.Modulus(), e.Modulus()) * RELATIVE_EPS * 2);
 
     public static Vector2 AsVector2(this Vector3 a)
         => a.Z.Near(0) ? new Vector2(a.X, a.Y) : throw new ArgumentOutOfRangeException($"**** ({a}).Z != 0 - cannot convert to Vector2");

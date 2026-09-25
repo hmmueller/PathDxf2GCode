@@ -413,7 +413,7 @@ public class SubpathParams : AbstractChildParams {
     public ActualVariables ActualVariables { get; }
 
     public SubpathParams(ParamsText text, ActualVariables superpathVariables, string errorContext, PathParams pathParams, Action<string, string> onError) : base(text, superpathVariables, errorContext, pathParams, onError) {
-        CheckKeysAndValues(text, "THOMN>");
+        CheckKeysAndValues(text, "THOMNC>");
         if (pathParams.E == null) {
             ParentE = null;
         } else {
