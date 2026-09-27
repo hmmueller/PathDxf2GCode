@@ -287,7 +287,8 @@ public class PathParams : AbstractParams {
 
     public PathParams(ParamsText text, ActualVariables superpathVariables, double? defaultSorNullForTplusO_mm, string errorContext, Options options, Action<string, string> onError) : base(text, superpathVariables, errorContext, onError) {
         _options = options;
-        S_mm = GetDouble('S') ?? defaultSorNullForTplusO_mm ?? T_mm + O_mm;
+        // HACK: T+O temporarily replaced with T+max(O,6). This is necessary for my clampings that are higher than 2mm. See issue #12.
+        S_mm = GetDouble('S') ?? defaultSorNullForTplusO_mm ?? T_mm + Math.Max(O_mm, 6);
         A_mm = GetDouble('A') ?? 4 * O_mm;
 
         CheckKeysAndValues(text, "FBDCISTOMPUZAWRE");

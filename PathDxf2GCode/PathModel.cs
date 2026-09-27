@@ -534,8 +534,8 @@ public class PathModel {
 
         // A. Connect RawSegments into a long chain
         // Algorithm:
-        // * repeatedly extend chain at currEnd;
-        // - if there is more than one un-traversed candidate, continue by order (N);
+        // * repeatedly extend chain at currEnd; if there is more than one un-traversed
+        //   candidate, continue with first by Order, then type=Preference, then length;
         List<IRawSegment> orderedRawSegments = new();
         {
             HashSet<IRawSegment> traversed = new();

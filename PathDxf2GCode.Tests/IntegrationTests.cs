@@ -2286,6 +2286,7 @@ M30
 
     [TestMethod]
     public void TestMethod34_PartslistTest() {
+        // HACK: T+Max(O,6) hack in Params has changed a number of 4s to 8s as well as the summary. To be reversed when hack is repaired.
         Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s8", "8999.34P.dxf"]));
         Compare("8999.34P_Milling.gcode", $@"%
 (PathDxf2GCode - HMMüller 2024-2026 V.{Program.VERSION})
@@ -2303,98 +2304,98 @@ G00 Z20.000
 G00 X30.000 Y20.000
   (START Subpath 8998.34P[8998.31-8998.34P.dxf] t=[ [95.000 155.000]=>[30.000 20.000] / [95.000 65.000]=>[30.000 -70.000] ])
   (START Subpath 8998.34D[8998.31-8998.34P.dxf] t=[ [45.000 155.000]=>[30.000 20.000] / [45.000 125.000]=>[30.000 -10.000] ])
-  (SweepAndDrillSafelyFromTo [30.000 20.000 20.000] [30.000 20.000 0.500] s=4.000 bt=False)
+  (SweepAndDrillSafelyFromTo [30.000 20.000 20.000] [30.000 20.000 0.500] s=8.000 bt=False)
     (DrillOrPullZFromTo 20.000 0.500)
 G00 Z2.000
 G01 Z0.500
   (MillLine s=[30.000 20.000] e=[50.000 5.000] fr=0.500 to=0.500 bt=False)
 G01 F150.000 X50.000 Y5.000 Z0.500
-  (SweepAndDrillSafelyFromTo [50.000 5.000 0.500] [50.000 5.000 1.000] s=4.000 bt=False)
+  (SweepAndDrillSafelyFromTo [50.000 5.000 0.500] [50.000 5.000 1.000] s=8.000 bt=False)
     (DrillOrPullZFromTo 0.500 1.000)
 G00 Z1.000
   (MillLine s=[50.000 5.000] e=[30.000 -10.000] fr=1.000 to=1.000 bt=False)
 G01 F150.000 X30.000 Y-10.000 Z1.000
-  (SweepAndDrillSafelyFromTo [30.000 -10.000 1.000] [50.000 5.000 -0.500] s=4.000 bt=False)
-    (DrillOrPullZFromTo 1.000 4.000)
-G00 Z4.000
+  (SweepAndDrillSafelyFromTo [30.000 -10.000 1.000] [50.000 5.000 -0.500] s=8.000 bt=False)
+    (DrillOrPullZFromTo 1.000 8.000)
+G00 Z8.000
 G00 X50.000 Y5.000
-    (DrillOrPullZFromTo 4.000 -0.500)
+    (DrillOrPullZFromTo 8.000 -0.500)
 G00 Z2.000
 G01 Z-0.500
   (MillLine s=[50.000 5.000] e=[30.000 20.000] fr=-0.500 to=-0.500 bt=False)
 G01 F150.000 X30.000 Y20.000 Z-0.500
-  (SweepAndDrillSafelyFromTo [30.000 20.000 -0.500] [30.000 -10.000 4.000] s=4.000 bt=False)
-    (DrillOrPullZFromTo -0.500 4.000)
-G00 Z4.000
+  (SweepAndDrillSafelyFromTo [30.000 20.000 -0.500] [30.000 -10.000 8.000] s=8.000 bt=False)
+    (DrillOrPullZFromTo -0.500 8.000)
+G00 Z8.000
 G00 X30.000 Y-10.000
   (END Subpath 8998.34D[8998.31-8998.34P.dxf] t=[ [45.000 155.000]=>[30.000 20.000] / [45.000 125.000]=>[30.000 -10.000] ])
   (START Subpath 8998.34V[8998.31-8998.34P.dxf] t=[ [45.000 115.000]=>[30.000 -10.000] / [45.000 85.000]=>[30.000 -40.000] ])
-  (SweepAndDrillSafelyFromTo [30.000 -10.000 4.000] [30.000 -10.000 1.000] s=4.000 bt=False)
-    (DrillOrPullZFromTo 4.000 1.000)
+  (SweepAndDrillSafelyFromTo [30.000 -10.000 8.000] [30.000 -10.000 1.000] s=8.000 bt=False)
+    (DrillOrPullZFromTo 8.000 1.000)
 G00 Z2.000
 G01 Z1.000
   (MillLine s=[30.000 -10.000] e=[50.000 -10.000] fr=1.000 to=1.000 bt=False)
 G01 F150.000 X50.000 Y-10.000 Z1.000
-  (SweepAndDrillSafelyFromTo [50.000 -10.000 1.000] [50.000 -10.000 0.500] s=4.000 bt=False)
+  (SweepAndDrillSafelyFromTo [50.000 -10.000 1.000] [50.000 -10.000 0.500] s=8.000 bt=False)
     (DrillOrPullZFromTo 1.000 0.500)
 G01 Z0.500
   (MillLine s=[50.000 -10.000] e=[50.000 -40.000] fr=0.500 to=0.500 bt=False)
 G01 F150.000 X50.000 Y-40.000 Z0.500
-  (SweepAndDrillSafelyFromTo [50.000 -40.000 0.500] [50.000 -40.000 1.000] s=4.000 bt=False)
+  (SweepAndDrillSafelyFromTo [50.000 -40.000 0.500] [50.000 -40.000 1.000] s=8.000 bt=False)
     (DrillOrPullZFromTo 0.500 1.000)
 G00 Z1.000
   (MillLine s=[50.000 -40.000] e=[30.000 -40.000] fr=1.000 to=1.000 bt=False)
 G01 F150.000 X30.000 Y-40.000 Z1.000
-  (SweepAndDrillSafelyFromTo [30.000 -40.000 1.000] [50.000 -40.000 -0.500] s=4.000 bt=False)
-    (DrillOrPullZFromTo 1.000 4.000)
-G00 Z4.000
+  (SweepAndDrillSafelyFromTo [30.000 -40.000 1.000] [50.000 -40.000 -0.500] s=8.000 bt=False)
+    (DrillOrPullZFromTo 1.000 8.000)
+G00 Z8.000
 G00 X50.000 Y-40.000
-    (DrillOrPullZFromTo 4.000 -0.500)
+    (DrillOrPullZFromTo 8.000 -0.500)
 G00 Z2.000
 G01 Z-0.500
   (MillLine s=[50.000 -40.000] e=[50.000 -10.000] fr=-0.500 to=-0.500 bt=False)
 G01 F150.000 X50.000 Y-10.000 Z-0.500
-  (SweepAndDrillSafelyFromTo [50.000 -10.000 -0.500] [30.000 -40.000 4.000] s=4.000 bt=False)
-    (DrillOrPullZFromTo -0.500 4.000)
-G00 Z4.000
+  (SweepAndDrillSafelyFromTo [50.000 -10.000 -0.500] [30.000 -40.000 8.000] s=8.000 bt=False)
+    (DrillOrPullZFromTo -0.500 8.000)
+G00 Z8.000
 G00 X30.000 Y-40.000
   (END Subpath 8998.34V[8998.31-8998.34P.dxf] t=[ [45.000 115.000]=>[30.000 -10.000] / [45.000 85.000]=>[30.000 -40.000] ])
   (START Subpath 8998.34D[8998.31-8998.34P.dxf] t=[ [45.000 155.000]=>[30.000 -40.000] / [45.000 125.000]=>[30.000 -70.000] ])
-  (SweepAndDrillSafelyFromTo [30.000 -40.000 4.000] [30.000 -40.000 0.500] s=4.000 bt=False)
-    (DrillOrPullZFromTo 4.000 0.500)
+  (SweepAndDrillSafelyFromTo [30.000 -40.000 8.000] [30.000 -40.000 0.500] s=8.000 bt=False)
+    (DrillOrPullZFromTo 8.000 0.500)
 G00 Z2.000
 G01 Z0.500
   (MillLine s=[30.000 -40.000] e=[50.000 -55.000] fr=0.500 to=0.500 bt=False)
 G01 F150.000 X50.000 Y-55.000 Z0.500
-  (SweepAndDrillSafelyFromTo [50.000 -55.000 0.500] [50.000 -55.000 1.000] s=4.000 bt=False)
+  (SweepAndDrillSafelyFromTo [50.000 -55.000 0.500] [50.000 -55.000 1.000] s=8.000 bt=False)
     (DrillOrPullZFromTo 0.500 1.000)
 G00 Z1.000
   (MillLine s=[50.000 -55.000] e=[30.000 -70.000] fr=1.000 to=1.000 bt=False)
 G01 F150.000 X30.000 Y-70.000 Z1.000
-  (SweepAndDrillSafelyFromTo [30.000 -70.000 1.000] [50.000 -55.000 -0.500] s=4.000 bt=False)
-    (DrillOrPullZFromTo 1.000 4.000)
-G00 Z4.000
+  (SweepAndDrillSafelyFromTo [30.000 -70.000 1.000] [50.000 -55.000 -0.500] s=8.000 bt=False)
+    (DrillOrPullZFromTo 1.000 8.000)
+G00 Z8.000
 G00 X50.000 Y-55.000
-    (DrillOrPullZFromTo 4.000 -0.500)
+    (DrillOrPullZFromTo 8.000 -0.500)
 G00 Z2.000
 G01 Z-0.500
   (MillLine s=[50.000 -55.000] e=[30.000 -40.000] fr=-0.500 to=-0.500 bt=False)
 G01 F150.000 X30.000 Y-40.000 Z-0.500
-  (SweepAndDrillSafelyFromTo [30.000 -40.000 -0.500] [30.000 -70.000 4.000] s=4.000 bt=False)
-    (DrillOrPullZFromTo -0.500 4.000)
-G00 Z4.000
+  (SweepAndDrillSafelyFromTo [30.000 -40.000 -0.500] [30.000 -70.000 8.000] s=8.000 bt=False)
+    (DrillOrPullZFromTo -0.500 8.000)
+G00 Z8.000
 G00 X30.000 Y-70.000
   (END Subpath 8998.34D[8998.31-8998.34P.dxf] t=[ [45.000 155.000]=>[30.000 -40.000] / [45.000 125.000]=>[30.000 -70.000] ])
   (END Subpath 8998.34P[8998.31-8998.34P.dxf] t=[ [95.000 155.000]=>[30.000 20.000] / [95.000 65.000]=>[30.000 -70.000] ])
-  (SweepAndDrillSafelyFromTo [30.000 -70.000 4.000] [0.000 -35.000 20.000] s=20.000 bt=False)
-    (DrillOrPullZFromTo 4.000 20.000)
+  (SweepAndDrillSafelyFromTo [30.000 -70.000 8.000] [0.000 -35.000 20.000] s=20.000 bt=False)
+    (DrillOrPullZFromTo 8.000 20.000)
 G00 Z20.000
 G00 X0.000 Y-35.000
 G00 Z20.000
   (Fräslänge:     250 mm   ca.  3 min)
   (Bohrungen:      13 mm   ca.  1 min)
-  (Leerfahrten:   318 mm   ca.  1 min)
-  (Summe:         581 mm   ca.  4 min)
+  (Leerfahrten:   361 mm   ca.  2 min)
+  (Summe:         624 mm   ca.  4 min)
   (Befehlszahl: 43)
 M30
 %");
