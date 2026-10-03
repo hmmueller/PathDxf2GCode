@@ -181,6 +181,9 @@ public class Options : AbstractOptions {
             case "v":
                 options.GlobalSweepRate_mmpmin = GetDoubleOption(ref i);
                 return true;
+            case "y":
+                options.GlobalClampHeight_mm = GetDoubleOption(ref i);
+                return true;
             case "s":
                 options.GlobalSweepHeight_mm = GetDoubleOption(ref i);
                 return true;
