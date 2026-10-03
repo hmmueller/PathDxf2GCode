@@ -9,9 +9,8 @@ public interface IMillGeometry {
 
     IMillGeometry CloneReversed();
     bool Equals(IMillGeometry g);
-    Vector3 EmitGCode(Vector3 currPos, Transformation3 t, double globalS_mm,
-                      List<GCode> gcodes, double fromZ_mm, double toZ_mm,
-                      double th_mm, double f_mmpmin, bool backtracking);
+    Vector3 EmitGCode(Vector3 currPos, Transformation3 t, double globalS_mm, List<GCode> gcodes, 
+        double toZ_mm, double th_mm, double f_mmpmin, bool backtracking);
     IMillGeometry Section(double from_mm, double lg_mm);
     bool Contains(Vector2 p);
 }
@@ -37,12 +36,12 @@ public class LineGeometry : IMillGeometry {
     public bool Equals(IMillGeometry g)
         => g is LineGeometry li && li.Start.Near(Start) && li.End.Near(End);
 
-    public Vector3 EmitGCode(Vector3 currPos, Transformation3 t, double globalS_mm,
-                                      List<GCode> gcodes, double fromZ_mm, double toZ_mm,
-                                      double th_mm, double f_mmpmin, bool backtracking) {
+    public Vector3 EmitGCode(Vector3 currPos, Transformation3 t, double globalS_mm, List<GCode> gcodes,
+            double toZ_mm, double th_mm, double f_mmpmin, bool backtracking) {
         LineGeometry l = Transform(t);
+        var fromZ_mm = currPos.Z;
         currPos = GCodeHelpers.DrillOrPullZFromTo(currPos, l.Start.AsVector3(fromZ_mm), th_mm, f_mmpmin, t, gcodes);
-        gcodes.AddComment($"MillLine s={l.Start.F3()} e={l.End.F3()} fr={fromZ_mm.F3()} to={toZ_mm.F3()} bt={backtracking}", 2);
+        gcodes.AddComment($"MillLine s={l.Start.F3()} e={l.End.F3()} fr={fromZ_mm.F3()} to={toZ_mm.F3()}", 2); //  bt={backtracking}
 
         gcodes.AddMill($"G01 F{f_mmpmin.F3()} X{l.End.X.F3()} Y{l.End.Y.F3()} Z{t.Expr(toZ_mm, l.Start)}",
             (l.End - l.Start).Modulus(), f_mmpmin);
@@ -50,8 +49,8 @@ public class LineGeometry : IMillGeometry {
         return l.End.AsVector3(toZ_mm);
     }
 
-    private Vector2 At(double f_mm)
-        => Start + (End - Start).Scaled(f_mm);
+    private Vector2 At(double offset_mm)
+        => Start + (End - Start).Scaled(offset_mm);
 
     public IMillGeometry Section(double from_mm, double lg_mm)
         => new LineGeometry(At(from_mm), At(from_mm + lg_mm));
@@ -76,7 +75,7 @@ public class ArcGeometry : IMillGeometry {
     public double Radius_mm { get; }
     private double StartAngle_deg { get; }
     private double EndAngle_deg { get; }
-    private bool Counterclockwise { get; }
+    public bool Counterclockwise { get; }
 
     public Vector2 Start
         => Vector2.Polar(Center, Radius_mm, StartAngle_deg * MathHelper.DegToRad);
@@ -84,8 +83,7 @@ public class ArcGeometry : IMillGeometry {
         => Vector2.Polar(Center, Radius_mm, EndAngle_deg * MathHelper.DegToRad);
 
     public double Length_mm
-        => MathHelper.TwoPI * Radius_mm * MathHelper.NormalizeAngle(
-             Direction * (EndAngle_deg - StartAngle_deg)) / 360;
+        => MathHelper.TwoPI * Radius_mm * MathHelper.NormalizeAngle(Direction * (EndAngle_deg - StartAngle_deg)) / 360;
 
     public IMillGeometry CloneReversed()
         => new ArcGeometry(Center, Radius_mm, EndAngle_deg, StartAngle_deg, !Counterclockwise);
@@ -98,13 +96,13 @@ public class ArcGeometry : IMillGeometry {
             && StartAngle_deg.Near(arc.StartAngle_deg) && EndAngle_deg.Near(arc.EndAngle_deg)
             && Counterclockwise == arc.Counterclockwise;
 
-    public Vector3 EmitGCode(Vector3 currPos, Transformation3 t, double globalS_mm,
-                                      List<GCode> gcodes, double fromZ_mm, double toZ_mm,
-                                      double th_mm, double f_mmpmin, bool backtracking) {
+    public Vector3 EmitGCode(Vector3 currPos, Transformation3 t, double globalS_mm, List<GCode> gcodes,
+            double toZ_mm, double th_mm, double f_mmpmin, bool backtracking) {
         ArcGeometry a = Transform(t);
+        var fromZ_mm = currPos.Z;
         currPos = GCodeHelpers.DrillOrPullZFromTo(currPos, a.Start.AsVector3(fromZ_mm), th_mm, f_mmpmin, t, gcodes);
 
-        gcodes.AddComment($"MillArc l={a.Center.F3()} r={Radius_mm.F3()} a0={a.StartAngle_deg.F3()} a1={a.EndAngle_deg.F3()} fr={fromZ_mm.F3()} to={toZ_mm.F3()} p0={a.Start.F3()} p1={a.End.F3()} bt={backtracking}", 2);
+        gcodes.AddComment($"MillArc l={a.Center.F3()} r={Radius_mm.F3()} a0={a.StartAngle_deg.F3()} a1={a.EndAngle_deg.F3()} fr={fromZ_mm.F3()} to={toZ_mm.F3()} p0={a.Start.F3()} p1={a.End.F3()}", 2); //  bt={backtracking}
         string g = Counterclockwise ? "G03" : "G02";
 
         gcodes.AddMill($"{g} F{f_mmpmin.F3()} I{(a.Center.X - a.Start.X).F3()} J{(a.Center.Y - a.Start.Y).F3()} X{a.End.X.F3()} Y{a.End.Y.F3()} Z{t.Expr(toZ_mm, a.Start)}",
@@ -115,11 +113,12 @@ public class ArcGeometry : IMillGeometry {
 
     private int Direction => Counterclockwise ? 1 : -1;
 
-    private double AngleAt_deg(double f_mm)
-        => StartAngle_deg + Direction * f_mm / (MathHelper.TwoPI * Radius_mm) * 360;
+    private double AngleAt_deg(double offset_mm)
+        => StartAngle_deg + Direction * offset_mm / (MathHelper.TwoPI * Radius_mm) * 360;
 
     public IMillGeometry Section(double from_mm, double lg_mm)
-        => new ArcGeometry(Center, Radius_mm, AngleAt_deg(from_mm), AngleAt_deg(from_mm + lg_mm), Counterclockwise);
+        => new ArcGeometry(Center, Radius_mm, AngleAt_deg(from_mm), AngleAt_deg(from_mm + lg_mm), 
+                           lg_mm < 0 ? !Counterclockwise : Counterclockwise);
 
     public bool Contains(Vector2 p)
         => GeometryHelpers.PointInArc(p, Center, Radius_mm, StartAngle_deg, EndAngle_deg);
@@ -169,20 +168,17 @@ public static class MillGeometryHelper {
         }
     }
 
+    public static double MillSupportStartZ(double millingBottom_mm, IParams pars) {
+        return Math.Max(millingBottom_mm, pars.D_mm);
+    }
+
     private enum SupportStep { Up, Bar, Down, Between }
 
-    public static Vector3 MillSupportsStart2End(this IMillGeometry[] supportGeometries, Vector3 currPos, double millingBottom_mm, double h_mm, double globalS_mm, Transformation3 t, List<GCode> gcodes, string errorContext, IParams pars, bool backtracking) {
+    public static Vector3 MillSupports(this IEnumerable<IMillGeometry> supportGeometries, Vector3 currPos, double millingBottom_mm, double h_mm, double globalS_mm, Transformation3 t, List<GCode> gcodes, string errorContext, IParams pars, bool backtracking) {
         SupportStep step = SupportStep.Bar;
         foreach (var sg in supportGeometries ) {
             gcodes.AddComment("Support." + step, 2);
             currPos = sg.EmitGCode(currPos, t, globalS_mm, gcodes,
-                    fromZ_mm: Math.Max(millingBottom_mm, step switch {
-                        SupportStep.Up => pars.B_mm,
-                        SupportStep.Bar => pars.D_mm,
-                        SupportStep.Down => pars.D_mm,
-                        SupportStep.Between => pars.B_mm,
-                        _ => throw new EmitGCodeException(errorContext, "Invalid step")
-                    }),
                     toZ_mm: Math.Max(millingBottom_mm, step switch {
                         SupportStep.Up => pars.D_mm,
                         SupportStep.Bar => pars.D_mm,
@@ -190,33 +186,7 @@ public static class MillGeometryHelper {
                         SupportStep.Between => pars.B_mm,
                         _ => throw new EmitGCodeException(errorContext, "Invalid step")
                     }),
-                    th_mm: h_mm + pars.T_mm, f_mmpmin: pars.F_mmpmin, backtracking);
-            step = step == SupportStep.Between ? SupportStep.Up : step + 1;
-        }
-
-        return currPos;
-    }
-
-    public static Vector3 MillSupportsEnd2Start(this IMillGeometry[] supportGeometries, Vector3 currPos, double millingBottom_mm, double h_mm, double globalS_mm, Transformation3 t, List<GCode> gcodes, string errorContext, IParams pars, bool backtracking) {
-        SupportStep step = SupportStep.Bar;
-        foreach (var sg in supportGeometries.Reverse()) {
-            gcodes.AddComment("Support." + step, 2);
-            currPos = sg.CloneReversed().EmitGCode(currPos, t, globalS_mm, gcodes,
-                    fromZ_mm: Math.Max(millingBottom_mm, step switch {
-                        SupportStep.Up => pars.B_mm,
-                        SupportStep.Bar => pars.D_mm,
-                        SupportStep.Down => pars.D_mm,
-                        SupportStep.Between => pars.B_mm,
-                        _ => throw new EmitGCodeException(errorContext, "Invalid step")
-                    }),
-                    toZ_mm: Math.Max(millingBottom_mm, step switch {
-                        SupportStep.Up => pars.D_mm,
-                        SupportStep.Bar => pars.D_mm,
-                        SupportStep.Down => pars.B_mm,
-                        SupportStep.Between => pars.B_mm,
-                        _ => throw new EmitGCodeException(errorContext, "Invalid step")
-                    }),
-                    th_mm: h_mm + pars.T_mm, f_mmpmin: pars.F_mmpmin, backtracking);
+                    th_mm: h_mm + pars.T_mm, f_mmpmin: pars.F_mmpmin /*TODO: steeper than J? -> drill speed!!!!!!!!!!!*/, backtracking);
             step = step == SupportStep.Between ? SupportStep.Up : step + 1;
         }
 

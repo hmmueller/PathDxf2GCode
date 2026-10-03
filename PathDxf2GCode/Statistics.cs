@@ -36,9 +36,9 @@ public class Statistics {
         _cmdCt++;
     }
 
-    public void AddDrillLength(double lg_mm, double f_mmpmin) {
+    public void AddDrillLength(double lg_mm, double g_mmpmin) {
         DrillLength_mm += lg_mm;
-        _netDrillTime_min += lg_mm / f_mmpmin;
+        _netDrillTime_min += lg_mm / g_mmpmin;
         _cmdCt++;
     }
 

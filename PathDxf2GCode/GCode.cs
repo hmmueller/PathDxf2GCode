@@ -72,17 +72,17 @@ public class MillGCode : GCode {
 
 public class DrillGCode : GCode {
     private readonly double _lg_mm;
-    private readonly double _f_mmpmin;
+    private readonly double _g_mmpmin;
 
     public override char Letter => DEFAULT_LETTER;
 
-    public DrillGCode(string g, double lg_mm, double f_mmpmin) : base(g) {
+    public DrillGCode(string g, double lg_mm, double g_mmpmin) : base(g) {
         _lg_mm = lg_mm;
-        _f_mmpmin = f_mmpmin;
+        _g_mmpmin = g_mmpmin;
     }
 
     public override void AddToStatistics(Statistics stats) {
-        stats.AddDrillLength(_lg_mm, _f_mmpmin);
+        stats.AddDrillLength(_lg_mm, _g_mmpmin);
     }
 }
 public class OtherGCode : GCode {

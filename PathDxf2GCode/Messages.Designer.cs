@@ -79,18 +79,25 @@ namespace de.hmmueller.PathDxf2GCode {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die /g must be &gt; 0 ähnelt.
+        /// </summary>
+        internal static string Options_GNotAbove0 {
+            get {
+                return ResourceManager.GetString("Options_GNotAbove0", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Call: PathDxf2GCode [options] [DXF files]
         ///
         ///Options:
-        ///    /h     Help text
-        ///    /f 000 Milling speed in mm/min; required
-        ///    /z 000 Probing speed in mm/min; default is /f value
-        ///    /v 000 Maximum speed for sweeps in mm/min; required
-        ///    /s 000 Default sweep height in mm; required
-        ///    /c     Check all paths in DXF file without writing GCode; if /c is not
-        ///           provided the DXF file must contain only one path layer
-        ///    /x zzz For all texts matching this regular expression, write assigned
-        ///         [Rest der Zeichenfolge wurde abgeschnitten]&quot;; ähnelt.
+        ///    /h     Show options text
+        ///    /f 000 Set default milling speed (F_xy) in mm/min; required
+        ///    /g 000 Set default drilling speed (F_z) in mm/min; default is F_xy / 4
+        ///    /j 000 Set default ramp angle in degrees; default is 10
+        ///    /z 000 Set probing speed in mm/min; default is F_z or F_xy / 4 if F_z is not provided
+        ///    /v 000 Provide maximum speed for sweeps in mm/min (for statistics only); required
+        ///    /s 000 Set default sweep height in mm; requ [Rest der Zeichenfolge wurde abgeschnitten]&quot;; ähnelt.
         /// </summary>
         internal static string Options_Help {
             get {
@@ -104,6 +111,15 @@ namespace de.hmmueller.PathDxf2GCode {
         internal static string Options_InvalidRegexInSubPathRestriction_Value_Message {
             get {
                 return ResourceManager.GetString("Options_InvalidRegexInSubPathRestriction_Value_Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die /j must be &gt; 0 and &lt;= 90 ähnelt.
+        /// </summary>
+        internal static string Options_JNotBetween0And90 {
+            get {
+                return ResourceManager.GetString("Options_JNotBetween0And90", resourceCulture);
             }
         }
         
@@ -135,7 +151,7 @@ namespace de.hmmueller.PathDxf2GCode {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die /v missing or not &gt; 0 ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die /s missing or not &gt; 0 ähnelt.
         /// </summary>
         internal static string Options_MissingS {
             get {
@@ -306,6 +322,15 @@ namespace de.hmmueller.PathDxf2GCode {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die J={0} must be &gt; 0 ähnelt.
+        /// </summary>
+        internal static string Params_JMustBeGtThan0_J {
+            get {
+                return ResourceManager.GetString("Params_JMustBeGtThan0_J", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die {0} value missing ähnelt.
         /// </summary>
         internal static string Params_MissingKey_Key {
@@ -396,20 +421,20 @@ namespace de.hmmueller.PathDxf2GCode {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die V={0} must be &gt; 0 ähnelt.
-        /// </summary>
-        internal static string Params_VMustBeGtThan0_V {
-            get {
-                return ResourceManager.GetString("Params_VMustBeGtThan0_V", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die W={0} must be &gt; 0 ähnelt.
         /// </summary>
         internal static string Params_WMustBeGtThan0_W {
             get {
                 return ResourceManager.GetString("Params_WMustBeGtThan0_W", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Y={0} must be &gt; 0 ähnelt.
+        /// </summary>
+        internal static string Params_YMustBeGtThan0_Y {
+            get {
+                return ResourceManager.GetString("Params_YMustBeGtThan0_Y", resourceCulture);
             }
         }
         
@@ -682,6 +707,15 @@ namespace de.hmmueller.PathDxf2GCode {
         internal static string PathSegment_PathNotFound_Name_Files {
             get {
                 return ResourceManager.GetString("PathSegment_PathNotFound_Name_Files", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Radius must be larger than bit radius, not {0} ähnelt.
+        /// </summary>
+        internal static string PathSegment_RadiusNotLargerHalfO_Radius {
+            get {
+                return ResourceManager.GetString("PathSegment_RadiusNotLargerHalfO_Radius", resourceCulture);
             }
         }
         

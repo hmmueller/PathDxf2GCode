@@ -58,13 +58,13 @@ public class PathModel {
         private readonly Dictionary<PathName, (RawPathModel RawModel, string DxfFilePath)> _rawModels = new();
         private readonly Dictionary<(PathName, Variables), PathModel> _models = new();
 
-        public PathModel? Load(PathName name, ActualVariables variables, double? defaultSorNullForTplusO_mm, string currentDxfFile, Options options, string overlayTextForErrors, MessageHandlerForEntities messages, int nestingDepth, out string searchedFiles) {
+        public PathModel? Load(PathName name, ActualVariables variables, string currentDxfFile, Options options, string overlayTextForErrors, MessageHandlerForEntities messages, int nestingDepth, out string searchedFiles) {
             searchedFiles = "";
             if (!_models.ContainsKey((name, variables))) {
                 (RawPathModel? rawModel, string? dxfFilePath) = LoadRawModel(name, Path.GetDirectoryName(Path.GetFullPath(currentDxfFile)), options, overlayTextForErrors, messages, out searchedFiles);
                 if (rawModel != null) { // errors when rawModel==null were already registered
                     if (FormalVariables.CheckAgainstActualVariables(rawModel.ParamsText!.VariableStrings, variables, msg => messages.AddError(overlayTextForErrors, msg))) {
-                        PathModel? m = CreatePathModel(name, rawModel, defaultSorNullForTplusO_mm: defaultSorNullForTplusO_mm, variables, dxfFilePath!, options, messages, nestingDepth);
+                        PathModel? m = CreatePathModel(name, rawModel, variables, dxfFilePath!, options, messages, nestingDepth);
                         if (m != null) { // errors when m==null were already registered
                             _models.Add((name, variables), m);
                         }
@@ -137,14 +137,14 @@ public class PathModel {
             }
         }
 
-        public SortedDictionary<string, PathModel> LoadAllModels(string dxfFilePath, double? globalSweepHeight_mm,
+        public SortedDictionary<string, PathModel> LoadAllModels(string dxfFilePath, 
             Func<PathName, ParamsText, ActualVariables> getVariables, Options options, MessageHandlerForEntities messages, int nestingDepth) {
             Dictionary<PathName, RawPathModel> rawModels = LoadRawModels(dxfFilePath, options, messages);
             SortedDictionary<string, PathModel> result = new();
             foreach (var kvp in rawModels) {
                 PathModel? model = Load(kvp.Key, 
                                         kvp.Value.ParamsText == null ? ActualVariables.EMPTY : getVariables(kvp.Key, kvp.Value.ParamsText),
-                                        globalSweepHeight_mm, dxfFilePath, options, "???", messages, nestingDepth, out _);
+                                        dxfFilePath, options, "???", messages, nestingDepth, out _);
                 if (model != null) {
                     result.Add(kvp.Key.AsString(), model);
                 }
@@ -520,7 +520,7 @@ public class PathModel {
         }
     }
 
-    private static PathModel? CreatePathModel(PathName name, RawPathModel rawModel, double? defaultSorNullForTplusO_mm,
+    private static PathModel? CreatePathModel(PathName name, RawPathModel rawModel, 
         ActualVariables superpathVariables, string dxfFilePath, Options options, MessageHandlerForEntities messages, int nestingDepth) {
         if (rawModel.Start == null) {
             messages.AddError(name, Messages.PathModel_MissingStart);
@@ -614,7 +614,8 @@ public class PathModel {
         void OnError(string context, string msg) {
             messages.AddError(context, msg);
         }
-        PathParams pathParams = new(rawModel.ParamsText!, superpathVariables, defaultSorNullForTplusO_mm,
+        PathParams pathParams = new(rawModel.ParamsText!, superpathVariables, 
+            nestingDepth > 0 ? null : options.GlobalSweepHeight_mm,
             MessageHandlerForEntities.Context(rawModel.StartObject!, rawModel.Start.Value, dxfFilePath), options, OnError);
         {
             foreach (var s in segments) {

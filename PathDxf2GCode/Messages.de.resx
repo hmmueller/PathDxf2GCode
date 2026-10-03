@@ -127,11 +127,14 @@
     <value>Aufruf: PathDxf2GCode [Optionen] [DXF-Dateien]
 
 Optionen:
-    /h     Hilfe-Anzeige
-    /f 000 Fräsgeschwindigkeit in mm/min; Pflichtwert
-    /z 000 Probe-Geschwindigkeit in mm/min; Standardwert ist /f-Wert
-    /v 000 Maximalgeschwindigkeit für Leerfahrten in mm/min; Pflichtwert
+    /h     Optionen anzeigen
+    /f 000 Vorgabe für Fräsgeschwindigkeit (F_xy) in mm/min; Pflichtwert
+    /g 000 Vorgabe für Bohrgeschwindigkeit (F_z) in mm/min; Standardwert ist F_xy / 4
+    /j 000 Vorgabe für Standardrampenwinkel in Grad; Standardwert ist 10
+    /z 000 Vorgabe für Probe-Geschwindigkeit in mm/min; Standardwert ist F_z oder F_xy / 4, wenn F_z fehlt
+    /v 000 Standardgeschwindigkeit für Leerfahrten in mm/min (nur für Statistik); Pflichtwert
     /s 000 Vorgabe für Leerfahrt-Höhe in mm; Pflichtwert
+    /y 000 Vorgabe für Befestigungshöhe in mm für Leerfahrten; wenn nicht angegeben, wird S verwendet
     /c     Überprüfen aller Pfade in der DXF-Datei ohne G-Code-Ausgabe; wenn
            /c nicht angegeben wird, darf die DXF-Datei nur einen Pfad enthalten
     /x zzz Gibt für alle auf diesen regulären Ausdruck passenden Texte aus, 
@@ -213,14 +216,17 @@ Optionen:
   <data name="Params_WMustBeGtThan0_W" xml:space="preserve">
     <value>W={0} muss &gt; 0 sein</value>
   </data>
+  <data name="Params_YMustBeGtThan0_Y" xml:space="preserve">
+    <value>Y={0} muss &gt; 0 sein</value>
+  </data>
   <data name="Params_TMustBeGtThan0_T" xml:space="preserve">
     <value>T={0} muss &gt; 0 sein</value>
   </data>
   <data name="Params_UnsupportedKey_Name_Context" xml:space="preserve">
     <value>Nicht unterstützter {0}-Wert; {1}</value>
   </data>
-  <data name="Params_VMustBeGtThan0_V" xml:space="preserve">
-    <value>V={0} muss &gt; 0 sein</value>
+  <data name="Params_JMustBeGtThan0_J" xml:space="preserve">
+    <value>J={0} muss &gt; 0 sein</value>
   </data>
   <data name="PathModel_PathDefinedTwice_Path_OtherFile" xml:space="preserve">
     <value>Pfad {0} schon einmal definiert in {1}</value>
@@ -403,5 +409,14 @@ hat zugeordneten Text '{1}'</value>
   </data>
   <data name="Program_CheckingForOtherVariables" xml:space="preserve">
     <value>Überprüfung mit anderen Variablenwerten</value>
+  </data>
+  <data name="PathSegment_RadiusNotLargerHalfO_Radius" xml:space="preserve">
+    <value>Radius muss größer als Fräserradius sein, statt {0}</value>
+  </data>
+  <data name="Options_JNotBetween0And90" xml:space="preserve">
+    <value>/j muss &gt;= 0 und &lt; 90 sein</value>
+  </data>
+  <data name="Options_GNotAbove0" xml:space="preserve">
+    <value>/g muss &gt; 0 sein</value>
   </data>
 </root>

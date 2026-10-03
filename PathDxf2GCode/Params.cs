@@ -127,14 +127,14 @@ public class ParamsText {
 }
 
 public interface IParams {
-    double F_mmpmin { get; }
     double? RawB_mm { get; }
     double? RawD_mm { get; }
     double? RawI_mm { get; }
     double? RawP_mm { get; }
     double? RawU_mm { get; }
-    int? RawC { get; }
-    double V_mmpmin { get; }
+
+    double F_mmpmin { get; }
+    double G_mmpmin { get; }
     double T_mm { get; }
     double O_mm { get; }
     string M { get; }
@@ -144,11 +144,12 @@ public interface IParams {
     double B_mm { get; }
     double D_mm { get; }
     double I_mm { get; }
+    double J_deg { get; }
     double P_mm { get; }
     double U_mm { get; }
-    int C { get; }
     double S_mm { get; }
     double A_mm { get; }
+    double? Y_mm { get; }
 }
 
 public abstract class AbstractParams : IParams {
@@ -202,17 +203,14 @@ public abstract class AbstractParams : IParams {
         if (RawI_mm.HasValue && RawI_mm.Value.Le(0)) {
             Error(Messages.Params_IMustBeGtThan0_I, RawI_mm);
         }
-        if (RawC <= 0) {
-            Error(Messages.Params_CMustBeGtThan0_C, RawC);
-        }
-        if (V_mmpmin.Le(0)) {
-            Error(Messages.Params_VMustBeGtThan0_V, V_mmpmin);
-        }
         if (O_mm.Le(0)) {
             Error(Messages.Params_OMustBeGtThan0_O, O_mm);
         }
         if (T_mm.Le(0)) {
             Error(Messages.Params_TMustBeGtThan0_T, T_mm);
+        }
+        if (J_deg.Le(0)) {
+            Error(Messages.Params_JMustBeGtThan0_J, J_deg);
         }
         if (S_mm.Le(T_mm)) {
             Error(Messages.Params_SMustBeGtThanT_S_T, S_mm, T_mm);
@@ -229,6 +227,9 @@ public abstract class AbstractParams : IParams {
         if (W_mm.HasValue && W_mm.Value.Le(0)) {
             Error(Messages.Params_WMustBeGtThan0_W, W_mm);
         }
+        if (Y_mm.HasValue && Y_mm.Value.Le(0)) {
+            Error(Messages.Params_YMustBeGtThan0_Y, Y_mm);
+        }
     }
 
     protected string GetString(ParamsText text, char key, Action<string> onError) {
@@ -239,14 +240,14 @@ public abstract class AbstractParams : IParams {
         return GetString(key) ?? MissingOnError(string.Format(Messages.Params_MissingKey_Key, key));
     }
 
-    public abstract double F_mmpmin { get; }
     public abstract double? RawB_mm { get; }
     public abstract double? RawD_mm { get; }
     public abstract double? RawI_mm { get; }
     public abstract double? RawP_mm { get; }
     public abstract double? RawU_mm { get; }
-    public abstract int? RawC { get; }
-    public abstract double V_mmpmin { get; }
+
+    public abstract double F_mmpmin { get; }
+    public abstract double G_mmpmin { get; }
     public abstract double T_mm { get; }
     public abstract double O_mm { get; }
     public abstract double S_mm { get; }
@@ -254,28 +255,31 @@ public abstract class AbstractParams : IParams {
     public abstract string M { get; }
     public abstract double Z_mmpmin { get; }
     public abstract double? W_mm { get; }
+    public abstract double? Y_mm { get; }
 
     public double B_mm => RawB_mm ?? throw new EmitGCodeException(_errorContext, Messages.Params_MissingKey_Key, 'B');
     public double D_mm => RawD_mm ?? throw new EmitGCodeException(_errorContext, Messages.Params_MissingKey_Key, 'D');
     public double I_mm => RawI_mm ?? throw new EmitGCodeException(_errorContext, Messages.Params_MissingKey_Key, 'I');
+    public abstract double J_deg { get; }
     public double P_mm => RawP_mm ?? throw new EmitGCodeException(_errorContext, Messages.Params_MissingKey_Key, 'P');
     public double U_mm => RawU_mm ?? throw new EmitGCodeException(_errorContext, Messages.Params_MissingKey_Key, 'U');
-    public int C => RawC ?? throw new EmitGCodeException(_errorContext, Messages.Params_MissingKey_Key, 'C');
 }
 
 public class PathParams : AbstractParams {
     private readonly Options _options;
 
-    public override double F_mmpmin => GetDouble('F') ?? _options.GlobalFeedRate_mmpmin;
     public override double? RawB_mm => GetDouble('B');
     public override double? RawD_mm => GetDouble('D');
     public override double? RawP_mm => GetDouble('P');
     public override double? RawU_mm => GetDouble('U');
-    public override int? RawC => (int?)GetDouble('C');
     public override double? RawI_mm => GetDouble('I');
+    public override double J_deg => GetDouble('J') ?? _options.GlobalRampAngle_deg;
+    public override double? Y_mm => GetDouble('Y') ?? _options.GlobalClampHeight_mm;
+
+    public override double F_mmpmin => GetDouble('F') ?? _options.GlobalFeedRate_mmpmin;
+    public override double G_mmpmin => GetDouble('G') ?? _options.GlobalDrillRate_mmpmin ?? F_mmpmin / 4.0;
     public override double S_mm { get; }
     public override double A_mm { get; }
-    public override double V_mmpmin => _options.GlobalSweepRate_mmpmin;
     public override double T_mm => GetDouble('T', OnErrorNaN);
     public override double O_mm => GetDouble('O', OnErrorNaN);
     public override string M => GetString(Text, 'M', OnError);
@@ -285,13 +289,12 @@ public class PathParams : AbstractParams {
     public string OutFileSuffix => GetString('R') ?? "";
     public FormalVariables FormalVariables { get; }
 
-    public PathParams(ParamsText text, ActualVariables superpathVariables, double? defaultSorNullForTplusO_mm, string errorContext, Options options, Action<string, string> onError) : base(text, superpathVariables, errorContext, onError) {
+    public PathParams(ParamsText text, ActualVariables superpathVariables, double? globalSorNullForTplusO_mm, string errorContext, Options options, Action<string, string> onError) : base(text, superpathVariables, errorContext, onError) {
         _options = options;
-        // HACK: T+O temporarily replaced with T+max(O,6). This is necessary for my clampings that are higher than 2mm. See issue #12.
-        S_mm = GetDouble('S') ?? defaultSorNullForTplusO_mm ?? T_mm + Math.Max(O_mm, 6);
+        S_mm = GetDouble('S') ?? T_mm + Y_mm ?? globalSorNullForTplusO_mm ?? T_mm + O_mm;
         A_mm = GetDouble('A') ?? 4 * O_mm;
 
-        CheckKeysAndValues(text, "FBDCISTOMPUZAWRE");
+        CheckKeysAndValues(text, "FGBDIJSTOMPUZAWRE");
         if (RawD_mm.HasValue && RawB_mm.HasValue && RawB_mm.Value.Ge(RawD_mm.Value)) {
             Error(Messages.Params_DMustBeGtThanB_D_B, RawD_mm, B_mm);
         }
@@ -308,15 +311,17 @@ public class PathParams : AbstractParams {
 public abstract class AbstractChildParams : AbstractParams {
     private readonly IParams _parent;
 
-    public override double F_mmpmin => _parent.F_mmpmin;
     public override double? RawB_mm => _parent.RawB_mm;
     public override double? RawD_mm => _parent.RawD_mm;
     public override double? RawP_mm => _parent.RawP_mm;
     public override double? RawU_mm => _parent.RawU_mm;
-    public override int? RawC => _parent.RawC;
     public override double? RawI_mm => _parent.RawI_mm;
+
+    public override double F_mmpmin => _parent.F_mmpmin;
+    public override double G_mmpmin => _parent.G_mmpmin;
+    public override double J_deg => _parent.J_deg;
     public override double S_mm => GetDouble('S') ?? _parent.S_mm;
-    public override double V_mmpmin => _parent.V_mmpmin;
+    public override double? Y_mm => GetDouble('Y') ?? _parent.Y_mm;
     public override double T_mm => _parent.T_mm;
     public override double O_mm => _parent.O_mm;
     public override string M => _parent.M;
@@ -330,9 +335,9 @@ public abstract class AbstractChildParams : AbstractParams {
 }
 
 public class ChainParams : AbstractChildParams, IParams {
-    public const string KEYS = "NICW";
-    public override int? RawC => (int?)GetDouble('C') ?? base.RawC;
+    public const string KEYS = "NIJW";
     public override double? RawI_mm => GetDouble('I') ?? base.RawI_mm;
+    public override double J_deg => GetDouble('J') ?? base.J_deg;
     public override double? W_mm => GetDouble('W') ?? base.W_mm;
 
     public ChainParams(ParamsText text, ActualVariables superpathVariables, string errorContext, IParams pathParams, Action<string, string> onError) : base(text.LimitedTo(KEYS), superpathVariables, errorContext, pathParams, onError) {
@@ -393,14 +398,13 @@ public class HelixParams : AbstractChildParams {
 }
 
 public class DrillParams : AbstractChildParams {
-    public override double F_mmpmin => GetDouble('F') ?? base.F_mmpmin;
+    public override double G_mmpmin => GetDouble('G') ?? base.G_mmpmin;
     public override double? RawB_mm => GetDouble('B') ?? base.RawB_mm;
     public override double? RawD_mm => GetDouble('D') ?? base.RawD_mm;
-    public override int? RawC => (int?)GetDouble('C') ?? base.RawC;
     public string? Q => GetString('Q');
 
     public DrillParams(ParamsText text, ActualVariables superpathVariables, bool isMark, string errorContext, IParams pathParams, Action<string, string> onError) : base(text, superpathVariables, errorContext, pathParams, onError) {
-        CheckKeysAndValues(text, isMark ? "FDCQ" : "FBCQ");
+        CheckKeysAndValues(text, isMark ? "GDQ" : "GBQ");
     }
 }
 
@@ -414,7 +418,7 @@ public class SubpathParams : AbstractChildParams {
     public ActualVariables ActualVariables { get; }
 
     public SubpathParams(ParamsText text, ActualVariables superpathVariables, string errorContext, PathParams pathParams, Action<string, string> onError) : base(text, superpathVariables, errorContext, pathParams, onError) {
-        CheckKeysAndValues(text, "THOMNC>");
+        CheckKeysAndValues(text, "THOMNC>"); // C is not stored anywhere; see documentation for its purpose
         if (pathParams.E == null) {
             ParentE = null;
         } else {

@@ -21,10 +21,20 @@ public class Options : AbstractOptions {
     private readonly List<(Regex Parent, Regex Child)> _subPathRestrictions = new();
 
     /// <summary>
-    /// /f: Milling speed für G01, G02, G03
+    /// /f: Milling speed (feed rate) for G01, G02, G03 in XY direction
     /// TODO: https://diymachining.com/grbl-feed-rate/ 
     /// </summary>
     public double GlobalFeedRate_mmpmin { get; private set; } = -1;
+
+    /// <summary>
+    /// /j: Maximum ramp angle; default is 10°
+    /// </summary>
+    public double GlobalRampAngle_deg { get; private set; } = 10;
+
+    /// <summary>
+    /// /g: Milling speed for G01 in Z direction; default is feed rate / 4
+    /// </summary>
+    public double? GlobalDrillRate_mmpmin { get; private set; }
 
     /// <summary>
     /// /v: Sweep speed for G00 (only necessary for statistics computations)
@@ -42,6 +52,11 @@ public class Options : AbstractOptions {
     /// the router bits might encounter.
     /// </summary>
     public double GlobalSweepHeight_mm { get; private set; } = -1;
+
+    /// <summary>
+    /// /y: Clamp height for local paths.
+    /// </summary>
+    public double? GlobalClampHeight_mm { get; private set; }
 
     /// <summary>
     /// /c: Dry run for all paths of a DXF file, no gcode output
@@ -154,6 +169,12 @@ public class Options : AbstractOptions {
             case "f":
                 options.GlobalFeedRate_mmpmin = GetDoubleOption(ref i);
                 return true;
+            case "g":
+                options.GlobalDrillRate_mmpmin = GetDoubleOption(ref i);
+                return true;
+            case "j":
+                options.GlobalRampAngle_deg = GetDoubleOption(ref i);
+                return true;
             case "z":
                 options.GlobalProbeRate_mmpmin = GetDoubleOption(ref i);
                 return true;
@@ -189,8 +210,16 @@ public class Options : AbstractOptions {
             messages.AddError("Options", Messages.Options_MissingS);
             result = false;
         }
+        if (options.GlobalRampAngle_deg <= 0 || options.GlobalRampAngle_deg > 90) {
+            messages.AddError("Options", Messages.Options_JNotBetween0And90);
+            result = false;
+        }
+        if (options.GlobalDrillRate_mmpmin <= 0) {
+            messages.AddError("Options", Messages.Options_GNotAbove0);
+            result = false;
+        }
         if (options.GlobalProbeRate_mmpmin <= 0) {
-            options.GlobalProbeRate_mmpmin = options.GlobalFeedRate_mmpmin;
+            options.GlobalProbeRate_mmpmin = options.GlobalDrillRate_mmpmin.HasValue ? options.GlobalDrillRate_mmpmin.Value : options.GlobalFeedRate_mmpmin / 4;
         }
         return result;
     }

@@ -127,22 +127,25 @@
     <value>Call: PathDxf2GCode [options] [DXF files]
 
 Options:
-    /h     Help text
-    /f 000 Milling speed in mm/min; required
-    /z 000 Probing speed in mm/min; default is /f value
-    /v 000 Maximum speed for sweeps in mm/min; required
-    /s 000 Default sweep height in mm; required
+    /h     Show options text
+    /f 000 Set default milling speed (F_xy) in mm/min; required
+    /g 000 Set default drilling speed (F_z) in mm/min; default is F_xy / 4
+    /j 000 Set default ramp angle in degrees; default is 10
+    /z 000 Set probing speed in mm/min; default is F_z or F_xy / 4 if F_z is not provided
+    /v 000 Provide maximum speed for sweeps in mm/min (for statistics only); required
+    /s 000 Set default sweep height in mm; required
+    /y 000 Set default clamp clearence in mm; no default (S used instead)
     /c     Check all paths in DXF file without writing GCode; if /c is not
            provided the DXF file must contain only one path layer
     /x zzz For all texts matching this regular expression, write assigned
            DXF objects; this is helpful for debugging parameter texts
     /d zzz Search path for references DXF files; can be specified multiple
            times; default is the location of the DXF file
-    /n zzz Regular expression for path names; default value is 
+    /n zzz Set regular expression for path names; default value is 
            ([0-9]{4})[.]([0-9]+)([A-Z])
-    /p zzz Regular expression for path patterns in file names; default is
+    /p zzz Set regular expression for path patterns in file names; default is
            ([0-9]{4})(?:[.]([0-9]+))?
-    /l zzz Language; default is operating system language
+    /l zzz Set output language; default is operating system language
 </value>
   </data>
   <data name="Options_LessThan0_Name_Value" xml:space="preserve">
@@ -158,7 +161,7 @@ Options:
     <value>/v missing or not &gt; 0</value>
   </data>
   <data name="Options_MissingS" xml:space="preserve">
-    <value>/v missing or not &gt; 0</value>
+    <value>/s missing or not &gt; 0</value>
   </data>
   <data name="Options_MissingValue_Name" xml:space="preserve">
     <value>Missing value for option {0}</value>
@@ -214,14 +217,17 @@ Options:
   <data name="Params_WMustBeGtThan0_W" xml:space="preserve">
     <value>W={0} must be &gt; 0</value>
   </data>
+  <data name="Params_YMustBeGtThan0_Y" xml:space="preserve">
+    <value>Y={0} must be &gt; 0</value>
+  </data>
   <data name="Params_TMustBeGtThan0_T" xml:space="preserve">
     <value>T={0} must be &gt; 0</value>
   </data>
   <data name="Params_UnsupportedKey_Name_Context" xml:space="preserve">
     <value>Unsupported {0} value; {1}</value>
   </data>
-  <data name="Params_VMustBeGtThan0_V" xml:space="preserve">
-    <value>V={0} must be &gt; 0</value>
+  <data name="Params_JMustBeGtThan0_J" xml:space="preserve">
+    <value>J={0} must be &gt; 0</value>
   </data>
   <data name="PathModel_PathDefinedTwice_Path_OtherFile" xml:space="preserve">
     <value>Path {0} has already been defined in {1}</value>
@@ -404,5 +410,14 @@ has assigned text '{1}'</value>
   </data>
   <data name="Program_CheckingForOtherVariables" xml:space="preserve">
     <value>Checking for other variable assignments</value>
+  </data>
+  <data name="PathSegment_RadiusNotLargerHalfO_Radius" xml:space="preserve">
+    <value>Radius must be larger than bit radius, not {0}</value>
+  </data>
+  <data name="Options_JNotBetween0And90" xml:space="preserve">
+    <value>/j must be &gt; 0 and &lt;= 90</value>
+  </data>
+  <data name="Options_GNotAbove0" xml:space="preserve">
+    <value>/g must be &gt; 0</value>
   </data>
 </root>
