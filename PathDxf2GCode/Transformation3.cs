@@ -6,9 +6,10 @@ using netDxf.Entities;
 using System.Text.RegularExpressions;
 
 public class ZProbe {
-    private readonly Vector2 _start, _end;
+    public Vector2 Start { get; }
+    private readonly Vector2 _end;
 
-    private Vector2? _probe;
+    private Vector2? _position;
     private ZProbeParams? _params;
     private string? _name;
 
@@ -16,13 +17,12 @@ public class ZProbe {
     private double _segmentH_mm;
 
     public EntityObject Source { get; }
-    public Vector2 Position => _start;
-    public Vector2 Probe => _probe!.Value;
+    public Vector2 Position => _position!.Value;
     public ParamsText ParamsText { get; }
     public bool Disabled { get; private set; }
 
     public ZProbe(Vector2 start, Vector2 end, EntityObject source, ParamsText paramsText) {
-        _start = start;
+        Start = start;
         _end = end;
         Source = source;
         ParamsText = paramsText;
@@ -35,11 +35,11 @@ public class ZProbe {
             Disabled = segment.Disabled;
         }
 
-        if (segment.Contains(_start)) {
-            _probe = _end;
+        if (segment.Contains(Start)) {
+            _position = _end;
             SetValues(segment);
         } else if (segment.Contains(_end)) {
-            _probe = _start;
+            _position = Start;
             SetValues(segment);
         } else {
             // ignore
@@ -47,10 +47,10 @@ public class ZProbe {
     }
 
 
-    public bool IsAttached => _probe != null;
+    public bool IsAttached => _position != null;
 
     public void CreateParams(PathParams pathParams, ActualVariables superpathVariables, string dxfFileName, Action<string, string> onError) {
-        _params = new ZProbeParams(ParamsText, superpathVariables, MessageHandlerForEntities.Context(Source, Position, dxfFileName), pathParams, onError);
+        _params = new ZProbeParams(ParamsText, superpathVariables, MessageHandlerForEntities.Context(Source, Start, dxfFileName), pathParams, onError);
     }
 
     public double TH_mm(double h_mm) => (_params!.RawT_mm ?? _segmentT_mm) + _segmentH_mm + h_mm;
@@ -58,9 +58,9 @@ public class ZProbe {
 
     public string Name => _name ?? throw new NullReferenceException("SetName was not called");
 
-    public Vector3 EmitGCode(Vector3 currPos, double h_mm, Vector2 transformedCenter,
+    public Vector3 EmitGCode(Vector3 currPos, double h_mm, Vector2 transformedLocation,
                              List<GCode> gcodes, string dxfFileName, MessageHandlerForEntities messages) {
-        PathSegment.AssertNear(currPos.XY(), transformedCenter, MessageHandlerForEntities.Context(Source, Probe, dxfFileName));
+        PathSegment.AssertNear(currPos.XY(), transformedLocation, MessageHandlerForEntities.Context(Source, Position, dxfFileName));
 
         double o_mm = _params!.O_mm;
         gcodes.AddNonhorizontalG00($"G00 Z{(TH_mm(h_mm) + o_mm).F3()}", currPos.Z - TH_mm(h_mm) - o_mm); // Go down quickly to T+O
@@ -84,13 +84,13 @@ public class ZProbe {
 }
 
 public class Transformation3 : Transformation2 {
-    private readonly (Vector2 Center, double TH_mm, string Name)[] _zProbeData;
+    private readonly (Vector2 Position, double TH_mm, string Name)[] _zProbeData;
 
-    public Transformation3(Vector2 fromStart, Vector2 fromEnd, Vector2 toStart, Vector2 toEnd, IEnumerable<(ZProbe ZProbe, Vector2 TransformedCenter, double H_mm)> orderedZProbes) : base(fromStart, fromEnd, toStart, toEnd) {
-        _zProbeData = orderedZProbes.Select(z => (Center: z.TransformedCenter, z.ZProbe.TH_mm(z.H_mm), z.ZProbe.Name)).ToArray();
+    public Transformation3(Vector2 fromStart, Vector2 fromEnd, Vector2 toStart, Vector2 toEnd, IEnumerable<(ZProbe ZProbe, Vector2 TransformedPosition, double H_mm)> orderedZProbes) : base(fromStart, fromEnd, toStart, toEnd) {
+        _zProbeData = orderedZProbes.Select(z => (Position: z.TransformedPosition, z.ZProbe.TH_mm(z.H_mm), z.ZProbe.Name)).ToArray();
     }
 
-    private Transformation3(Transformation2 t, (Vector2 Center, double T_mm, string Name)[] zProbes) : base(t) {
+    private Transformation3(Transformation2 t, (Vector2 Position, double T_mm, string Name)[] zProbes) : base(t) {
         _zProbeData = zProbes;
     }
 
@@ -101,7 +101,7 @@ public class Transformation3 : Transformation2 {
         if (_zProbeData.Any()) {
             (double Weight, double T_mm, string Name)[] ws = _zProbeData
                 .Select(z => (
-                    Weight: 1 / ((z.Center - xy).Modulus() + 1e-3), // 1e-3 avoids /0; but is small enough so that
+                    Weight: 1 / ((z.Position - xy).Modulus() + 1e-3), // 1e-3 avoids /0; but is small enough so that
                                           // typical distances to ZProbes (on the order of mm) are not distorted.
                     z.TH_mm,
                     z.Name))

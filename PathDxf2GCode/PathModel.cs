@@ -408,8 +408,8 @@ public class PathModel {
         return NearestOverlapping(lines, textCircle, text, layerName,
             textCircleOverLaps: c => CircleOverlapsLine(textCircle, c),
             isNearerThan: (textCenter, line1, line2)
-                => MathHelper.PointLineDistance(textCenter, line1.StartPoint.AsVector2(), line1.Direction.AsVector2())
-                    < MathHelper.PointLineDistance(textCenter, line2.StartPoint.AsVector2(), line2.Direction.AsVector2())
+                => MathHelper.PointLineDistance(textCenter, line1.StartPoint.AsVector2(), Vector2.Normalize(line1.Direction.AsVector2()))
+                    < MathHelper.PointLineDistance(textCenter, line2.StartPoint.AsVector2(), Vector2.Normalize(line2.Direction.AsVector2()))
         );
     }
 
@@ -641,7 +641,7 @@ public class PathModel {
                 z.TryAttachTo(b);
             }
             if (!z.IsAttached) {
-                messages.AddError(z.Source, z.Position, dxfFilePath, Messages.PathModel_ZProbeNotAttached);
+                messages.AddError(z.Source, z.Start, dxfFilePath, Messages.PathModel_ZProbeNotAttached);
             }   
         }
 
@@ -651,7 +651,7 @@ public class PathModel {
 
     public bool IsEmpty() => !_segments.Any();
 
-    public Transformation3 CreateTransformation(IEnumerable<(ZProbe ZProbe, Vector2 TransformedCenter, double H_mm)> orderedZProbes)
+    public Transformation3 CreateTransformation(IEnumerable<(ZProbe ZProbe, Vector2 TransformedPosition, double H_mm)> orderedZProbes)
         => new Transformation3(Start, Start + Vector2.UnitX, Vector2.Zero, Vector2.UnitX, orderedZProbes);
 
     public Vector3 EmitMillingGCode(Vector3 currPos, double h_mm, Transformation3 t, double globalS_mm,
@@ -668,18 +668,18 @@ public class PathModel {
     }
 
 
-    public List<(ZProbe ZProbe, Vector2 TransformedCenter, double H_mm)> CollectAndOrderAllZProbes() {
+    public List<(ZProbe ZProbe, Vector2 TransformedPosition, double H_mm)> CollectAndOrderAllZProbes() {
         // A. Collect all zProbes
-        HashSet<(ZProbe ZProbe, Vector2 TransformedCenter, double)> openZProbes = CollectZProbes(new Transformation2(Start, Start + Vector2.UnitX, Vector2.Zero, Vector2.UnitX), h_mm: 0).ToHashSet();
+        HashSet<(ZProbe ZProbe, Vector2 TransformedPosition, double)> openZProbes = CollectZProbes(new Transformation2(Start, Start + Vector2.UnitX, Vector2.Zero, Vector2.UnitX), h_mm: 0).ToHashSet();
 
         // B. Order them
-        List<(ZProbe ZProbe, Vector2 TransformedCenter, double H_mm)> orderedZProbes = new();
+        List<(ZProbe ZProbe, Vector2 TransformedPosition, double H_mm)> orderedZProbes = new();
         {
             Vector2 currZEnd = Vector2.Zero;
             while (openZProbes.Any()) {
-                (ZProbe ZProbe, Vector2 TransformedCenter, double H_mm) nearestZ = openZProbes.MinBy(z => (z.TransformedCenter - currZEnd).Modulus())!;
+                (ZProbe ZProbe, Vector2 TransformedPosition, double H_mm) nearestZ = openZProbes.MinBy(z => (z.TransformedPosition - currZEnd).Modulus())!;
                 orderedZProbes.Add(nearestZ);
-                currZEnd = nearestZ.TransformedCenter;
+                currZEnd = nearestZ.TransformedPosition;
                 openZProbes.Remove(nearestZ);
             }
         }
@@ -693,11 +693,11 @@ public class PathModel {
         return orderedZProbes;
     }
 
-    internal IEnumerable<(ZProbe ZProbe, Vector2 TransformedCenter, double H_mm)> CollectZProbes(Transformation2 t, double h_mm) {
-        List<(ZProbe ZProbe, Vector2 TransformedCenter, double H_mm)> result = 
+    internal IEnumerable<(ZProbe ZProbe, Vector2 Position, double H_mm)> CollectZProbes(Transformation2 t, double h_mm) {
+        List<(ZProbe ZProbe, Vector2 Position, double H_mm)> result = 
             _zProbes
             .Where(z => !z.Disabled)
-            .Select(z => (z, t.Transform(z.Probe), h_mm))
+            .Select(z => (z, t.Transform(z.Position), h_mm))
             .ToList();
         foreach (var s in _segments.OfType<SubPathSegment>()) {
             result.AddRange(s.CollectZProbes(t, h_mm + s.H_mm));

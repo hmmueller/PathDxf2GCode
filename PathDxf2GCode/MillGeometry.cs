@@ -56,7 +56,8 @@ public class LineGeometry : IMillGeometry {
         => new LineGeometry(At(from_mm), At(from_mm + lg_mm));
 
     public bool Contains(Vector2 p) 
-        => MathHelper.PointInSegment(p, Start, End) == 0;
+        => MathHelper.PointInSegment(p, Start, End) == 0 
+           && MathHelper.PointLineDistance(p, Start, Vector2.Normalize(End - Start)).Near(0);
 }
 
 public class ArcGeometry : IMillGeometry {

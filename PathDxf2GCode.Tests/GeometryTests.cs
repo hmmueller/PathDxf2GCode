@@ -29,5 +29,11 @@ public class GeometryTests {
             }
         }
     }
+
+    [TestMethod]
+    public void DistanceIsZero() {
+        Assert.AreEqual(0, MathHelper.PointLineDistance(new Vector2(48, 200), new Vector2(80, 200), Vector2.Normalize(new Vector2(5, 0))));
+    }
+
 }
 

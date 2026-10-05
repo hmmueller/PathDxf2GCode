@@ -788,7 +788,7 @@ public class SubPathSegment : PathSegmentWithParamsText<SubPathSegment.RawSegmen
         return currPos;
     }
 
-    public IEnumerable<(ZProbe ZProbe, Vector2 Center, double H_mm)> CollectZProbes(Transformation2 t, double h_mm) {
+    public IEnumerable<(ZProbe ZProbe, Vector2 Position, double H_mm)> CollectZProbes(Transformation2 t, double h_mm) {
         if (_targetModel != null) {
             Transformation2 compound = t.Transform(new Transformation2(_targetModel.Start, _targetModel.End, Start, End));
             return _targetModel.CollectZProbes(compound, h_mm) ?? Enumerable.Empty<(ZProbe, Vector2, double)>();
