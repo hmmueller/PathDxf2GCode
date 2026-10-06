@@ -198,11 +198,11 @@ Optionen:
   <data name="Params_FMustBeGtThan0_F" xml:space="preserve">
     <value>F={0} muss &gt; 0 sein</value>
   </data>
+  <data name="Params_GMustBeGtThan0_G" xml:space="preserve">
+    <value>G={0} muss &gt; 0 sein</value>
+  </data>
   <data name="Params_IMustBeGtThan0_I" xml:space="preserve">
     <value>I={0} muss &gt; 0 sein</value>
-  </data>
-  <data name="Params_MissingKey_Key" xml:space="preserve">
-    <value>{0}-Wert fehlt</value>
   </data>
   <data name="Params_OMustBeGtThan0_O" xml:space="preserve">
     <value>O={0} muss &gt; 0 sein</value>
@@ -218,6 +218,9 @@ Optionen:
   </data>
   <data name="Params_YMustBeGtThan0_Y" xml:space="preserve">
     <value>Y={0} muss &gt; 0 sein</value>
+  </data>
+  <data name="Params_ZMustBeGtThan0_Z" xml:space="preserve">
+    <value>Z={0} muss &gt; 0 sein</value>
   </data>
   <data name="Params_TMustBeGtThan0_T" xml:space="preserve">
     <value>T={0} muss &gt; 0 sein</value>
@@ -418,5 +421,8 @@ hat zugeordneten Text '{1}'</value>
   </data>
   <data name="Options_GNotAbove0" xml:space="preserve">
     <value>/g muss &gt; 0 sein</value>
+  </data>
+  <data name="Params_MissingKey_Keys" xml:space="preserve">
+    <value>Alle Werte für Parameter {0} fehlen</value>
   </data>
 </root>

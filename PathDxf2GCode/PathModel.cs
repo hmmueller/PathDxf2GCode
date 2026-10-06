@@ -64,7 +64,7 @@ public class PathModel {
                 (RawPathModel? rawModel, string? dxfFilePath) = LoadRawModel(name, Path.GetDirectoryName(Path.GetFullPath(currentDxfFile)), options, overlayTextForErrors, messages, out searchedFiles);
                 if (rawModel != null) { // errors when rawModel==null were already registered
                     if (FormalVariables.CheckAgainstActualVariables(rawModel.ParamsText!.VariableStrings, variables, msg => messages.AddError(overlayTextForErrors, msg))) {
-                        PathModel? m = CreatePathModel(name, rawModel, variables, dxfFilePath!, options, messages, nestingDepth);
+                        PathModel? m = CreatePathModel(name, rawModel, variables, dxfFilePath!, messages, nestingDepth);
                         if (m != null) { // errors when m==null were already registered
                             _models.Add((name, variables), m);
                         }
@@ -521,7 +521,7 @@ public class PathModel {
     }
 
     private static PathModel? CreatePathModel(PathName name, RawPathModel rawModel, 
-        ActualVariables superpathVariables, string dxfFilePath, Options options, MessageHandlerForEntities messages, int nestingDepth) {
+        ActualVariables superpathVariables, string dxfFilePath, MessageHandlerForEntities messages, int nestingDepth) {
         if (rawModel.Start == null) {
             messages.AddError(name, Messages.PathModel_MissingStart);
         }
@@ -614,9 +614,8 @@ public class PathModel {
         void OnError(string context, string msg) {
             messages.AddError(context, msg);
         }
-        PathParams pathParams = new(rawModel.ParamsText!, superpathVariables, 
-            nestingDepth > 0 ? null : options.GlobalSweepHeight_mm,
-            MessageHandlerForEntities.Context(rawModel.StartObject!, rawModel.Start.Value, dxfFilePath), options, OnError);
+        PathParams pathParams = new(rawModel.ParamsText!, nestingDepth == 0, superpathVariables, 
+            MessageHandlerForEntities.Context(rawModel.StartObject!, rawModel.Start.Value, dxfFilePath), OnError);
         {
             foreach (var s in segments) {
                 s.CreateParams(pathParams, superpathVariables, dxfFilePath, OnError);
@@ -654,12 +653,13 @@ public class PathModel {
     public Transformation3 CreateTransformation(IEnumerable<(ZProbe ZProbe, Vector2 TransformedPosition, double H_mm)> orderedZProbes)
         => new Transformation3(Start, Start + Vector2.UnitX, Vector2.Zero, Vector2.UnitX, orderedZProbes);
 
-    public Vector3 EmitMillingGCode(Vector3 currPos, double h_mm, Transformation3 t, double globalS_mm,
-        List<GCode> gcodes, string dxfFileName, MessageHandlerForEntities messages) {
+    public Vector3 EmitMillingGCode(Vector3 currPos, double h_mm, Transformation3 t, 
+        IEmitParams emitParams, List<GCode> gcodes, string dxfFileName, MessageHandlerForEntities messages) {
 
+        using (Params.WithEmitParams(emitParams))
         foreach (var s in _segments) {
             try {
-                currPos = s.EmitGCode(currPos, h_mm, t, globalS_mm, gcodes, dxfFileName, messages);
+                currPos = s.EmitGCode(currPos, h_mm, t, gcodes, dxfFileName, messages);
             } catch (EmitGCodeException ex) {
                 messages.AddError(ex.ErrorContext, ex.Message);
             }

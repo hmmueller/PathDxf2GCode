@@ -126,30 +126,40 @@ public class ParamsText {
     }
 }
 
-public interface IParams {
+public interface IEmitParams {
+    double? RawF_mmpmin { get; }
+    double? RawG_mmpmin { get; }
+    double? RawI_mm { get; }
+    double? RawJ_deg { get; }
+    double? RawS_mm { get; }
+    double? RawY_mm { get; }
+    double? RawZ_mmpmin { get; }
+}
+
+public interface IParams : IEmitParams {
+    double F_mmpmin { get; }
+    double G_mmpmin { get; }
+    double I_mm { get; }
+    double J_deg { get; }
+    double S_mm { get; }
+    double? Y_mm { get; }
+    double Z_mmpmin { get; }
+
     double? RawB_mm { get; }
     double? RawD_mm { get; }
-    double? RawI_mm { get; }
     double? RawP_mm { get; }
     double? RawU_mm { get; }
 
-    double F_mmpmin { get; }
-    double G_mmpmin { get; }
     double T_mm { get; }
     double O_mm { get; }
     string M { get; }
-    double Z_mmpmin { get; }
     double? W_mm { get; }
 
     double B_mm { get; }
     double D_mm { get; }
-    double I_mm { get; }
-    double J_deg { get; }
     double P_mm { get; }
     double U_mm { get; }
-    double S_mm { get; }
     double A_mm { get; }
-    double? Y_mm { get; }
 }
 
 public abstract class AbstractParams : IParams {
@@ -197,23 +207,11 @@ public abstract class AbstractParams : IParams {
         foreach (char c in text.Keys.Except(expectedKeys)) {
             Error(Messages.Params_UnsupportedKey_Name_Context, c, text.Context);
         }
-        if (F_mmpmin.Le(0)) {
-            Error(Messages.Params_FMustBeGtThan0_F, F_mmpmin);
-        }
-        if (RawI_mm.HasValue && RawI_mm.Value.Le(0)) {
-            Error(Messages.Params_IMustBeGtThan0_I, RawI_mm);
-        }
         if (O_mm.Le(0)) {
             Error(Messages.Params_OMustBeGtThan0_O, O_mm);
         }
         if (T_mm.Le(0)) {
             Error(Messages.Params_TMustBeGtThan0_T, T_mm);
-        }
-        if (J_deg.Le(0)) {
-            Error(Messages.Params_JMustBeGtThan0_J, J_deg);
-        }
-        if (S_mm.Le(T_mm)) {
-            Error(Messages.Params_SMustBeGtThanT_S_T, S_mm, T_mm);
         }
         if (RawB_mm.HasValue && RawB_mm.Value.Ge(T_mm)) {
             Error(Messages.Params_BMustBeLessThanT_B_T, RawB_mm, T_mm);
@@ -227,9 +225,6 @@ public abstract class AbstractParams : IParams {
         if (W_mm.HasValue && W_mm.Value.Le(0)) {
             Error(Messages.Params_WMustBeGtThan0_W, W_mm);
         }
-        if (Y_mm.HasValue && Y_mm.Value.Le(0)) {
-            Error(Messages.Params_YMustBeGtThan0_Y, Y_mm);
-        }
     }
 
     protected string GetString(ParamsText text, char key, Action<string> onError) {
@@ -237,64 +232,115 @@ public abstract class AbstractParams : IParams {
             onError(s);
             return "***Missing***";
         }
-        return GetString(key) ?? MissingOnError(string.Format(Messages.Params_MissingKey_Key, key));
+        return GetString(key) ?? MissingOnError(string.Format(Messages.Params_MissingKey_Keys, key));
     }
+
+    public abstract double? RawF_mmpmin { get; }
+    public abstract double? RawG_mmpmin { get; }
+    public abstract double? RawI_mm { get; }
+    public abstract double? RawJ_deg { get; }
+    public abstract double? RawS_mm { get; }
+    public abstract double? RawY_mm { get; }
+    public abstract double? RawZ_mmpmin { get; }
+
+    public virtual double F_mmpmin => RawF_mmpmin
+        ?? throw new EmitGCodeException(_errorContext, Messages.Params_MissingKey_Keys, "F");
+    public virtual double G_mmpmin => RawG_mmpmin ?? RawF_mmpmin / 4
+        ?? throw new EmitGCodeException(_errorContext, Messages.Params_MissingKey_Keys, "F, G");
+    public virtual double I_mm => RawI_mm
+        ?? throw new EmitGCodeException(_errorContext, Messages.Params_MissingKey_Keys, "I");
+    public virtual double J_deg => RawJ_deg ?? 10;
+    public virtual double S_mm => RawS_mm ?? T_mm + RawY_mm
+        ?? throw new EmitGCodeException(_errorContext, Messages.Params_MissingKey_Keys, "S, Y");
+    public virtual double? Y_mm => RawY_mm;
+    public virtual double Z_mmpmin => RawZ_mmpmin
+        ?? throw new EmitGCodeException(_errorContext, Messages.Params_MissingKey_Keys, "Z");
+
+    public abstract double T_mm { get; }
+    public abstract double O_mm { get; }
+    public abstract double A_mm { get; }
+    public abstract string M { get; }
+    public abstract double? W_mm { get; }
 
     public abstract double? RawB_mm { get; }
     public abstract double? RawD_mm { get; }
-    public abstract double? RawI_mm { get; }
     public abstract double? RawP_mm { get; }
     public abstract double? RawU_mm { get; }
 
-    public abstract double F_mmpmin { get; }
-    public abstract double G_mmpmin { get; }
-    public abstract double T_mm { get; }
-    public abstract double O_mm { get; }
-    public abstract double S_mm { get; }
-    public abstract double A_mm { get; }
-    public abstract string M { get; }
-    public abstract double Z_mmpmin { get; }
-    public abstract double? W_mm { get; }
-    public abstract double? Y_mm { get; }
-
-    public double B_mm => RawB_mm ?? throw new EmitGCodeException(_errorContext, Messages.Params_MissingKey_Key, 'B');
-    public double D_mm => RawD_mm ?? throw new EmitGCodeException(_errorContext, Messages.Params_MissingKey_Key, 'D');
-    public double I_mm => RawI_mm ?? throw new EmitGCodeException(_errorContext, Messages.Params_MissingKey_Key, 'I');
-    public abstract double J_deg { get; }
-    public double P_mm => RawP_mm ?? throw new EmitGCodeException(_errorContext, Messages.Params_MissingKey_Key, 'P');
-    public double U_mm => RawU_mm ?? throw new EmitGCodeException(_errorContext, Messages.Params_MissingKey_Key, 'U');
+    public double B_mm => RawB_mm ?? throw new EmitGCodeException(_errorContext, Messages.Params_MissingKey_Keys, "B");
+    public double D_mm => RawD_mm ?? throw new EmitGCodeException(_errorContext, Messages.Params_MissingKey_Keys, "D");
+    public double P_mm => RawP_mm ?? throw new EmitGCodeException(_errorContext, Messages.Params_MissingKey_Keys, "P");
+    public double U_mm => RawU_mm ?? throw new EmitGCodeException(_errorContext, Messages.Params_MissingKey_Keys, "U");
 }
 
 public class PathParams : AbstractParams {
-    private readonly Options _options;
+    private readonly bool _topLevel;
+    private IEmitParams? _emitParams;
+
+    private class WithEmitParamsWrapper : IDisposable {
+        private readonly PathParams _pathParams;
+        public WithEmitParamsWrapper(PathParams pathParams, IEmitParams emitParams) {
+            _pathParams = pathParams;
+            _pathParams._emitParams = emitParams;
+        }
+
+        public void Dispose() {
+            _pathParams._emitParams = null;
+        }
+    }
+
+    public IDisposable WithEmitParams(IEmitParams millingParams) => new WithEmitParamsWrapper(this, millingParams);
+
+    private T Check<T>(T value, Func<T, bool> ok, Action<T> error) {
+        if (!ok(value)) {
+            error(value);
+        }
+        return value;
+    }
+
+    private double CheckGt0(double value, string msg)
+        => Check(value, value => value.Gt(0), value => Error(msg, value));
+
+    private double? CheckGt0(double? value, string msg)
+        => Check(value, value => !value.HasValue || value.Value.Gt(0), value => Error(msg, value!));
+
+    public override double F_mmpmin => CheckGt0(base.F_mmpmin, Messages.Params_FMustBeGtThan0_F);
+    public override double G_mmpmin => CheckGt0(base.G_mmpmin, Messages.Params_GMustBeGtThan0_G);
+    public override double I_mm => CheckGt0(base.I_mm, Messages.Params_IMustBeGtThan0_I);
+    public override double J_deg => CheckGt0(base.J_deg, Messages.Params_JMustBeGtThan0_J);
+    public override double S_mm => Check(base.S_mm, value => value.Gt(T_mm),
+                                         value => Error(Messages.Params_SMustBeGtThanT_S_T, value, T_mm));
+    public override double? Y_mm => CheckGt0(base.Y_mm, Messages.Params_YMustBeGtThan0_Y);
+    public override double Z_mmpmin => CheckGt0(base.Z_mmpmin, Messages.Params_ZMustBeGtThan0_Z);
+
+    public override double? RawI_mm => GetDouble('I') ?? _emitParams!.RawI_mm;
+    public override double? RawJ_deg => GetDouble('J') ?? _emitParams!.RawJ_deg;
+    public override double? RawF_mmpmin => GetDouble('F') ?? _emitParams!.RawF_mmpmin;
+    public override double? RawG_mmpmin => GetDouble('G') ?? _emitParams!.RawG_mmpmin;
+    public override double? RawS_mm => GetDouble('S') ?? T_mm + RawY_mm
+                                           ?? (_topLevel ? _emitParams!.RawS_mm : T_mm + O_mm);
+    public override double? RawY_mm => GetDouble('Y') ?? _emitParams!.RawY_mm;
+    public override double? RawZ_mmpmin => GetDouble('Z') ?? _emitParams!.RawZ_mmpmin;
 
     public override double? RawB_mm => GetDouble('B');
     public override double? RawD_mm => GetDouble('D');
     public override double? RawP_mm => GetDouble('P');
     public override double? RawU_mm => GetDouble('U');
-    public override double? RawI_mm => GetDouble('I');
-    public override double J_deg => GetDouble('J') ?? _options.GlobalRampAngle_deg;
-    public override double? Y_mm => GetDouble('Y') ?? _options.GlobalClampHeight_mm;
 
-    public override double F_mmpmin => GetDouble('F') ?? _options.GlobalFeedRate_mmpmin;
-    public override double G_mmpmin => GetDouble('G') ?? _options.GlobalDrillRate_mmpmin ?? F_mmpmin / 4.0;
-    public override double S_mm { get; }
     public override double A_mm { get; }
     public override double T_mm => GetDouble('T', OnErrorNaN);
     public override double O_mm => GetDouble('O', OnErrorNaN);
     public override string M => GetString(Text, 'M', OnError);
     public string? E => GetString('E');
-    public override double Z_mmpmin => GetDouble('Z') ?? _options.GlobalProbeRate_mmpmin;
     public override double? W_mm => GetDouble('W');
     public string OutFileSuffix => GetString('R') ?? "";
     public FormalVariables FormalVariables { get; }
 
-    public PathParams(ParamsText text, ActualVariables superpathVariables, double? globalSorNullForTplusO_mm, string errorContext, Options options, Action<string, string> onError) : base(text, superpathVariables, errorContext, onError) {
-        _options = options;
-        S_mm = GetDouble('S') ?? T_mm + Y_mm ?? globalSorNullForTplusO_mm ?? T_mm + O_mm;
+    public PathParams(ParamsText text, bool topLevel, ActualVariables superpathVariables, string errorContext, Action<string, string> onError) : base(text, superpathVariables, errorContext, onError) {
+        _topLevel = topLevel;
         A_mm = GetDouble('A') ?? 4 * O_mm;
 
-        CheckKeysAndValues(text, "FGBDIJSTOMPUZAWRE");
+        CheckKeysAndValues(text, "FGBDIJSTOMPUZAWREY");
         if (RawD_mm.HasValue && RawB_mm.HasValue && RawB_mm.Value.Ge(RawD_mm.Value)) {
             Error(Messages.Params_DMustBeGtThanB_D_B, RawD_mm, B_mm);
         }
@@ -315,17 +361,18 @@ public abstract class AbstractChildParams : AbstractParams {
     public override double? RawD_mm => _parent.RawD_mm;
     public override double? RawP_mm => _parent.RawP_mm;
     public override double? RawU_mm => _parent.RawU_mm;
-    public override double? RawI_mm => _parent.RawI_mm;
 
-    public override double F_mmpmin => _parent.F_mmpmin;
-    public override double G_mmpmin => _parent.G_mmpmin;
-    public override double J_deg => _parent.J_deg;
-    public override double S_mm => GetDouble('S') ?? _parent.S_mm;
-    public override double? Y_mm => GetDouble('Y') ?? _parent.Y_mm;
+    public override double? RawF_mmpmin => _parent.RawF_mmpmin;
+    public override double? RawG_mmpmin => _parent.RawG_mmpmin;
+    public override double? RawI_mm => _parent.RawI_mm;
+    public override double? RawJ_deg => _parent.RawJ_deg;
+    public override double? RawS_mm => GetDouble('S') ?? _parent.RawS_mm;
+    public override double? RawY_mm => _parent.RawY_mm;
+    public override double? RawZ_mmpmin => _parent.RawZ_mmpmin;
+
     public override double T_mm => _parent.T_mm;
     public override double O_mm => _parent.O_mm;
     public override string M => _parent.M;
-    public override double Z_mmpmin => _parent.Z_mmpmin;
     public override double A_mm => _parent.A_mm;
     public override double? W_mm => _parent.W_mm;
 
@@ -337,7 +384,7 @@ public abstract class AbstractChildParams : AbstractParams {
 public class ChainParams : AbstractChildParams, IParams {
     public const string KEYS = "NIJW";
     public override double? RawI_mm => GetDouble('I') ?? base.RawI_mm;
-    public override double J_deg => GetDouble('J') ?? base.J_deg;
+    public override double? RawJ_deg => GetDouble('J') ?? base.RawJ_deg;
     public override double? W_mm => GetDouble('W') ?? base.W_mm;
 
     public ChainParams(ParamsText text, ActualVariables superpathVariables, string errorContext, IParams pathParams, Action<string, string> onError) : base(text.LimitedTo(KEYS), superpathVariables, errorContext, pathParams, onError) {
@@ -355,7 +402,7 @@ public class MillParams : AbstractChildParams {
     public const string MILL_KEYS = "FBSNQ";
     public const string MARK_KEYS = "FDSNQ";
     public const string SUPPORT_KEYS = "FDBSNPUQ";
-    public override double F_mmpmin => GetDouble('F') ?? base.F_mmpmin;
+    public override double? RawF_mmpmin => GetDouble('F') ?? base.RawF_mmpmin;
     public override double? RawB_mm => GetDouble('B') ?? base.RawB_mm;
     public override double? RawD_mm => GetDouble('D') ?? base.RawD_mm;
     public override double? RawP_mm => GetDouble('P') ?? base.RawP_mm;
@@ -378,7 +425,7 @@ public class HelixParams : AbstractChildParams {
     public const string MARK_KEYS = "FDIQ";
     public const string SUPPORT_KEYS = "FDBIPUQ";
 
-    public override double F_mmpmin => GetDouble('F') ?? base.F_mmpmin;
+    public override double? RawF_mmpmin => GetDouble('F') ?? base.RawF_mmpmin;
     public override double? RawB_mm => GetDouble('B') ?? base.RawB_mm;
     public override double? RawD_mm => GetDouble('D') ?? base.RawD_mm;
     public override double? RawI_mm => GetDouble('I') ?? base.RawI_mm;
@@ -398,7 +445,7 @@ public class HelixParams : AbstractChildParams {
 }
 
 public class DrillParams : AbstractChildParams {
-    public override double G_mmpmin => GetDouble('G') ?? base.G_mmpmin;
+    public override double? RawG_mmpmin => GetDouble('G') ?? base.RawG_mmpmin;
     public override double? RawB_mm => GetDouble('B') ?? base.RawB_mm;
     public override double? RawD_mm => GetDouble('D') ?? base.RawD_mm;
     public string? Q => GetString('Q');
@@ -435,7 +482,7 @@ public class SubpathParams : AbstractChildParams {
 public class ZProbeParams : AbstractChildParams {
     public double? RawT_mm => GetDouble('T');
     public string? L => GetString('L');
-    public override double Z_mmpmin => GetDouble('Z') ?? base.Z_mmpmin;
+    public override double? RawZ_mmpmin => GetDouble('Z') ?? base.RawZ_mmpmin;
 
     public ZProbeParams(ParamsText text, ActualVariables superpathVariables, string errorContext, IParams pathParams,
         Action<string, string> onError) : base(text, superpathVariables, errorContext, pathParams, onError) {

@@ -304,6 +304,15 @@ namespace de.hmmueller.PathDxf2GCode {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die G={0} must be &gt; 0 ähnelt.
+        /// </summary>
+        internal static string Params_GMustBeGtThan0_G {
+            get {
+                return ResourceManager.GetString("Params_GMustBeGtThan0_G", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die I={0} must be &gt; 0 ähnelt.
         /// </summary>
         internal static string Params_IMustBeGtThan0_I {
@@ -331,11 +340,11 @@ namespace de.hmmueller.PathDxf2GCode {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die {0} value missing ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die All values for parameters {0} missing ähnelt.
         /// </summary>
-        internal static string Params_MissingKey_Key {
+        internal static string Params_MissingKey_Keys {
             get {
-                return ResourceManager.GetString("Params_MissingKey_Key", resourceCulture);
+                return ResourceManager.GetString("Params_MissingKey_Keys", resourceCulture);
             }
         }
         
@@ -435,6 +444,15 @@ namespace de.hmmueller.PathDxf2GCode {
         internal static string Params_YMustBeGtThan0_Y {
             get {
                 return ResourceManager.GetString("Params_YMustBeGtThan0_Y", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Z={0} must be &gt; 0 ähnelt.
+        /// </summary>
+        internal static string Params_ZMustBeGtThan0_Z {
+            get {
+                return ResourceManager.GetString("Params_ZMustBeGtThan0_Z", resourceCulture);
             }
         }
         

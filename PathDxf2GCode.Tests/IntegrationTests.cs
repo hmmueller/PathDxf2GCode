@@ -144,7 +144,7 @@ M30
 
     [TestMethod]
     public void TestMethod02_LineAndSweeps() {
-        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s15", /*TEMP"/j90",*/ "8999.02P"]));
+        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s20", "8999.02P"]));
         Compare("8999.02P_Milling.gcode", $@"%
 (PathDxf2GCode - HMMüller 2024-2026 V.{Program.VERSION})
 (8999.02P.dxf)
@@ -192,6 +192,91 @@ M30
 %");
     }
 
+    [TestMethod]
+    public void TestMethod04_LineAndSweeps() {
+        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s20", "8999.04P"]));
+        Compare("8999.04P_Milling.gcode", $@"%
+(PathDxf2GCode - HMMüller 2024-2026 V.{Program.VERSION})
+(8999.04P.dxf)
+F150
+G17 G21 G40 G49 G54 G80 G90 G94
+T1
+(SweepSafelyTo [0.000 0.000 20.000])
+G00 Z20.000
+G00 X0.000 Y0.000
+  (Model 8999.4P[8999.04P.dxf])
+  (PullAndSweepHorizontallyFromTo [0.000 0.000 20.000] [0.000 0.000] s=20.000)
+    (DrillOrPullZFromTo 20.000 0.800)
+G00 Z3.000
+  (MillLine s=[0.000 0.000] e=[6.238 0.000] fr=3.000 to=1.900)
+G01 F150.000 X6.238 Y0.000 Z1.900
+  (MillLine s=[6.238 0.000] e=[0.000 0.000] fr=1.900 to=0.800)
+G01 F150.000 X0.000 Y0.000 Z0.800
+  (MillLine s=[0.000 0.000] e=[30.000 0.000] fr=0.800 to=0.800)
+G01 F150.000 X30.000 Y0.000 Z0.800
+  (PullAndSweepHorizontallyFromTo [30.000 0.000 0.800] [30.000 0.000] s=20.000)
+  (MillLine s=[30.000 0.000] e=[50.000 20.000] fr=0.800 to=0.800)
+G01 F150.000 X50.000 Y20.000 Z0.800
+  (PullAndSweepHorizontallyFromTo [50.000 20.000 0.800] [50.000 20.000] s=20.000)
+  (MillLine s=[50.000 20.000] e=[80.000 20.000] fr=0.800 to=0.800)
+G01 F150.000 X80.000 Y20.000 Z0.800
+  (PullAndSweepHorizontallyFromTo [80.000 20.000 0.800] [80.000 20.000] s=20.000)
+  (MillLine s=[80.000 20.000] e=[90.000 40.000] fr=0.800 to=0.800)
+G01 F150.000 X90.000 Y40.000 Z0.800
+  (PullAndSweepHorizontallyFromTo [90.000 40.000 0.800] [90.000 40.000] s=20.000)
+    (DrillOrPullZFromTo 0.800 -0.300)
+  (MillLine s=[90.000 40.000] e=[87.210 34.420] fr=0.800 to=0.250)
+G01 F150.000 X87.210 Y34.420 Z0.250
+  (MillLine s=[87.210 34.420] e=[90.000 40.000] fr=0.250 to=-0.300)
+G01 F150.000 X90.000 Y40.000 Z-0.300
+  (MillLine s=[90.000 40.000] e=[80.000 20.000] fr=-0.300 to=-0.300)
+G01 F150.000 X80.000 Y20.000 Z-0.300
+  (PullAndSweepHorizontallyFromTo [80.000 20.000 -0.300] [80.000 20.000] s=20.000)
+  (MillLine s=[80.000 20.000] e=[50.000 20.000] fr=-0.300 to=-0.300)
+G01 F150.000 X50.000 Y20.000 Z-0.300
+  (PullAndSweepHorizontallyFromTo [50.000 20.000 -0.300] [50.000 20.000] s=20.000)
+  (MillLine s=[50.000 20.000] e=[30.000 0.000] fr=-0.300 to=-0.300)
+G01 F150.000 X30.000 Y0.000 Z-0.300
+  (PullAndSweepHorizontallyFromTo [30.000 0.000 -0.300] [30.000 0.000] s=20.000)
+  (MillLine s=[30.000 0.000] e=[0.000 0.000] fr=-0.300 to=-0.300)
+G01 F150.000 X0.000 Y0.000 Z-0.300
+  (PullAndSweepHorizontallyFromTo [0.000 0.000 -0.300] [90.000 40.000] s=20.000)
+    (DrillOrPullZFromTo -0.300 20.000)
+G00 Z20.000
+; G00 X90.000 Y40.000
+  (PullAndSweepHorizontallyFromTo [90.000 40.000 20.000] [60.000 30.000] s=20.000)
+G00 X60.000 Y30.000
+    (DrillOrPullZFromTo 20.000 5.000)
+G00 Z5.000
+  (MillHelix l=[60.000 30.000] r=2.000)
+G00 X60.000 Y29.000
+    (MillSemiCircle l=3.000)
+G02 F150.000 I0 J1.000 X60.000 Y31.000 Z2.446
+G02 F150.000 I0 J-1.000 X60.000 Y29.000 Z1.892
+    (MillSemiCircle l=1.892)
+G02 F150.000 I0 J1.000 X60.000 Y31.000 Z1.338
+G02 F150.000 I0 J-1.000 X60.000 Y29.000 Z0.784
+    (MillSemiCircle l=0.784)
+G02 F150.000 I0 J1.000 X60.000 Y31.000 Z0.230
+G02 F150.000 I0 J-1.000 X60.000 Y29.000 Z-0.300
+    (MillSemiCircle l=-0.300)
+G02 F150.000 I0 J1.000 X60.000 Y31.000 Z-0.300
+G02 F150.000 I0 J-1.000 X60.000 Y29.000 Z-0.300
+G00 X60.000 Y30.000
+  (PullAndSweepHorizontallyFromTo [60.000 30.000 -0.300] [30.000 30.000] s=20.000)
+    (DrillOrPullZFromTo -0.300 20.000)
+G00 Z20.000
+G00 X30.000 Y30.000
+G00 Z20.000
+  (Fräslänge:     271 mm   ca.  3 min)
+  (Bohrungen:       0 mm   ca.  0 min)
+  (Leerfahrten:   136 mm   ca.  1 min)
+  (Summe:         408 mm   ca.  3 min)
+  (Befehlszahl: 29)
+M30
+%");
+    }
+
 
     [TestMethod]
     public void TestMethod05_TestScale1To3() {
@@ -200,7 +285,7 @@ M30
 
     [TestMethod]
     public void TestMethod08_ArcsBelow180DegWithZigZag() {
-        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s15", "8999.08P.dxf"]));
+        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s5", "8999.08P.dxf"]));
         Compare("8999.08P_Milling.gcode", $@"%
 (PathDxf2GCode - HMMüller 2024-2026 V.{Program.VERSION})
 (8999.08P.dxf)
@@ -274,7 +359,7 @@ M30
 
     [TestMethod]
     public void TestMethod08_ArcsBelow180DegWithDrill() {
-        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s15", "/j90", "8999.08P.dxf"]));
+        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s5", "/j90", "8999.08P.dxf"]));
         Compare("8999.08P_Milling.gcode", $@"%
 (PathDxf2GCode - HMMüller 2024-2026 V.{Program.VERSION})
 (8999.08P.dxf)
@@ -345,7 +430,7 @@ M30
 
     [TestMethod]
     public void TestMethod09_ArcsAbove180Deg() {
-        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s15", "/j90", "8999.09P.dxf"]));
+        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s5", "/j90", "8999.09P.dxf"]));
         Compare("8999.09P_Milling.gcode", $@"%
 (PathDxf2GCode - HMMüller 2024-2026 V.{Program.VERSION})
 (8999.09P.dxf)
@@ -454,7 +539,7 @@ M30
 
     [TestMethod]
     public void TestMethod10_ArcsWith45Deg() {
-        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s15", "/j90", "8999.10P.dxf"]));
+        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s5", "/j90", "8999.10P.dxf"]));
         Compare("8999.10P_Milling.gcode", $@"%
 (PathDxf2GCode - HMMüller 2024-2026 V.{Program.VERSION})
 (8999.10P.dxf)
@@ -492,7 +577,7 @@ M30
 
     [TestMethod]
     public void TestMethod11_Subpath() {
-        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s15", "/j90", "/x", "O2", "8999.11P.dxf"]));
+        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s5", "/j90", "/x", "O2", "8999.11P.dxf"]));
         Compare("8999.11P_Milling.gcode", $@"%
 (PathDxf2GCode - HMMüller 2024-2026 V.{Program.VERSION})
 (8999.11P.dxf)
@@ -550,7 +635,7 @@ M30
 
     [TestMethod]
     public void TestMethod12_Ordering() {
-        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s15", "/j90", "8999.12P.dxf"]));
+        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s2", "/j90", "8999.12P.dxf"]));
         Compare("8999.12P_Milling.gcode", $@"%
 (PathDxf2GCode - HMMüller 2024-2026 V.{Program.VERSION})
 (8999.12P.dxf)
@@ -593,7 +678,7 @@ M30
 
     [TestMethod]
     public void TestMethod13_HMM() {
-        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s15", "/j90", "8999.13P.dxf"]));
+        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s25", "/j90", "8999.13P.dxf"]));
         Compare("8999.13P_Milling.gcode", $@"%
 (PathDxf2GCode - HMMüller 2024-2026 V.{Program.VERSION})
 (8999.13P.dxf)
@@ -936,7 +1021,7 @@ M30
 
     [TestMethod]
     public void TestMethod14_HelixesWithDrill() {
-        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s15", "/g99", "/j90", "8999.14P.dxf"]));
+        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s5", "/g99", "/j90", "8999.14P.dxf"]));
         Compare("8999.14P_Milling.gcode", $@"%
 (PathDxf2GCode - HMMüller 2024-2026 V.{Program.VERSION})
 (8999.14P.dxf)
@@ -1349,7 +1434,7 @@ M30
 
     [TestMethod]
     public void TestMethod14_HelixesWithZigZag() {
-        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s15", "/g99", "8999.14P.dxf"]));
+        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s5", "/g99", "8999.14P.dxf"]));
         Compare("8999.14P_Milling.gcode", $@"%
 (PathDxf2GCode - HMMüller 2024-2026 V.{Program.VERSION})
 (8999.14P.dxf)
@@ -1816,7 +1901,7 @@ M30
 
     [TestMethod]
     public void TestMethod15_MillsAndMarks() {
-        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s15", "/j90", "8999.15P.dxf"]));
+        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s5", "/j90", "8999.15P.dxf"]));
         Compare("8999.15P_Milling.gcode", $@"%
 (PathDxf2GCode - HMMüller 2024-2026 V.{Program.VERSION})
 (8999.15P.dxf)
@@ -1920,7 +2005,7 @@ M30
 
     [TestMethod]
     public void TestMethod16_Reversing() {
-        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s15", "/j90", "8999.16P.dxf"]));
+        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s5", "/j90", "8999.16P.dxf"]));
         Compare("8999.16P_Milling.gcode", $@"%
 (PathDxf2GCode - HMMüller 2024-2026 V.{Program.VERSION})
 (8999.16P.dxf)
@@ -2019,7 +2104,7 @@ M30
 
     [TestMethod]
     public void TestMethod19_ZProbesOnLine() {
-        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s15", "/z50", "/j90", "8999.19P.dxf"]));
+        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s5", "/z50", "/j90", "8999.19P.dxf"]));
         Compare("8999.19P_Clean.gcode", $@"%
 (PathDxf2GCode - HMMüller 2024-2026 V.{Program.VERSION})
 (8999.19P.dxf)
@@ -2083,7 +2168,7 @@ M30
 
     [TestMethod]
     public void TestMethod42_ZProbesOnLine() {
-        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s15", "/z50", "/j90", "8999.42P.dxf"]));
+        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s5", "/z50", "/j90", "8999.42P.dxf"]));
         Compare("8999.42P_Clean.gcode", $@"%
 (PathDxf2GCode - HMMüller 2024-2026 V.{Program.VERSION})
 (8999.42P.dxf)
@@ -2178,7 +2263,7 @@ G02 F150.000 I0 J-14.000 X30.000 Y-24.000 Z1.000
 G02 F150.000 I0.000 J14.000 X23.288 Y-22.286 Z1.000
   (Support.Down)
   (MillArc l=[30.000 -10.000] r=14.000 a0=241.352 a1=235.213 fr=1.000 to=-0.500 p0=[23.288 -22.286] p1=[22.013 -21.498])
-G02 F150.000 I6.712 J12.286 X22.013 Y-21.498 Z-0.500
+G02 F53.033 I6.712 J12.286 X22.013 Y-21.498 Z-0.500
   (Support.Between)
   (MillArc l=[30.000 -10.000] r=14.000 a0=235.213 a1=124.787 fr=-0.500 to=-0.500 p0=[22.013 -21.498] p1=[22.013 1.498])
 G02 F150.000 I7.987 J11.498 X22.013 Y1.498 Z-0.500
@@ -2190,7 +2275,7 @@ G02 F150.000 I7.987 J-11.498 X23.288 Y2.286 Z1.000
 G02 F150.000 I6.712 J-12.286 X36.712 Y2.286 Z1.000
   (Support.Down)
   (MillArc l=[30.000 -10.000] r=14.000 a0=61.352 a1=55.213 fr=1.000 to=-0.500 p0=[36.712 2.286] p1=[37.987 1.498])
-G02 F150.000 I-6.712 J-12.286 X37.987 Y1.498 Z-0.500
+G02 F53.033 I-6.712 J-12.286 X37.987 Y1.498 Z-0.500
   (Support.Between)
   (MillArc l=[30.000 -10.000] r=14.000 a0=55.213 a1=304.787 fr=-0.500 to=-0.500 p0=[37.987 1.498] p1=[37.987 -21.498])
 G02 F150.000 I-7.987 J-11.498 X37.987 Y-21.498 Z-0.500
@@ -2248,7 +2333,7 @@ G02 F150.000 I0 J-7.000 X30.000 Y-17.000 Z1.000
 G02 F150.000 I0.000 J7.000 X24.110 Y-13.782 Z1.000
   (Support.Down)
   (MillArc l=[30.000 -10.000] r=7.000 a0=212.704 a1=200.427 fr=1.000 to=-0.500 p0=[24.110 -13.782] p1=[23.440 -12.443])
-G02 F150.000 I5.890 J3.782 X23.440 Y-12.443 Z-0.500
+G02 F53.033 I5.890 J3.782 X23.440 Y-12.443 Z-0.500
   (Support.Between)
   (MillArc l=[30.000 -10.000] r=7.000 a0=200.427 a1=339.574 fr=-0.500 to=-0.500 p0=[23.440 -12.443] p1=[36.560 -12.443])
 G02 F150.000 I6.560 J2.443 X36.560 Y-12.443 Z-0.500
@@ -2353,7 +2438,7 @@ G01 F150.000 X0.000 Y0.000 Z1.000
 G01 F150.000 X7.000 Y0.000 Z1.000
   (Support.Down)
   (MillLine s=[7.000 0.000] e=[8.500 0.000] fr=1.000 to=-0.500)
-G01 F150.000 X8.500 Y0.000 Z-0.500
+G01 F53.033 X8.500 Y0.000 Z-0.500
   (Support.Between)
   (MillLine s=[8.500 0.000] e=[91.500 0.000] fr=-0.500 to=-0.500)
 G01 F150.000 X91.500 Y0.000 Z-0.500
@@ -2369,7 +2454,7 @@ G01 F150.000 X100.000 Y0.000 Z1.000
 G01 F150.000 X94.238 Y-3.974 Z1.000
   (Support.Down)
   (MillLine s=[94.238 -3.974] e=[93.003 -4.826] fr=1.000 to=-0.500)
-G01 F150.000 X93.003 Y-4.826 Z-0.500
+G01 F53.033 X93.003 Y-4.826 Z-0.500
   (Support.Between)
   (MillLine s=[93.003 -4.826] e=[65.837 -23.562] fr=-0.500 to=-0.500)
 G01 F150.000 X65.837 Y-23.562 Z-0.500
@@ -2381,7 +2466,7 @@ G01 F150.000 X64.602 Y-24.413 Z1.000
 G01 F150.000 X53.078 Y-32.362 Z1.000
   (Support.Down)
   (MillLine s=[53.078 -32.362] e=[51.843 -33.213] fr=1.000 to=-0.500)
-G01 F150.000 X51.843 Y-33.213 Z-0.500
+G01 F53.033 X51.843 Y-33.213 Z-0.500
   (Support.Between)
   (MillLine s=[51.843 -33.213] e=[24.677 -51.949] fr=-0.500 to=-0.500)
 G01 F150.000 X24.677 Y-51.949 Z-0.500
@@ -2407,7 +2492,7 @@ s => Count(s, "Support.Bar") == 2 + 3);
 
     [TestMethod]
     public void TestMethod26_LinesWith2And3SupportsWithZigZag() {
-        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s8", /*TEMP"/j90",*/ "8999.26 Pv.dxf"]));
+        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s8", "8999.26 Pv.dxf"]));
         Compare("8999.26 Pv_Milling.gcode", $@"%
 (PathDxf2GCode - HMMüller 2024-2026 V.{Program.VERSION})
 (8999.26 Pv.dxf)
@@ -2447,7 +2532,7 @@ G01 F150.000 X0.000 Y0.000 Z1.000
 G01 F150.000 X7.000 Y0.000 Z1.000
   (Support.Down)
   (MillLine s=[7.000 0.000] e=[8.500 0.000] fr=1.000 to=-0.500)
-G01 F150.000 X8.500 Y0.000 Z-0.500
+G01 F53.033 X8.500 Y0.000 Z-0.500
   (Support.Between)
   (MillLine s=[8.500 0.000] e=[91.500 0.000] fr=-0.500 to=-0.500)
 G01 F150.000 X91.500 Y0.000 Z-0.500
@@ -2463,7 +2548,7 @@ G01 F150.000 X100.000 Y0.000 Z1.000
 G01 F150.000 X94.238 Y-3.974 Z1.000
   (Support.Down)
   (MillLine s=[94.238 -3.974] e=[93.003 -4.826] fr=1.000 to=-0.500)
-G01 F150.000 X93.003 Y-4.826 Z-0.500
+G01 F53.033 X93.003 Y-4.826 Z-0.500
   (Support.Between)
   (MillLine s=[93.003 -4.826] e=[65.837 -23.562] fr=-0.500 to=-0.500)
 G01 F150.000 X65.837 Y-23.562 Z-0.500
@@ -2475,7 +2560,7 @@ G01 F150.000 X64.602 Y-24.413 Z1.000
 G01 F150.000 X53.078 Y-32.362 Z1.000
   (Support.Down)
   (MillLine s=[53.078 -32.362] e=[51.843 -33.213] fr=1.000 to=-0.500)
-G01 F150.000 X51.843 Y-33.213 Z-0.500
+G01 F53.033 X51.843 Y-33.213 Z-0.500
   (Support.Between)
   (MillLine s=[51.843 -33.213] e=[24.677 -51.949] fr=-0.500 to=-0.500)
 G01 F150.000 X24.677 Y-51.949 Z-0.500
@@ -2771,7 +2856,7 @@ M30
 
     [TestMethod]
     public void TestMethod31_SimpleVariables() {
-        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s22", "/j90", "8999.31P.dxf"]));
+        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s22", "/j90", "/i0.6", "8999.31P.dxf"]));
         Compare("8999.31P_Milling.gcode", $@"%
 (PathDxf2GCode - HMMüller 2024-2026 V.{Program.VERSION})
 (8999.31P.dxf)
@@ -2888,7 +2973,7 @@ M30
 
     [TestMethod]
     public void TestMethod33_DeepLineWith2Supports() {
-        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s8", /*TEMP"/j90",*/ "8999.33 Pv.dxf"]));
+        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s8", "8999.33 Pv.dxf"]));
         Compare("8999.33 Pv_Milling.gcode", $@"%
 (PathDxf2GCode - HMMüller 2024-2026 V.{Program.VERSION})
 (8999.33 Pv.dxf)
@@ -2919,7 +3004,7 @@ G01 F150.000 X100.000 Y0.000 Z2.500
 G01 F150.000 X93.000 Y0.000 Z2.500
   (Support.Down)
   (MillLine s=[93.000 0.000] e=[90.000 0.000] fr=2.500 to=1.000)
-G01 F150.000 X90.000 Y0.000 Z1.000
+G01 F53.033 X90.000 Y0.000 Z1.000
   (Support.Between)
   (MillLine s=[90.000 0.000] e=[10.000 0.000] fr=1.000 to=1.000)
 G01 F150.000 X10.000 Y0.000 Z1.000
@@ -2935,7 +3020,7 @@ G01 F150.000 X0.000 Y0.000 Z2.500
 G01 F150.000 X7.000 Y0.000 Z2.500
   (Support.Down)
   (MillLine s=[7.000 0.000] e=[10.000 0.000] fr=2.500 to=-0.500)
-G01 F150.000 X10.000 Y0.000 Z-0.500
+G01 F53.033 X10.000 Y0.000 Z-0.500
   (Support.Between)
   (MillLine s=[10.000 0.000] e=[90.000 0.000] fr=-0.500 to=-0.500)
 G01 F150.000 X90.000 Y0.000 Z-0.500
@@ -2965,7 +3050,7 @@ M30
 
     [TestMethod]
     public void TestMethod34_PartslistTest() {
-        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s8", "8999.34P.dxf"]));
+        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s20", "8999.34P.dxf"]));
         Compare("8999.34P_Milling.gcode", $@"%
 (PathDxf2GCode - HMMüller 2024-2026 V.{Program.VERSION})
 (8999.34P.dxf)
@@ -3102,7 +3187,7 @@ M30
 
     [TestMethod]
     public void TestMethod35_SubpathWithHeight() {
-        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s15", /*TEMP"/j90",*/ "/x", "O2", "8999.35P.dxf"]));
+        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s5", "/x", "O2", "8999.35P.dxf"]));
         Compare("8999.35P_Milling.gcode", $@"%
 (PathDxf2GCode - HMMüller 2024-2026 V.{Program.VERSION})
 (8999.35P.dxf)
@@ -3168,7 +3253,7 @@ M30
 
     [TestMethod]
     public void TestMethod36_ZProbesOnArc() {
-        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s15", "/z50", /*TEMP"/j90",*/ "8999.36P.dxf"]));
+        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s5", "/z50", "8999.36P.dxf"]));
         Compare("8999.36P_Clean.gcode", $@"%
 (PathDxf2GCode - HMMüller 2024-2026 V.{Program.VERSION})
 (8999.36P.dxf)
@@ -3264,7 +3349,7 @@ M30
     public void TestMethod37_ZProbesOnSubpathArc_noH_noH() {
         using (var tempDir = new TemporaryDir("8999.37P.dxf",
                 new Dictionary<string, string> { { "##S", "T1" }, { "##Z", "" } })) {
-            Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s15", "/z50", "/j90", "/d.", tempDir.Combine("8999.37P.dxf")]));
+            Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s5", "/z50", "/j90", "/d.", tempDir.Combine("8999.37P.dxf")]));
             Compare(tempDir.Combine("8999.37P_Clean.gcode"), $@"%
 (PathDxf2GCode - HMMüller 2024-2026 V.{Program.VERSION})
 (8999.37P.dxf)
@@ -3378,7 +3463,7 @@ $@"([130.841 109.211]/TH=6.000) #51=
 
     [TestMethod]
     public void TestMethod38_ZProbesOnSubpathArcLongerThanSemicircleWithHeight() {
-        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s15", "/z50", "8999.38P.dxf"]));
+        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s5", "/z50", "8999.38P.dxf"]));
         Compare("8999.38P_Clean.gcode", $@"%
 (PathDxf2GCode - HMMüller 2024-2026 V.{Program.VERSION})
 (8999.38P.dxf)
@@ -3471,7 +3556,7 @@ M30
 
     [TestMethod]
     public void TestMethod39_ZProbesOnDisabledSubpath() {
-        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s15", "/z50", "8999.39P.dxf"]));
+        Assert.AreEqual(0, Program.Main(["/f150", "/v500", "/s5", "/z50", "8999.39P.dxf"]));
         Compare("8999.39P_Milling.gcode", $@"%
 (PathDxf2GCode - HMMüller 2024-2026 V.{Program.VERSION})
 (8999.39P.dxf)

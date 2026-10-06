@@ -85,7 +85,7 @@ public static class GCodeHelpers {
     }
 
     public static Vector3 SweepAndDrillSafelyFromTo(Vector3 from, Vector3 to, double th_mm, double s_mm,
-            double globalS_mm, double g_mmpmin, bool backtracking, Transformation3 zCorr, List<GCode> gcodes) {
+            double g_mmpmin, bool backtracking, Transformation3 zCorr, List<GCode> gcodes) {
         Vector3 currPos = PullAndSweepHorizontallyFromTo(from, to.XY(), th_mm, s_mm, g_mmpmin, zCorr, gcodes);
         return DrillOrPullZFromTo(currPos, to.Z, th_mm, g_mmpmin, zCorr, gcodes);
     }

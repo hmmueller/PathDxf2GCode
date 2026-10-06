@@ -37,7 +37,7 @@ public class OptionsTests {
         Options? o = Options.Create(["A", "/v1.1", "/f2,2", "/s3.3", "Z"], messages);
         Assert.IsFalse(messages.Errors.Any(), string.Join("\r\n", messages.Errors));
         Assert.AreEqual(1.1, o!.GlobalSweepRate_mmpmin, 1e-4);
-        Assert.AreEqual(2.2, o.GlobalFeedRate_mmpmin, 1e-4);
+        Assert.AreEqual(2.2, o.RawF_mmpmin!.Value, 1e-4);
         CollectionAssert.AreEqual(new[] { "A", "Z" }, o.DxfFilePaths.ToArray());
     }
 
@@ -47,7 +47,7 @@ public class OptionsTests {
         MessageHandlerForEntities messages = new(sw);
         Options? o = Options.Create(["-f", "1.1", "-v", "2,2", "/s", "3.3",], messages);
         Assert.IsFalse(messages.Errors.Any(), string.Join("\r\n", messages.Errors));
-        Assert.AreEqual(1.1, o!.GlobalFeedRate_mmpmin, 1e-4);
+        Assert.AreEqual(1.1, o!.RawF_mmpmin!.Value, 1e-4);
         Assert.AreEqual(2.2, o.GlobalSweepRate_mmpmin, 1e-4);
     }
 

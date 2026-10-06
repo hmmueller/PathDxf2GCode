@@ -226,9 +226,9 @@ namespace de.hmmueller.PathDxf2GCode {
         /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die {0}-Wert fehlt ähnelt.
         /// </summary>
-        internal static string Params_MissingKey_Key {
+        internal static string Params_MissingKey_Keys {
             get {
-                return ResourceManager.GetString("Params_MissingKey_Key", resourceCulture);
+                return ResourceManager.GetString("Params_MissingKey_Keys", resourceCulture);
             }
         }
         

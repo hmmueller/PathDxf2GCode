@@ -7,7 +7,7 @@ public class EmitGCodeException : Exception {
         ErrorContext = errorContext;
     }
 
-    public EmitGCodeException(string errorContext, string message, char key) : base(string.Format(message, key)) {
+    public EmitGCodeException(string errorContext, string message, string keys) : base(string.Format(message, keys)) {
         ErrorContext = errorContext;
     }
 

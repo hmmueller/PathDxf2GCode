@@ -4,7 +4,7 @@ using de.hmmueller.PathGCodeLibrary;
 using System.Globalization;
 using System.Text.RegularExpressions;
 
-public class Options : AbstractOptions {
+public class Options : AbstractOptions, IEmitParams {
     /// <summary>
     /// /d: search directories for DXF files
     /// </summary>
@@ -21,42 +21,48 @@ public class Options : AbstractOptions {
     private readonly List<(Regex Parent, Regex Child)> _subPathRestrictions = new();
 
     /// <summary>
-    /// /f: Milling speed (feed rate) for G01, G02, G03 in XY direction
+    /// /f: Default milling speed (feed rate) for G01, G02, G03 in XY direction
     /// TODO: https://diymachining.com/grbl-feed-rate/ 
     /// </summary>
-    public double GlobalFeedRate_mmpmin { get; private set; } = -1;
+    public double? RawF_mmpmin { get; private set; }
 
     /// <summary>
-    /// /j: Maximum ramp angle; default is 10°
+    /// /j: Default maximum ramp angle
     /// </summary>
-    public double GlobalRampAngle_deg { get; private set; } = 10;
+    public double? RawJ_deg { get; private set; }
 
     /// <summary>
-    /// /g: Milling speed for G01 in Z direction; default is feed rate / 4
+    /// /g: Default milling speed for G01 in Z direction
     /// </summary>
-    public double? GlobalDrillRate_mmpmin { get; private set; }
+    public double? RawG_mmpmin { get; private set; }
+
+    /// <summary>
+    /// /i: Default infeed
+    /// </summary>
+    public double? RawI_mm { get; private set; }
 
     /// <summary>
     /// /v: Sweep speed for G00 (only necessary for statistics computations)
     /// TODO: https://diymachining.com/grbl-feed-rate/ 
     /// </summary>
-    public double GlobalSweepRate_mmpmin { get; private set; } = -1;
+    public double GlobalSweepRate_mmpmin { get; private set; }
 
     /// <summary>
-    /// /z: Probe rate for G38
+    /// /z: Default probe rate for G38
     /// </summary>
-    public double GlobalProbeRate_mmpmin { get; private set; } = -1;
+    public double? RawZ_mmpmin { get; private set; }
 
     /// <summary>
-    /// /s: Sweep height for main path; must be higher than any obstacle
+    /// /s: Default sweep height for main path; must be higher than any obstacle
     /// the router bits might encounter.
     /// </summary>
-    public double GlobalSweepHeight_mm { get; private set; } = -1;
+    public double S_mm { get; private set; }
+    public double? RawS_mm => S_mm;
 
     /// <summary>
-    /// /y: Clamp height for local paths.
+    /// /y: Default clamp height for local paths.
     /// </summary>
-    public double? GlobalClampHeight_mm { get; private set; }
+    public double? RawY_mm { get; private set; }
 
     /// <summary>
     /// /c: Dry run for all paths of a DXF file, no gcode output
@@ -167,25 +173,28 @@ public class Options : AbstractOptions {
                 }
                 return true;
             case "f":
-                options.GlobalFeedRate_mmpmin = GetDoubleOption(ref i);
+                options.RawF_mmpmin = GetDoubleOption(ref i);
                 return true;
             case "g":
-                options.GlobalDrillRate_mmpmin = GetDoubleOption(ref i);
+                options.RawG_mmpmin = GetDoubleOption(ref i);
                 return true;
             case "j":
-                options.GlobalRampAngle_deg = GetDoubleOption(ref i);
+                options.RawJ_deg = GetDoubleOption(ref i);
+                return true;
+            case "i":
+                options.RawI_mm = GetDoubleOption(ref i);
                 return true;
             case "z":
-                options.GlobalProbeRate_mmpmin = GetDoubleOption(ref i);
+                options.RawZ_mmpmin = GetDoubleOption(ref i);
                 return true;
             case "v":
                 options.GlobalSweepRate_mmpmin = GetDoubleOption(ref i);
                 return true;
             case "y":
-                options.GlobalClampHeight_mm = GetDoubleOption(ref i);
+                options.RawY_mm = GetDoubleOption(ref i);
                 return true;
             case "s":
-                options.GlobalSweepHeight_mm = GetDoubleOption(ref i);
+                options.S_mm = GetDoubleOption(ref i);
                 return true;
             case "l":
                 Thread.CurrentThread.CurrentUICulture = new CultureInfo(GetStringOption(ref i));
@@ -201,28 +210,13 @@ public class Options : AbstractOptions {
 
     private static bool CheckOptions(Options options, MessageHandler messages) {
         bool result = true;
-        if (options.GlobalFeedRate_mmpmin <= 0) {
-            messages.AddError("Options", Messages.Options_MissingF);
-            result = false;
-        }
-        if (options.GlobalSweepRate_mmpmin <= 0) {
-            messages.AddError("Options", Messages.Options_MissingV);
-            result = false;
-        }
-        if (options.GlobalSweepHeight_mm <= 0) {
+        if (options.S_mm <= 0) {
             messages.AddError("Options", Messages.Options_MissingS);
             result = false;
         }
-        if (options.GlobalRampAngle_deg <= 0 || options.GlobalRampAngle_deg > 90) {
+        if (options.RawJ_deg <= 0 || options.RawJ_deg > 90) {
             messages.AddError("Options", Messages.Options_JNotBetween0And90);
             result = false;
-        }
-        if (options.GlobalDrillRate_mmpmin <= 0) {
-            messages.AddError("Options", Messages.Options_GNotAbove0);
-            result = false;
-        }
-        if (options.GlobalProbeRate_mmpmin <= 0) {
-            options.GlobalProbeRate_mmpmin = options.GlobalDrillRate_mmpmin.HasValue ? options.GlobalDrillRate_mmpmin.Value : options.GlobalFeedRate_mmpmin / 4;
         }
         return result;
     }

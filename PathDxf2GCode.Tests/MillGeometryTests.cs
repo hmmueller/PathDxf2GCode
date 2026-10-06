@@ -79,17 +79,23 @@ public class MillGeometryTests {
         public double T_mm => throw new NotImplementedException();
         public double O_mm => throw new NotImplementedException();
         public string M => throw new NotImplementedException();
-        public double Z_mmpmin => throw new NotImplementedException();
+        public double? RawZ_mmpmin => throw new NotImplementedException();
         public double? W_mm => throw new NotImplementedException();
         public double B_mm => throw new NotImplementedException();
         public double D_mm => throw new NotImplementedException();
-        public double I_mm => throw new NotImplementedException();
-        public double J_deg => throw new NotImplementedException();
+        public double? RawJ_deg => throw new NotImplementedException();
         public double P_mm => throw new NotImplementedException();
         public double U_mm => throw new NotImplementedException();
         public double S_mm => throw new NotImplementedException();
         public double A_mm => throw new NotImplementedException();
         public double? Y_mm => throw new NotImplementedException();
+        public double I_mm => throw new NotImplementedException();
+        public double J_deg => throw new NotImplementedException();
+        public double Z_mmpmin => throw new NotImplementedException();
+        public double? RawF_mmpmin => throw new NotImplementedException();
+        public double? RawG_mmpmin => throw new NotImplementedException();
+        public double? RawS_mm => throw new NotImplementedException();
+        public double? RawY_mm => throw new NotImplementedException();
     }
 
     [TestMethod]
