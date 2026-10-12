@@ -142,6 +142,15 @@ namespace de.hmmueller.PathDxf2GCode {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die /v missing or not &gt; 0 ähnelt.
+        /// </summary>
+        internal static string Options_MissingK {
+            get {
+                return ResourceManager.GetString("Options_MissingK", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Missing value after option {0} ähnelt.
         /// </summary>
         internal static string Options_MissingOptionAfter_Name {

@@ -45,7 +45,12 @@ public class Options : AbstractOptions, IEmitParams {
     /// /v: Sweep speed for G00 (only necessary for statistics computations)
     /// TODO: https://diymachining.com/grbl-feed-rate/ 
     /// </summary>
-    public double GlobalSweepRate_mmpmin { get; private set; }
+    public double GlobalSweepRate_mmpmin { get; private set; } = -1;
+
+    /// <summary>
+    /// /k: Infeed reduction for top level pass
+    /// </summary>
+    public double K_mm { get; private set; } = 0;
 
     /// <summary>
     /// /z: Default probe rate for G38
@@ -56,7 +61,7 @@ public class Options : AbstractOptions, IEmitParams {
     /// /s: Default sweep height for main path; must be higher than any obstacle
     /// the router bits might encounter.
     /// </summary>
-    public double S_mm { get; private set; }
+    public double S_mm { get; private set; } = -1;
     public double? RawS_mm => S_mm;
 
     /// <summary>
@@ -184,6 +189,9 @@ public class Options : AbstractOptions, IEmitParams {
             case "i":
                 options.RawI_mm = GetDoubleOption(ref i);
                 return true;
+            case "k":
+                options.K_mm = GetDoubleOption(ref i);
+                return true;
             case "z":
                 options.RawZ_mmpmin = GetDoubleOption(ref i);
                 return true;
@@ -212,6 +220,10 @@ public class Options : AbstractOptions, IEmitParams {
         bool result = true;
         if (options.S_mm <= 0) {
             messages.AddError("Options", Messages.Options_MissingS);
+            result = false;
+        }
+        if (options.GlobalSweepRate_mmpmin <= 0) {
+            messages.AddError("Options", Messages.Options_MissingV);
             result = false;
         }
         if (options.RawJ_deg <= 0 || options.RawJ_deg > 90) {

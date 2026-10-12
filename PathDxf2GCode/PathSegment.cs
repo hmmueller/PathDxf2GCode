@@ -150,7 +150,7 @@ public class MillChain : PathSegment {
     private Vector3 ZigZagOrPullFromTo(Vector3 currPosZigZag, double toZ_mm, Edge e, double rampLength_mm,
             double th_mm, Transformation3 t, List<GCode> gcodes) {
         if (toZ_mm.Ge(currPosZigZag.Z)) {
-            // Reines PULL!!!!!!!
+            // Pull only!
             return GCodeHelpers.DrillOrPullZFromTo(currPosZigZag, toZ_mm, th_mm, _params!.G_mmpmin, t, gcodes);
         } else {
             return GCodeHelpers.MillOrPullZTo(currPosZigZag, toZ_mm, th_mm, currPosMillDown => {
@@ -176,7 +176,8 @@ public class MillChain : PathSegment {
         // A. Create milling movements ("edges") from segments
         List<List<Edge>> edgesBySegment = new();
         {
-            double firstMillingBottomH_mm = h_mm + (_params!.W_mm ?? _params!.T_mm - _params!.I_mm);
+            double firstMillingBottomH_mm = h_mm + (_params!.W_mm 
+                                                 ?? _params!.T_mm - _params!.I_mm + _params!.K_mm); // Depth gauging might be wrong, so the first pass is milled shallower.
             foreach (var s in _segments) {
                 List<Edge> edgesOfS = new();
                 Edge? prev = default;

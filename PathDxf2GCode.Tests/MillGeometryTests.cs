@@ -74,6 +74,7 @@ public class MillGeometryTests {
         public double? RawB_mm => throw new NotImplementedException();
         public double? RawD_mm => throw new NotImplementedException();
         public double? RawI_mm => throw new NotImplementedException();
+        public double K_mm => throw new NotImplementedException();
         public double? RawP_mm => throw new NotImplementedException();
         public double? RawU_mm => throw new NotImplementedException();
         public double T_mm => throw new NotImplementedException();

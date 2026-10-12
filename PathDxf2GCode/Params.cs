@@ -134,6 +134,7 @@ public interface IEmitParams {
     double? RawS_mm { get; }
     double? RawY_mm { get; }
     double? RawZ_mmpmin { get; }
+    double K_mm { get; }
 }
 
 public interface IParams : IEmitParams {
@@ -238,6 +239,7 @@ public abstract class AbstractParams : IParams {
     public abstract double? RawF_mmpmin { get; }
     public abstract double? RawG_mmpmin { get; }
     public abstract double? RawI_mm { get; }
+    public abstract double K_mm { get; }
     public abstract double? RawJ_deg { get; }
     public abstract double? RawS_mm { get; }
     public abstract double? RawY_mm { get; }
@@ -314,6 +316,7 @@ public class PathParams : AbstractParams {
     public override double Z_mmpmin => CheckGt0(base.Z_mmpmin, Messages.Params_ZMustBeGtThan0_Z);
 
     public override double? RawI_mm => GetDouble('I') ?? _emitParams!.RawI_mm;
+    public override double K_mm => GetDouble('K') ?? _emitParams!.K_mm;
     public override double? RawJ_deg => GetDouble('J') ?? _emitParams!.RawJ_deg;
     public override double? RawF_mmpmin => GetDouble('F') ?? _emitParams!.RawF_mmpmin;
     public override double? RawG_mmpmin => GetDouble('G') ?? _emitParams!.RawG_mmpmin;
@@ -365,6 +368,7 @@ public abstract class AbstractChildParams : AbstractParams {
     public override double? RawF_mmpmin => _parent.RawF_mmpmin;
     public override double? RawG_mmpmin => _parent.RawG_mmpmin;
     public override double? RawI_mm => _parent.RawI_mm;
+    public override double K_mm => _parent.K_mm;
     public override double? RawJ_deg => _parent.RawJ_deg;
     public override double? RawS_mm => GetDouble('S') ?? _parent.RawS_mm;
     public override double? RawY_mm => _parent.RawY_mm;
@@ -382,9 +386,10 @@ public abstract class AbstractChildParams : AbstractParams {
 }
 
 public class ChainParams : AbstractChildParams, IParams {
-    public const string KEYS = "NIJW";
+    public const string KEYS = "NIKJW";
     public override double? RawI_mm => GetDouble('I') ?? base.RawI_mm;
     public override double? RawJ_deg => GetDouble('J') ?? base.RawJ_deg;
+    public override double K_mm => GetDouble('K') ?? base.K_mm;
     public override double? W_mm => GetDouble('W') ?? base.W_mm;
 
     public ChainParams(ParamsText text, ActualVariables superpathVariables, string errorContext, IParams pathParams, Action<string, string> onError) : base(text.LimitedTo(KEYS), superpathVariables, errorContext, pathParams, onError) {
