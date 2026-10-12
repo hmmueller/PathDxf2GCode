@@ -130,6 +130,8 @@ Optionen:
     /h     Optionen anzeigen
     /f 000 Vorgabe für Fräsgeschwindigkeit (F_xy) in mm/min; Pflichtwert
     /g 000 Vorgabe für Bohrgeschwindigkeit (F_z) in mm/min; Standardwert ist F_xy / 4
+    /i 000 Vorgabe für Zustellung; ohne Standardwert
+    /k 000 Vorgabe für Zustellungsreduktion für oberste Fräsung; ohen Standardwert
     /j 000 Vorgabe für Standardrampenwinkel in Grad; Standardwert ist 10
     /z 000 Vorgabe für Probe-Geschwindigkeit in mm/min; Standardwert ist F_z oder F_xy / 4, wenn F_z fehlt
     /v 000 Standardgeschwindigkeit für Leerfahrten in mm/min (nur für Statistik); Pflichtwert

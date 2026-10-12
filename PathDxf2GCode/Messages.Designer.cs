@@ -94,10 +94,11 @@ namespace de.hmmueller.PathDxf2GCode {
         ///    /h     Show options text
         ///    /f 000 Set default milling speed (F_xy) in mm/min; required
         ///    /g 000 Set default drilling speed (F_z) in mm/min; default is F_xy / 4
+        ///    /i 000 Set default infeed in mm; no default
+        ///    /k 000 Set default infeed reduction for top passes in mm; no default
         ///    /j 000 Set default ramp angle in degrees; default is 10
         ///    /z 000 Set probing speed in mm/min; default is F_z or F_xy / 4 if F_z is not provided
-        ///    /v 000 Provide maximum speed for sweeps in mm/min (for statistics only); required
-        ///    /s 000 Set default sweep height in mm; requ [Rest der Zeichenfolge wurde abgeschnitten]&quot;; ähnelt.
+        ///    /v 000  [Rest der Zeichenfolge wurde abgeschnitten]&quot;; ähnelt.
         /// </summary>
         internal static string Options_Help {
             get {
