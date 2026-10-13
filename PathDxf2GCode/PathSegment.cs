@@ -113,8 +113,8 @@ public class MillChain : PathSegment {
 
     private class Edge {
         public readonly ChainSegment Segment;
-        public readonly double MillingBottom_mm;
         public readonly Edge? Above;
+        public double MillingBottom_mm;
         public EdgeMilled Milled;
 
         public Edge(ChainSegment segment, double millingBottom_mm, Edge? above) {
@@ -128,6 +128,16 @@ public class MillChain : PathSegment {
         public Vector3 End(Transformation3 t) => t.Transform(Segment.End).AsVector3(MillingBottom_mm);
 
         public bool TopUnmilled => Milled == EdgeMilled.Unknown && (Above == null || Above.Milled != EdgeMilled.Unknown);
+
+        internal void EnsureMillingBottomSignificantlyAboveZero(double millingBottomBelow_mm, double i_mm, double k_mm) {
+            //if (millingBottomBelow_mm.Le(0) && MillingBottom_mm.Ge(0)) { // edge straddles bottom of material
+            //    double minMillingBottom = Above == null
+            //        ? millingBottomBelow_mm + i_mm - k_mm // top pass edge
+            //        : millingBottomBelow_mm + i_mm; // lower pass edge
+            //    if (MillingBottom_mm.Lt(minMillingBottom))
+            //        MillingBottom_mm = minMillingBottom;
+            //}
+        }
     }
 
     private static EdgeMilled AddEdgeForChainWithSlowMilling(List<Edge> edgesForThisRun, Edge e, Transformation3 t, ref Vector3 headPos) {
@@ -180,7 +190,7 @@ public class MillChain : PathSegment {
                                                  ?? _params!.T_mm - _params!.I_mm + _params!.K_mm); // Depth gauging might be wrong, so the first pass is milled shallower.
             foreach (var s in _segments) {
                 List<Edge> edgesOfS = new();
-                Edge? prev = default;
+                Edge? prev = null;
                 double bottomH_mm = h_mm + s.Bottom_mm;
                 for (double millingBottom_mm = firstMillingBottomH_mm; millingBottom_mm.Ge(bottomH_mm); millingBottom_mm -= _params!.I_mm) {
                     edgesOfS.Add(prev = new Edge(s, millingBottom_mm, prev));
@@ -269,12 +279,27 @@ public class MillChain : PathSegment {
                         nearestConnectAtStart = candStartIsNearer;
                     }
                 }
+                if (nearest!.MillingBottom_mm.Le(0) && !nearestConnectAtStart) {
+                    // Edges that cut throught the material (i.e. where millingBottom is <= 0) are always
+                    // milled from Start to End; by this, it is possible to create milling paths that
+                    // ensure that pieces that are, in their milled state, fastened at only a few extreme
+                    // points are not "freed" at an unexpected place - where they might "wobble" into the
+                    // milling bit and get damaged, or damage the bit.
+                    // Thus, such edeges get an infinite candidate distance to its End point, so that only
+                    // their Start point is found as a connection point for continuing milling.
+                    nearest = edgesBySegment.SelectMany(e => e).First(e => e.Milled == EdgeMilled.Unknown);
+                    nearestConnectAtStart = true;
+                }
 
-                sortedEdges.Add(nearest!);
-                if (nearest!.Milled != EdgeMilled.Unknown) {
+                if (nearest.Milled != EdgeMilled.Unknown) {
                     throw new Exception("Internal Error");
                 }
+
                 nearest.Milled = nearestConnectAtStart ? EdgeMilled.Start2End : EdgeMilled.End2Start;
+                nearest.Above?.EnsureMillingBottomSignificantlyAboveZero(nearest.MillingBottom_mm, _params.I_mm, _params.K_mm);
+
+                sortedEdges.Add(nearest);
+
                 headPos = nearestConnectAtStart ? nearest.End(t) : nearest.Start(t);
                 remaining--;
             }
@@ -285,12 +310,10 @@ public class MillChain : PathSegment {
 
             foreach (var e in sortedEdges) {
                 double rampLength_mm = Math.Min(maxRampLength_mm, e.Segment.Geometry.Length_mm);
-
-                currPos = GCodeHelpers.PullAndSweepHorizontallyFromTo(from: currPos,
-                  to: (e.Milled == EdgeMilled.Start2End ? e.Start(t) : e.End(t)).XY(),
+                Vector2 to = (e.Milled == EdgeMilled.Start2End ? e.Start(t) : e.End(t)).XY();
+                currPos = GCodeHelpers.PullAndSweepHorizontallyFromTo(from: currPos, to: to,
                   th_mm: h_mm + _params!.T_mm,
                   s_mm: s_mm, g_mmpmin: _params!.G_mmpmin, zCorr: t, gcodes: gcodes);
-
 
                 currPos = e.Segment.EmitGCode(currPos,
                     (cp, z) => ZigZagOrPullFromTo(cp, z, e, rampLength_mm, th_mm, t, gcodes),

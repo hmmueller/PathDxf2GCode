@@ -568,8 +568,10 @@ public class PathModel {
                         break;
                     }
                 } else if (!candidates.Skip(1).Any()) { // Exactly one candidate
+                    // AddTo ensures that Start/End are in path orientation
                     candidates.Single().AddTo(orderedRawSegments, traversed, ref currEnd);
                 } else {
+                    // AddTo ensures that Start/End are in path orientation
                     candidates.OrderBy(s => s.Order)
                         .ThenBy(s => s.Preference)
                         .ThenBy(s => s.Length)
@@ -584,6 +586,7 @@ public class PathModel {
                 messages.AddError(last.Source, last.End, dxfFilePath, Messages.PathModel_LostEnd_End, rawModel.End.Value.F3());
             }
         }
+        // Invariant: For all segements, Start/End is in path orientation
 
         // B. Create PathSegments
         ILeafSegment[] bottomSegments = orderedRawSegments.Select(r => r.CreateSegment()).ToArray();

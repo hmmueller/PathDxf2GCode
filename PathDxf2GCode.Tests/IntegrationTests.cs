@@ -82,24 +82,27 @@ G01 F150.000 X3.403 Y0.000 Z1.400
 G01 F150.000 X0.000 Y0.000 Z0.800
   (MillLine s=[0.000 0.000] e=[57.687 0.000] fr=0.800 to=0.800)
 G01 F150.000 X57.687 Y0.000 Z0.800
-  (PullAndSweepHorizontallyFromTo [57.687 0.000 0.800] [57.687 0.000] s=5.000)
-    (DrillOrPullZFromTo 0.800 -0.300)
-  (MillLine s=[57.687 0.000] e=[54.284 0.000] fr=0.800 to=0.250)
-G01 F150.000 X54.284 Y0.000 Z0.250
-  (MillLine s=[54.284 0.000] e=[57.687 0.000] fr=0.250 to=-0.300)
+  (PullAndSweepHorizontallyFromTo [57.687 0.000 0.800] [0.000 0.000] s=5.000)
+    (DrillOrPullZFromTo 0.800 5.000)
+G00 Z5.000
+G00 X0.000 Y0.000
+    (DrillOrPullZFromTo 5.000 -0.300)
+G00 Z2.000
+  (MillLine s=[0.000 0.000] e=[3.403 0.000] fr=2.000 to=0.850)
+G01 F117.125 X3.403 Y0.000 Z0.850
+  (MillLine s=[3.403 0.000] e=[0.000 0.000] fr=0.850 to=-0.300)
+G01 F117.125 X0.000 Y0.000 Z-0.300
+  (MillLine s=[0.000 0.000] e=[57.687 0.000] fr=-0.300 to=-0.300)
 G01 F150.000 X57.687 Y0.000 Z-0.300
-  (MillLine s=[57.687 0.000] e=[0.000 0.000] fr=-0.300 to=-0.300)
-G01 F150.000 X0.000 Y0.000 Z-0.300
-  (PullAndSweepHorizontallyFromTo [0.000 0.000 -0.300] [57.687 0.000] s=5.000)
+  (PullAndSweepHorizontallyFromTo [57.687 0.000 -0.300] [57.687 0.000] s=5.000)
     (DrillOrPullZFromTo -0.300 5.000)
 G00 Z5.000
-G00 X57.687 Y0.000
 G00 Z5.000
   (Fräslänge:     129 mm   ca.  2 min)
   (Bohrungen:       0 mm   ca.  0 min)
-  (Leerfahrten:    66 mm   ca.  1 min)
-  (Summe:         195 mm   ca.  2 min)
-  (Befehlszahl: 10)
+  (Leerfahrten:    73 mm   ca.  1 min)
+  (Summe:         202 mm   ca.  2 min)
+  (Befehlszahl: 12)
 M30
 %");
     }
@@ -123,21 +126,24 @@ G00 Z2.000
 G01 Z0.800
   (MillLine s=[0.000 0.000] e=[57.687 0.000] fr=0.800 to=0.800)
 G01 F150.000 X57.687 Y0.000 Z0.800
-  (PullAndSweepHorizontallyFromTo [57.687 0.000 0.800] [57.687 0.000] s=5.000)
-    (DrillOrPullZFromTo 0.800 -0.300)
+  (PullAndSweepHorizontallyFromTo [57.687 0.000 0.800] [0.000 0.000] s=5.000)
+    (DrillOrPullZFromTo 0.800 5.000)
+G00 Z5.000
+G00 X0.000 Y0.000
+    (DrillOrPullZFromTo 5.000 -0.300)
+G00 Z2.000
 G01 Z-0.300
-  (MillLine s=[57.687 0.000] e=[0.000 0.000] fr=-0.300 to=-0.300)
-G01 F150.000 X0.000 Y0.000 Z-0.300
-  (PullAndSweepHorizontallyFromTo [0.000 0.000 -0.300] [57.687 0.000] s=5.000)
+  (MillLine s=[0.000 0.000] e=[57.687 0.000] fr=-0.300 to=-0.300)
+G01 F150.000 X57.687 Y0.000 Z-0.300
+  (PullAndSweepHorizontallyFromTo [57.687 0.000 -0.300] [57.687 0.000] s=5.000)
     (DrillOrPullZFromTo -0.300 5.000)
 G00 Z5.000
-G00 X57.687 Y0.000
 G00 Z5.000
   (Fräslänge:     115 mm   ca.  2 min)
-  (Bohrungen:       2 mm   ca.  1 min)
-  (Leerfahrten:    66 mm   ca.  1 min)
-  (Summe:         184 mm   ca.  2 min)
-  (Befehlszahl: 8)
+  (Bohrungen:       4 mm   ca.  1 min)
+  (Leerfahrten:    73 mm   ca.  1 min)
+  (Summe:         192 mm   ca.  2 min)
+  (Befehlszahl: 10)
 M30
 %");
     }
@@ -168,26 +174,29 @@ G01 F150.000 X7.649 Y5.963 Z0.700
 G01 F150.000 X5.948 Y5.963 Z0.400
   (MillLine s=[5.948 5.963] e=[63.635 5.963] fr=0.400 to=0.400)
 G01 F150.000 X63.635 Y5.963 Z0.400
-  (PullAndSweepHorizontallyFromTo [63.635 5.963 0.400] [63.635 5.963] s=20.000)
-    (DrillOrPullZFromTo 0.400 -0.100)
-  (MillLine s=[63.635 5.963] e=[61.933 5.963] fr=0.400 to=0.150)
-G01 F150.000 X61.933 Y5.963 Z0.150
-  (MillLine s=[61.933 5.963] e=[63.635 5.963] fr=0.150 to=-0.100)
+  (PullAndSweepHorizontallyFromTo [63.635 5.963 0.400] [5.948 5.963] s=20.000)
+    (DrillOrPullZFromTo 0.400 20.000)
+G00 Z20.000
+G00 X5.948 Y5.963
+    (DrillOrPullZFromTo 20.000 -0.100)
+G00 Z1.000
+  (MillLine s=[5.948 5.963] e=[7.649 5.963] fr=1.000 to=0.450)
+G01 F121.914 X7.649 Y5.963 Z0.450
+  (MillLine s=[7.649 5.963] e=[5.948 5.963] fr=0.450 to=-0.100)
+G01 F121.914 X5.948 Y5.963 Z-0.100
+  (MillLine s=[5.948 5.963] e=[63.635 5.963] fr=-0.100 to=-0.100)
 G01 F150.000 X63.635 Y5.963 Z-0.100
-  (MillLine s=[63.635 5.963] e=[5.948 5.963] fr=-0.100 to=-0.100)
-G01 F150.000 X5.948 Y5.963 Z-0.100
-  (PullAndSweepHorizontallyFromTo [5.948 5.963 -0.100] [63.635 5.963] s=20.000)
+  (PullAndSweepHorizontallyFromTo [63.635 5.963 -0.100] [63.635 5.963] s=20.000)
     (DrillOrPullZFromTo -0.100 20.000)
 G00 Z20.000
-; G00 X63.635 Y5.963
   (PullAndSweepHorizontallyFromTo [63.635 5.963 20.000] [76.907 14.144] s=20.000)
 G00 X76.907 Y14.144
 G00 Z20.000
   (Fräslänge:     122 mm   ca.  2 min)
   (Bohrungen:       0 mm   ca.  0 min)
-  (Leerfahrten:    63 mm   ca.  1 min)
-  (Summe:         185 mm   ca.  2 min)
-  (Befehlszahl: 12)
+  (Leerfahrten:   159 mm   ca.  1 min)
+  (Summe:         282 mm   ca.  2 min)
+  (Befehlszahl: 15)
 M30
 %");
     }
@@ -223,27 +232,30 @@ G01 F150.000 X80.000 Y20.000 Z0.800
   (PullAndSweepHorizontallyFromTo [80.000 20.000 0.800] [80.000 20.000] s=20.000)
   (MillLine s=[80.000 20.000] e=[90.000 40.000] fr=0.800 to=0.800)
 G01 F150.000 X90.000 Y40.000 Z0.800
-  (PullAndSweepHorizontallyFromTo [90.000 40.000 0.800] [90.000 40.000] s=20.000)
-    (DrillOrPullZFromTo 0.800 -0.300)
-  (MillLine s=[90.000 40.000] e=[87.210 34.420] fr=0.800 to=0.250)
-G01 F150.000 X87.210 Y34.420 Z0.250
-  (MillLine s=[87.210 34.420] e=[90.000 40.000] fr=0.250 to=-0.300)
-G01 F150.000 X90.000 Y40.000 Z-0.300
-  (MillLine s=[90.000 40.000] e=[80.000 20.000] fr=-0.300 to=-0.300)
-G01 F150.000 X80.000 Y20.000 Z-0.300
-  (PullAndSweepHorizontallyFromTo [80.000 20.000 -0.300] [80.000 20.000] s=20.000)
-  (MillLine s=[80.000 20.000] e=[50.000 20.000] fr=-0.300 to=-0.300)
-G01 F150.000 X50.000 Y20.000 Z-0.300
-  (PullAndSweepHorizontallyFromTo [50.000 20.000 -0.300] [50.000 20.000] s=20.000)
-  (MillLine s=[50.000 20.000] e=[30.000 0.000] fr=-0.300 to=-0.300)
+  (PullAndSweepHorizontallyFromTo [90.000 40.000 0.800] [0.000 0.000] s=20.000)
+    (DrillOrPullZFromTo 0.800 20.000)
+G00 Z20.000
+G00 X0.000 Y0.000
+    (DrillOrPullZFromTo 20.000 -0.300)
+G00 Z3.000
+  (MillLine s=[0.000 0.000] e=[6.238 0.000] fr=3.000 to=1.350)
+G01 F146.657 X6.238 Y0.000 Z1.350
+  (MillLine s=[6.238 0.000] e=[0.000 0.000] fr=1.350 to=-0.300)
+G01 F146.657 X0.000 Y0.000 Z-0.300
+  (MillLine s=[0.000 0.000] e=[30.000 0.000] fr=-0.300 to=-0.300)
 G01 F150.000 X30.000 Y0.000 Z-0.300
   (PullAndSweepHorizontallyFromTo [30.000 0.000 -0.300] [30.000 0.000] s=20.000)
-  (MillLine s=[30.000 0.000] e=[0.000 0.000] fr=-0.300 to=-0.300)
-G01 F150.000 X0.000 Y0.000 Z-0.300
-  (PullAndSweepHorizontallyFromTo [0.000 0.000 -0.300] [90.000 40.000] s=20.000)
+  (MillLine s=[30.000 0.000] e=[50.000 20.000] fr=-0.300 to=-0.300)
+G01 F150.000 X50.000 Y20.000 Z-0.300
+  (PullAndSweepHorizontallyFromTo [50.000 20.000 -0.300] [50.000 20.000] s=20.000)
+  (MillLine s=[50.000 20.000] e=[80.000 20.000] fr=-0.300 to=-0.300)
+G01 F150.000 X80.000 Y20.000 Z-0.300
+  (PullAndSweepHorizontallyFromTo [80.000 20.000 -0.300] [80.000 20.000] s=20.000)
+  (MillLine s=[80.000 20.000] e=[90.000 40.000] fr=-0.300 to=-0.300)
+G01 F150.000 X90.000 Y40.000 Z-0.300
+  (PullAndSweepHorizontallyFromTo [90.000 40.000 -0.300] [90.000 40.000] s=20.000)
     (DrillOrPullZFromTo -0.300 20.000)
 G00 Z20.000
-; G00 X90.000 Y40.000
   (PullAndSweepHorizontallyFromTo [90.000 40.000 20.000] [60.000 30.000] s=20.000)
 G00 X60.000 Y30.000
     (DrillOrPullZFromTo 20.000 5.000)
@@ -270,9 +282,9 @@ G00 X30.000 Y30.000
 G00 Z20.000
   (Fräslänge:     271 mm   ca.  3 min)
   (Bohrungen:       0 mm   ca.  0 min)
-  (Leerfahrten:   136 mm   ca.  1 min)
-  (Summe:         408 mm   ca.  3 min)
-  (Befehlszahl: 29)
+  (Leerfahrten:   271 mm   ca.  1 min)
+  (Summe:         542 mm   ca.  4 min)
+  (Befehlszahl: 32)
 M30
 %");
     }
@@ -556,21 +568,24 @@ G00 Z2.000
 G01 Z0.800
   (MillArc l=[-14.142 -14.142] r=20.000 a0=45.000 a1=90.000 fr=0.800 to=0.800 p0=[0.000 0.000] p1=[-14.142 5.858])
 G03 F150.000 I-14.142 J-14.142 X-14.142 Y5.858 Z0.800
-  (PullAndSweepHorizontallyFromTo [-14.142 5.858 0.800] [-14.142 5.858] s=5.000)
-    (DrillOrPullZFromTo 0.800 -0.100)
+  (PullAndSweepHorizontallyFromTo [-14.142 5.858 0.800] [0.000 0.000] s=5.000)
+    (DrillOrPullZFromTo 0.800 5.000)
+G00 Z5.000
+G00 X0.000 Y0.000
+    (DrillOrPullZFromTo 5.000 -0.100)
+G00 Z2.000
 G01 Z-0.100
-  (MillArc l=[-14.142 -14.142] r=20.000 a0=90.000 a1=45.000 fr=-0.100 to=-0.100 p0=[-14.142 5.858] p1=[0.000 0.000])
-G02 F150.000 I-0.000 J-20.000 X0.000 Y0.000 Z-0.100
-  (PullAndSweepHorizontallyFromTo [0.000 0.000 -0.100] [-14.142 5.858] s=5.000)
+  (MillArc l=[-14.142 -14.142] r=20.000 a0=45.000 a1=90.000 fr=-0.100 to=-0.100 p0=[0.000 0.000] p1=[-14.142 5.858])
+G03 F150.000 I-14.142 J-14.142 X-14.142 Y5.858 Z-0.100
+  (PullAndSweepHorizontallyFromTo [-14.142 5.858 -0.100] [-14.142 5.858] s=5.000)
     (DrillOrPullZFromTo -0.100 5.000)
 G00 Z5.000
-G00 X-14.142 Y5.858
 G00 Z5.000
   (Fräslänge:      31 mm   ca.  1 min)
-  (Bohrungen:       2 mm   ca.  1 min)
-  (Leerfahrten:    23 mm   ca.  1 min)
-  (Summe:          57 mm   ca.  1 min)
-  (Befehlszahl: 8)
+  (Bohrungen:       3 mm   ca.  1 min)
+  (Leerfahrten:    31 mm   ca.  1 min)
+  (Summe:          65 mm   ca.  1 min)
+  (Befehlszahl: 10)
 M30
 %");
     }
@@ -605,30 +620,33 @@ G01 F150.000 X0.000 Y50.000 Z-0.200
   (PullAndSweepHorizontallyFromTo [0.000 50.000 -0.200] [0.000 50.000] s=5.000)
   (MillLine s=[0.000 50.000] e=[20.000 70.000] fr=-0.200 to=-0.200)
 G01 F150.000 X20.000 Y70.000 Z-0.200
-  (PullAndSweepHorizontallyFromTo [20.000 70.000 -0.200] [20.000 70.000] s=5.000)
-    (DrillOrPullZFromTo -0.200 -0.300)
+  (PullAndSweepHorizontallyFromTo [20.000 70.000 -0.200] [20.000 0.000] s=5.000)
+    (DrillOrPullZFromTo -0.200 5.000)
+G00 Z5.000
+G00 X20.000 Y0.000
+    (DrillOrPullZFromTo 5.000 -0.300)
+G00 Z1.000
 G01 Z-0.300
-  (MillLine s=[20.000 70.000] e=[0.000 50.000] fr=-0.300 to=-0.300)
-G01 F150.000 X0.000 Y50.000 Z-0.300
-  (PullAndSweepHorizontallyFromTo [0.000 50.000 -0.300] [0.000 50.000] s=5.000)
-  (MillLine s=[0.000 50.000] e=[0.000 20.000] fr=-0.300 to=-0.300)
+  (MillLine s=[20.000 0.000] e=[0.000 20.000] fr=-0.300 to=-0.300)
 G01 F150.000 X0.000 Y20.000 Z-0.300
   (PullAndSweepHorizontallyFromTo [0.000 20.000 -0.300] [0.000 20.000] s=5.000)
-  (MillLine s=[0.000 20.000] e=[20.000 0.000] fr=-0.300 to=-0.300)
-G01 F150.000 X20.000 Y0.000 Z-0.300
-  (PullAndSweepHorizontallyFromTo [20.000 0.000 -0.300] [20.000 70.000] s=5.000)
+  (MillLine s=[0.000 20.000] e=[0.000 50.000] fr=-0.300 to=-0.300)
+G01 F150.000 X0.000 Y50.000 Z-0.300
+  (PullAndSweepHorizontallyFromTo [0.000 50.000 -0.300] [0.000 50.000] s=5.000)
+  (MillLine s=[0.000 50.000] e=[20.000 70.000] fr=-0.300 to=-0.300)
+G01 F150.000 X20.000 Y70.000 Z-0.300
+  (PullAndSweepHorizontallyFromTo [20.000 70.000 -0.300] [20.000 70.000] s=5.000)
     (DrillOrPullZFromTo -0.300 5.000)
 G00 Z5.000
-; G00 X20.000 Y70.000
   (END Subpath 8998.2P[8998.dxf] t=[ [120.000 170.000]=>[20.000 0.000] / [120.000 100.000]=>[20.000 70.000] ])
   (PullAndSweepHorizontallyFromTo [20.000 70.000 5.000] [0.000 70.000] s=5.000)
 G00 X0.000 Y70.000
 G00 Z5.000
   (Fräslänge:     173 mm   ca.  2 min)
-  (Bohrungen:       1 mm   ca.  1 min)
-  (Leerfahrten:    49 mm   ca.  1 min)
-  (Summe:         224 mm   ca.  2 min)
-  (Befehlszahl: 14)
+  (Bohrungen:       2 mm   ca.  1 min)
+  (Leerfahrten:   129 mm   ca.  1 min)
+  (Summe:         304 mm   ca.  3 min)
+  (Befehlszahl: 17)
 M30
 %");
     }
@@ -1933,24 +1951,27 @@ G03 F150.000 I30.000 J20.207 X160.000 Y-50.000 Z1.500
 G01 Z0.800
   (MillLine s=[160.000 -50.000] e=[160.000 25.000] fr=0.800 to=0.800)
 G01 F150.000 X160.000 Y25.000 Z0.800
-  (PullAndSweepHorizontallyFromTo [160.000 25.000 0.800] [160.000 25.000] s=5.000)
-    (DrillOrPullZFromTo 0.800 -0.100)
-G01 Z-0.100
-  (MillLine s=[160.000 25.000] e=[160.000 -50.000] fr=-0.100 to=-0.100)
-G01 F150.000 X160.000 Y-50.000 Z-0.100
-  (PullAndSweepHorizontallyFromTo [160.000 -50.000 -0.100] [100.000 0.000] s=5.000)
-    (DrillOrPullZFromTo -0.100 5.000)
+  (PullAndSweepHorizontallyFromTo [160.000 25.000 0.800] [0.000 0.000] s=5.000)
+    (DrillOrPullZFromTo 0.800 5.000)
 G00 Z5.000
-G00 X100.000 Y0.000
+G00 X0.000 Y0.000
     (DrillOrPullZFromTo 5.000 -0.100)
 G00 Z2.000
 G01 Z-0.100
-  (MillLine s=[100.000 0.000] e=[0.000 0.000] fr=-0.100 to=-0.100)
-G01 F150.000 X0.000 Y0.000 Z-0.100
-  (PullAndSweepHorizontallyFromTo [0.000 0.000 -0.100] [160.000 25.000] s=5.000)
+  (MillLine s=[0.000 0.000] e=[100.000 0.000] fr=-0.100 to=-0.100)
+G01 F150.000 X100.000 Y0.000 Z-0.100
+  (PullAndSweepHorizontallyFromTo [100.000 0.000 -0.100] [160.000 -50.000] s=5.000)
     (DrillOrPullZFromTo -0.100 5.000)
 G00 Z5.000
-; G00 X160.000 Y25.000
+G00 X160.000 Y-50.000
+    (DrillOrPullZFromTo 5.000 -0.100)
+G00 Z2.000
+G01 Z-0.100
+  (MillLine s=[160.000 -50.000] e=[160.000 25.000] fr=-0.100 to=-0.100)
+G01 F150.000 X160.000 Y25.000 Z-0.100
+  (PullAndSweepHorizontallyFromTo [160.000 25.000 -0.100] [160.000 25.000] s=5.000)
+    (DrillOrPullZFromTo -0.100 5.000)
+G00 Z5.000
   (PullAndSweepHorizontallyFromTo [160.000 25.000 5.000] [200.000 0.000] s=5.000)
 G00 X200.000 Y0.000
   (PullAndSweepHorizontallyFromTo [200.000 0.000 5.000] [200.000 0.000] s=5.000)
@@ -1962,21 +1983,21 @@ G01 F150.000 X300.000 Y0.000 Z0.800
   (PullAndSweepHorizontallyFromTo [300.000 0.000 0.800] [300.000 0.000] s=5.000)
   (MillLine s=[300.000 0.000] e=[300.000 -50.000] fr=0.800 to=0.800)
 G01 F150.000 X300.000 Y-50.000 Z0.800
-  (PullAndSweepHorizontallyFromTo [300.000 -50.000 0.800] [300.000 -50.000] s=5.000)
-    (DrillOrPullZFromTo 0.800 -0.100)
+  (PullAndSweepHorizontallyFromTo [300.000 -50.000 0.800] [200.000 0.000] s=5.000)
+    (DrillOrPullZFromTo 0.800 5.000)
+G00 Z5.000
+G00 X200.000 Y0.000
+    (DrillOrPullZFromTo 5.000 -0.100)
+G00 Z2.000
 G01 Z-0.100
-  (MillLine s=[300.000 -50.000] e=[300.000 0.000] fr=-0.100 to=-0.100)
+  (MillLine s=[200.000 0.000] e=[300.000 0.000] fr=-0.100 to=-0.100)
 G01 F150.000 X300.000 Y0.000 Z-0.100
   (PullAndSweepHorizontallyFromTo [300.000 0.000 -0.100] [300.000 0.000] s=5.000)
-  (MillLine s=[300.000 0.000] e=[200.000 0.000] fr=-0.100 to=-0.100)
-G01 F150.000 X200.000 Y0.000 Z-0.100
-  (PullAndSweepHorizontallyFromTo [200.000 0.000 -0.100] [300.000 -50.000] s=5.000)
-    (DrillOrPullZFromTo -0.100 5.000)
-G00 Z5.000
-G00 X300.000 Y-50.000
-    (DrillOrPullZFromTo 5.000 1.800)
-G00 Z2.000
-G01 Z1.800
+  (MillLine s=[300.000 0.000] e=[300.000 -50.000] fr=-0.100 to=-0.100)
+G01 F150.000 X300.000 Y-50.000 Z-0.100
+  (PullAndSweepHorizontallyFromTo [300.000 -50.000 -0.100] [300.000 -50.000] s=5.000)
+    (DrillOrPullZFromTo -0.100 1.800)
+G00 Z1.800
   (MillArc l=[330.000 -29.793] r=36.170 a0=213.962 a1=326.038 fr=1.800 to=1.800 p0=[300.000 -50.000] p1=[360.000 -50.000])
 G03 F150.000 I30.000 J20.207 X360.000 Y-50.000 Z1.800
   (PullAndSweepHorizontallyFromTo [360.000 -50.000 1.800] [360.000 -50.000] s=5.000)
@@ -1984,21 +2005,24 @@ G03 F150.000 I30.000 J20.207 X360.000 Y-50.000 Z1.800
 G01 Z0.800
   (MillLine s=[360.000 -50.000] e=[360.000 25.000] fr=0.800 to=0.800)
 G01 F150.000 X360.000 Y25.000 Z0.800
-  (PullAndSweepHorizontallyFromTo [360.000 25.000 0.800] [360.000 25.000] s=5.000)
-    (DrillOrPullZFromTo 0.800 -0.100)
+  (PullAndSweepHorizontallyFromTo [360.000 25.000 0.800] [360.000 -50.000] s=5.000)
+    (DrillOrPullZFromTo 0.800 5.000)
+G00 Z5.000
+G00 X360.000 Y-50.000
+    (DrillOrPullZFromTo 5.000 -0.100)
+G00 Z2.000
 G01 Z-0.100
-  (MillLine s=[360.000 25.000] e=[360.000 -50.000] fr=-0.100 to=-0.100)
-G01 F150.000 X360.000 Y-50.000 Z-0.100
-  (PullAndSweepHorizontallyFromTo [360.000 -50.000 -0.100] [360.000 25.000] s=5.000)
+  (MillLine s=[360.000 -50.000] e=[360.000 25.000] fr=-0.100 to=-0.100)
+G01 F150.000 X360.000 Y25.000 Z-0.100
+  (PullAndSweepHorizontallyFromTo [360.000 25.000 -0.100] [360.000 25.000] s=5.000)
     (DrillOrPullZFromTo -0.100 5.000)
 G00 Z5.000
-G00 X360.000 Y25.000
 G00 Z5.000
   (Fräslänge:     992 mm   ca. 10 min)
-  (Bohrungen:       9 mm   ca.  1 min)
-  (Leerfahrten:   345 mm   ca.  1 min)
-  (Summe:        1346 mm   ca. 11 min)
-  (Befehlszahl: 37)
+  (Bohrungen:      12 mm   ca.  1 min)
+  (Leerfahrten:   523 mm   ca.  2 min)
+  (Summe:        1527 mm   ca. 12 min)
+  (Befehlszahl: 42)
 M30
 %");
     }
@@ -2060,28 +2084,40 @@ G00 Z2.000
 G01 Z0.000
   (MillLine s=[30.000 -20.000] e=[30.000 -35.000] fr=0.000 to=0.000)
 G01 F150.000 X30.000 Y-35.000 Z0.000
-  (PullAndSweepHorizontallyFromTo [30.000 -35.000 0.000] [30.000 -35.000] s=5.000)
-    (DrillOrPullZFromTo 0.000 -0.100)
+  (PullAndSweepHorizontallyFromTo [30.000 -35.000 0.000] [30.000 -20.000] s=5.000)
+    (DrillOrPullZFromTo 0.000 5.000)
+G00 Z5.000
+G00 X30.000 Y-20.000
+    (DrillOrPullZFromTo 5.000 -0.100)
+G00 Z2.000
 G01 Z-0.100
-  (MillLine s=[30.000 -35.000] e=[30.000 -20.000] fr=-0.100 to=-0.100)
-G01 F150.000 X30.000 Y-20.000 Z-0.100
-  (PullAndSweepHorizontallyFromTo [30.000 -20.000 -0.100] [30.000 -20.000] s=5.000)
-    (DrillOrPullZFromTo -0.100 0.000)
-G00 Z0.000
+  (MillLine s=[30.000 -20.000] e=[30.000 -35.000] fr=-0.100 to=-0.100)
+G01 F150.000 X30.000 Y-35.000 Z-0.100
+  (PullAndSweepHorizontallyFromTo [30.000 -35.000 -0.100] [30.000 -20.000] s=5.000)
+    (DrillOrPullZFromTo -0.100 5.000)
+G00 Z5.000
+G00 X30.000 Y-20.000
+    (DrillOrPullZFromTo 5.000 0.000)
+G00 Z2.000
+G01 Z0.000
   (MillLine s=[30.000 -20.000] e=[35.000 -30.000] fr=0.000 to=0.000)
 G01 F150.000 X35.000 Y-30.000 Z0.000
   (PullAndSweepHorizontallyFromTo [35.000 -30.000 0.000] [35.000 -30.000] s=5.000)
   (MillLine s=[35.000 -30.000] e=[35.000 -45.000] fr=0.000 to=0.000)
 G01 F150.000 X35.000 Y-45.000 Z0.000
-  (PullAndSweepHorizontallyFromTo [35.000 -45.000 0.000] [35.000 -45.000] s=5.000)
-    (DrillOrPullZFromTo 0.000 -0.100)
+  (PullAndSweepHorizontallyFromTo [35.000 -45.000 0.000] [30.000 -20.000] s=5.000)
+    (DrillOrPullZFromTo 0.000 5.000)
+G00 Z5.000
+G00 X30.000 Y-20.000
+    (DrillOrPullZFromTo 5.000 -0.100)
+G00 Z2.000
 G01 Z-0.100
-  (MillLine s=[35.000 -45.000] e=[35.000 -30.000] fr=-0.100 to=-0.100)
+  (MillLine s=[30.000 -20.000] e=[35.000 -30.000] fr=-0.100 to=-0.100)
 G01 F150.000 X35.000 Y-30.000 Z-0.100
   (PullAndSweepHorizontallyFromTo [35.000 -30.000 -0.100] [35.000 -30.000] s=5.000)
-  (MillLine s=[35.000 -30.000] e=[30.000 -20.000] fr=-0.100 to=-0.100)
-G01 F150.000 X30.000 Y-20.000 Z-0.100
-  (PullAndSweepHorizontallyFromTo [30.000 -20.000 -0.100] [20.000 0.000] s=5.000)
+  (MillLine s=[35.000 -30.000] e=[35.000 -45.000] fr=-0.100 to=-0.100)
+G01 F150.000 X35.000 Y-45.000 Z-0.100
+  (PullAndSweepHorizontallyFromTo [35.000 -45.000 -0.100] [20.000 0.000] s=5.000)
     (DrillOrPullZFromTo -0.100 5.000)
 G00 Z5.000
 ; G00 X20.000 Y0.000
@@ -2089,10 +2125,10 @@ G00 Z5.000
 G00 X20.000 Y110.000
 G00 Z5.000
   (Fräslänge:     209 mm   ca.  2 min)
-  (Bohrungen:       3 mm   ca.  1 min)
-  (Leerfahrten:   168 mm   ca.  1 min)
-  (Summe:         380 mm   ca.  3 min)
-  (Befehlszahl: 30)
+  (Bohrungen:       9 mm   ca.  1 min)
+  (Leerfahrten:   247 mm   ca.  1 min)
+  (Summe:         466 mm   ca.  3 min)
+  (Befehlszahl: 39)
 M30
 %");
     }
@@ -2121,21 +2157,24 @@ G00 Z2.000(=2.000+0.787*[#51-2.000]+0.213*[#52-2.000])
 G01 Z0.800(=0.800+0.787*[#51-2.000]+0.213*[#52-2.000])
   (MillLine s=[0.000 0.000] e=[57.687 0.000] fr=0.800 to=0.800)
 G01 F150.000 X57.687 Y0.000 Z0.800(=0.800+0.787*[#51-2.000]+0.213*[#52-2.000])
-  (PullAndSweepHorizontallyFromTo [57.687 0.000 0.800] [57.687 0.000] s=5.000)
-    (DrillOrPullZFromTo 0.800 -0.300)
-G01 Z-0.300(=-0.300+0.788*[#52-2.000]+0.212*[#51-2.000])
-  (MillLine s=[57.687 0.000] e=[0.000 0.000] fr=-0.300 to=-0.300)
-G01 F150.000 X0.000 Y0.000 Z-0.300(=-0.300+0.788*[#52-2.000]+0.212*[#51-2.000])
-  (PullAndSweepHorizontallyFromTo [0.000 0.000 -0.300] [57.687 0.000] s=5.000)
+  (PullAndSweepHorizontallyFromTo [57.687 0.000 0.800] [0.000 0.000] s=5.000)
+    (DrillOrPullZFromTo 0.800 5.000)
+G00 Z5.000(=5.000+0.788*[#52-2.000]+0.212*[#51-2.000])
+G00 X0.000 Y0.000
+    (DrillOrPullZFromTo 5.000 -0.300)
+G00 Z2.000(=2.000+0.787*[#51-2.000]+0.213*[#52-2.000])
+G01 Z-0.300(=-0.300+0.787*[#51-2.000]+0.213*[#52-2.000])
+  (MillLine s=[0.000 0.000] e=[57.687 0.000] fr=-0.300 to=-0.300)
+G01 F150.000 X57.687 Y0.000 Z-0.300(=-0.300+0.787*[#51-2.000]+0.213*[#52-2.000])
+  (PullAndSweepHorizontallyFromTo [57.687 0.000 -0.300] [57.687 0.000] s=5.000)
     (DrillOrPullZFromTo -0.300 5.000)
-G00 Z5.000(=5.000+0.787*[#51-2.000]+0.213*[#52-2.000])
-G00 X57.687 Y0.000
+G00 Z5.000(=5.000+0.788*[#52-2.000]+0.212*[#51-2.000])
 G00 Z5.000
   (Fräslänge:     115 mm   ca.  2 min)
-  (Bohrungen:       2 mm   ca.  1 min)
-  (Leerfahrten:    66 mm   ca.  1 min)
-  (Summe:         184 mm   ca.  2 min)
-  (Befehlszahl: 8)
+  (Bohrungen:       4 mm   ca.  1 min)
+  (Leerfahrten:    73 mm   ca.  1 min)
+  (Summe:         192 mm   ca.  2 min)
+  (Befehlszahl: 10)
 M30
 %");
         Compare("8999.19P_Z.txt", $@"([57.606 242.590]/TH=2.000) #51=
@@ -2185,15 +2224,18 @@ G00 Z2.000(=2.000+0.625*[#51-2.000]+0.375*[#52-2.000])
 G01 Z0.800(=0.800+0.625*[#51-2.000]+0.375*[#52-2.000])
   (MillLine s=[0.000 0.000] e=[40.000 0.000] fr=0.800 to=0.800)
 G01 F150.000 X40.000 Y0.000 Z0.800(=0.800+0.625*[#51-2.000]+0.375*[#52-2.000])
-  (PullAndSweepHorizontallyFromTo [40.000 0.000 0.800] [40.000 0.000] s=5.000)
-    (DrillOrPullZFromTo 0.800 -0.300)
-G01 Z-0.300(=-0.300+0.625*[#52-2.000]+0.375*[#51-2.000])
-  (MillLine s=[40.000 0.000] e=[0.000 0.000] fr=-0.300 to=-0.300)
-G01 F150.000 X0.000 Y0.000 Z-0.300(=-0.300+0.625*[#52-2.000]+0.375*[#51-2.000])
-  (PullAndSweepHorizontallyFromTo [0.000 0.000 -0.300] [40.000 0.000] s=5.000)
+  (PullAndSweepHorizontallyFromTo [40.000 0.000 0.800] [0.000 0.000] s=5.000)
+    (DrillOrPullZFromTo 0.800 5.000)
+G00 Z5.000(=5.000+0.625*[#52-2.000]+0.375*[#51-2.000])
+G00 X0.000 Y0.000
+    (DrillOrPullZFromTo 5.000 -0.300)
+G00 Z2.000(=2.000+0.625*[#51-2.000]+0.375*[#52-2.000])
+G01 Z-0.300(=-0.300+0.625*[#51-2.000]+0.375*[#52-2.000])
+  (MillLine s=[0.000 0.000] e=[40.000 0.000] fr=-0.300 to=-0.300)
+G01 F150.000 X40.000 Y0.000 Z-0.300(=-0.300+0.625*[#51-2.000]+0.375*[#52-2.000])
+  (PullAndSweepHorizontallyFromTo [40.000 0.000 -0.300] [40.000 0.000] s=5.000)
     (DrillOrPullZFromTo -0.300 5.000)
-G00 Z5.000(=5.000+0.625*[#51-2.000]+0.375*[#52-2.000])
-; G00 X40.000 Y0.000
+G00 Z5.000(=5.000+0.625*[#52-2.000]+0.375*[#51-2.000])
   (PullAndSweepHorizontallyFromTo [40.000 0.000 5.000] [40.000 60.000] s=5.000)
 G00 X40.000 Y60.000
   (PullAndSweepHorizontallyFromTo [40.000 60.000 5.000] [40.000 60.000] s=5.000)
@@ -2202,21 +2244,24 @@ G00 Z2.000(=2.000+0.625*[#52-2.000]+0.375*[#51-2.000])
 G01 Z0.800(=0.800+0.625*[#52-2.000]+0.375*[#51-2.000])
   (MillLine s=[40.000 60.000] e=[0.000 60.000] fr=0.800 to=0.800)
 G01 F150.000 X0.000 Y60.000 Z0.800(=0.800+0.625*[#52-2.000]+0.375*[#51-2.000])
-  (PullAndSweepHorizontallyFromTo [0.000 60.000 0.800] [0.000 60.000] s=5.000)
-    (DrillOrPullZFromTo 0.800 -0.300)
-G01 Z-0.300(=-0.300+0.625*[#51-2.000]+0.375*[#52-2.000])
-  (MillLine s=[0.000 60.000] e=[40.000 60.000] fr=-0.300 to=-0.300)
-G01 F150.000 X40.000 Y60.000 Z-0.300(=-0.300+0.625*[#51-2.000]+0.375*[#52-2.000])
-  (PullAndSweepHorizontallyFromTo [40.000 60.000 -0.300] [0.000 60.000] s=5.000)
+  (PullAndSweepHorizontallyFromTo [0.000 60.000 0.800] [40.000 60.000] s=5.000)
+    (DrillOrPullZFromTo 0.800 5.000)
+G00 Z5.000(=5.000+0.625*[#51-2.000]+0.375*[#52-2.000])
+G00 X40.000 Y60.000
+    (DrillOrPullZFromTo 5.000 -0.300)
+G00 Z2.000(=2.000+0.625*[#52-2.000]+0.375*[#51-2.000])
+G01 Z-0.300(=-0.300+0.625*[#52-2.000]+0.375*[#51-2.000])
+  (MillLine s=[40.000 60.000] e=[0.000 60.000] fr=-0.300 to=-0.300)
+G01 F150.000 X0.000 Y60.000 Z-0.300(=-0.300+0.625*[#52-2.000]+0.375*[#51-2.000])
+  (PullAndSweepHorizontallyFromTo [0.000 60.000 -0.300] [0.000 60.000] s=5.000)
     (DrillOrPullZFromTo -0.300 5.000)
-G00 Z5.000(=5.000+0.625*[#52-2.000]+0.375*[#51-2.000])
-G00 X0.000 Y60.000
+G00 Z5.000(=5.000+0.625*[#51-2.000]+0.375*[#52-2.000])
 G00 Z5.000
   (Fräslänge:     160 mm   ca.  2 min)
-  (Bohrungen:       5 mm   ca.  1 min)
-  (Leerfahrten:   117 mm   ca.  1 min)
-  (Summe:         281 mm   ca.  2 min)
-  (Befehlszahl: 15)
+  (Bohrungen:       7 mm   ca.  1 min)
+  (Leerfahrten:   171 mm   ca.  1 min)
+  (Summe:         338 mm   ca.  3 min)
+  (Befehlszahl: 20)
 M30
 %");
     }
@@ -3081,19 +3126,19 @@ G01 F150.000 X50.000 Y5.000 Z0.500
 G00 Z1.000
   (MillLine s=[50.000 5.000] e=[30.000 -10.000] fr=1.000 to=1.000)
 G01 F150.000 X30.000 Y-10.000 Z1.000
-  (PullAndSweepHorizontallyFromTo [30.000 -10.000 1.000] [50.000 5.000] s=4.000)
+  (PullAndSweepHorizontallyFromTo [30.000 -10.000 1.000] [30.000 20.000] s=4.000)
     (DrillOrPullZFromTo 1.000 4.000)
 G00 Z4.000
-G00 X50.000 Y5.000
+G00 X30.000 Y20.000
     (DrillOrPullZFromTo 4.000 -0.500)
 G00 Z2.000
-  (MillLine s=[50.000 5.000] e=[46.597 7.552] fr=2.000 to=0.750)
-G01 F133.000 X46.597 Y7.552 Z0.750
-  (MillLine s=[46.597 7.552] e=[50.000 5.000] fr=0.750 to=-0.500)
-G01 F133.000 X50.000 Y5.000 Z-0.500
-  (MillLine s=[50.000 5.000] e=[30.000 20.000] fr=-0.500 to=-0.500)
-G01 F150.000 X30.000 Y20.000 Z-0.500
-  (PullAndSweepHorizontallyFromTo [30.000 20.000 -0.500] [30.000 -10.000] s=4.000)
+  (MillLine s=[30.000 20.000] e=[33.403 17.448] fr=2.000 to=0.750)
+G01 F133.000 X33.403 Y17.448 Z0.750
+  (MillLine s=[33.403 17.448] e=[30.000 20.000] fr=0.750 to=-0.500)
+G01 F133.000 X30.000 Y20.000 Z-0.500
+  (MillLine s=[30.000 20.000] e=[50.000 5.000] fr=-0.500 to=-0.500)
+G01 F150.000 X50.000 Y5.000 Z-0.500
+  (PullAndSweepHorizontallyFromTo [50.000 5.000 -0.500] [30.000 -10.000] s=4.000)
     (DrillOrPullZFromTo -0.500 4.000)
 G00 Z4.000
 G00 X30.000 Y-10.000
@@ -3121,19 +3166,19 @@ G01 F150.000 X50.000 Y-40.000 Z0.500
 G00 Z1.000
   (MillLine s=[50.000 -40.000] e=[30.000 -40.000] fr=1.000 to=1.000)
 G01 F150.000 X30.000 Y-40.000 Z1.000
-  (PullAndSweepHorizontallyFromTo [30.000 -40.000 1.000] [50.000 -40.000] s=4.000)
+  (PullAndSweepHorizontallyFromTo [30.000 -40.000 1.000] [50.000 -10.000] s=4.000)
     (DrillOrPullZFromTo 1.000 4.000)
 G00 Z4.000
-G00 X50.000 Y-40.000
+G00 X50.000 Y-10.000
     (DrillOrPullZFromTo 4.000 -0.500)
 G00 Z2.000
-  (MillLine s=[50.000 -40.000] e=[50.000 -35.747] fr=2.000 to=0.750)
-G01 F133.000 X50.000 Y-35.747 Z0.750
-  (MillLine s=[50.000 -35.747] e=[50.000 -40.000] fr=0.750 to=-0.500)
-G01 F133.000 X50.000 Y-40.000 Z-0.500
-  (MillLine s=[50.000 -40.000] e=[50.000 -10.000] fr=-0.500 to=-0.500)
-G01 F150.000 X50.000 Y-10.000 Z-0.500
-  (PullAndSweepHorizontallyFromTo [50.000 -10.000 -0.500] [30.000 -40.000] s=4.000)
+  (MillLine s=[50.000 -10.000] e=[50.000 -14.253] fr=2.000 to=0.750)
+G01 F133.000 X50.000 Y-14.253 Z0.750
+  (MillLine s=[50.000 -14.253] e=[50.000 -10.000] fr=0.750 to=-0.500)
+G01 F133.000 X50.000 Y-10.000 Z-0.500
+  (MillLine s=[50.000 -10.000] e=[50.000 -40.000] fr=-0.500 to=-0.500)
+G01 F150.000 X50.000 Y-40.000 Z-0.500
+  (PullAndSweepHorizontallyFromTo [50.000 -40.000 -0.500] [30.000 -40.000] s=4.000)
     (DrillOrPullZFromTo -0.500 4.000)
 G00 Z4.000
 G00 X30.000 Y-40.000
@@ -3153,19 +3198,19 @@ G01 F150.000 X50.000 Y-55.000 Z0.500
 G00 Z1.000
   (MillLine s=[50.000 -55.000] e=[30.000 -70.000] fr=1.000 to=1.000)
 G01 F150.000 X30.000 Y-70.000 Z1.000
-  (PullAndSweepHorizontallyFromTo [30.000 -70.000 1.000] [50.000 -55.000] s=4.000)
+  (PullAndSweepHorizontallyFromTo [30.000 -70.000 1.000] [30.000 -40.000] s=4.000)
     (DrillOrPullZFromTo 1.000 4.000)
 G00 Z4.000
-G00 X50.000 Y-55.000
+G00 X30.000 Y-40.000
     (DrillOrPullZFromTo 4.000 -0.500)
 G00 Z2.000
-  (MillLine s=[50.000 -55.000] e=[46.597 -52.448] fr=2.000 to=0.750)
-G01 F133.000 X46.597 Y-52.448 Z0.750
-  (MillLine s=[46.597 -52.448] e=[50.000 -55.000] fr=0.750 to=-0.500)
-G01 F133.000 X50.000 Y-55.000 Z-0.500
-  (MillLine s=[50.000 -55.000] e=[30.000 -40.000] fr=-0.500 to=-0.500)
-G01 F150.000 X30.000 Y-40.000 Z-0.500
-  (PullAndSweepHorizontallyFromTo [30.000 -40.000 -0.500] [30.000 -70.000] s=4.000)
+  (MillLine s=[30.000 -40.000] e=[33.403 -42.552] fr=2.000 to=0.750)
+G01 F133.000 X33.403 Y-42.552 Z0.750
+  (MillLine s=[33.403 -42.552] e=[30.000 -40.000] fr=0.750 to=-0.500)
+G01 F133.000 X30.000 Y-40.000 Z-0.500
+  (MillLine s=[30.000 -40.000] e=[50.000 -55.000] fr=-0.500 to=-0.500)
+G01 F150.000 X50.000 Y-55.000 Z-0.500
+  (PullAndSweepHorizontallyFromTo [50.000 -55.000 -0.500] [30.000 -70.000] s=4.000)
     (DrillOrPullZFromTo -0.500 4.000)
 G00 Z4.000
 G00 X30.000 Y-70.000
@@ -3273,24 +3318,27 @@ G03 F150.000 I28.843 J91.433 X3.263 Y-0.966 Z1.400(=1.400+0.787*[#51-2.000]+0.21
 G02 F150.000 I25.581 J92.399 X-0.000 Y0.000 Z0.800(=0.800+0.789*[#51-2.000]+0.211*[#52-2.000])
   (MillArc l=[28.843 91.433] r=95.874 a0=252.492 a1=287.508 fr=0.800 to=0.800 p0=[-0.000 0.000] p1=[57.687 0.000])
 G03 F150.000 I28.843 J91.433 X57.687 Y0.000 Z0.800(=0.800+0.787*[#51-2.000]+0.213*[#52-2.000])
-  (PullAndSweepHorizontallyFromTo [57.687 0.000 0.800] [57.687 0.000] s=5.000)
-    (DrillOrPullZFromTo 0.800 -0.300)
-  (MillArc l=[28.843 91.433] r=95.874 a0=287.508 a1=285.475 fr=0.800 to=0.250 p0=[57.687 0.000] p1=[54.424 -0.966])
-G02 F150.000 I-28.843 J91.433 X54.424 Y-0.966 Z0.250(=0.250+0.788*[#52-2.000]+0.212*[#51-2.000])
-  (MillArc l=[28.843 91.433] r=95.874 a0=285.475 a1=287.508 fr=0.250 to=-0.300 p0=[54.424 -0.966] p1=[57.687 0.000])
-G03 F150.000 I-25.581 J92.399 X57.687 Y0.000 Z-0.300(=-0.300+0.794*[#52-2.000]+0.206*[#51-2.000])
-  (MillArc l=[28.843 91.433] r=95.874 a0=287.508 a1=252.492 fr=-0.300 to=-0.300 p0=[57.687 0.000] p1=[-0.000 0.000])
-G02 F150.000 I-28.843 J91.433 X-0.000 Y0.000 Z-0.300(=-0.300+0.788*[#52-2.000]+0.212*[#51-2.000])
-  (PullAndSweepHorizontallyFromTo [-0.000 0.000 -0.300] [57.687 0.000] s=5.000)
+  (PullAndSweepHorizontallyFromTo [57.687 0.000 0.800] [-0.000 0.000] s=5.000)
+    (DrillOrPullZFromTo 0.800 5.000)
+G00 Z5.000(=5.000+0.788*[#52-2.000]+0.212*[#51-2.000])
+G00 X-0.000 Y0.000
+    (DrillOrPullZFromTo 5.000 -0.300)
+G00 Z2.000(=2.000+0.787*[#51-2.000]+0.213*[#52-2.000])
+  (MillArc l=[28.843 91.433] r=95.874 a0=252.492 a1=254.525 fr=2.000 to=0.850 p0=[-0.000 0.000] p1=[3.263 -0.966])
+G03 F117.125 I28.843 J91.433 X3.263 Y-0.966 Z0.850(=0.850+0.787*[#51-2.000]+0.213*[#52-2.000])
+  (MillArc l=[28.843 91.433] r=95.874 a0=254.525 a1=252.492 fr=0.850 to=-0.300 p0=[3.263 -0.966] p1=[-0.000 0.000])
+G02 F117.125 I25.581 J92.399 X-0.000 Y0.000 Z-0.300(=-0.300+0.789*[#51-2.000]+0.211*[#52-2.000])
+  (MillArc l=[28.843 91.433] r=95.874 a0=252.492 a1=287.508 fr=-0.300 to=-0.300 p0=[-0.000 0.000] p1=[57.687 0.000])
+G03 F150.000 I28.843 J91.433 X57.687 Y0.000 Z-0.300(=-0.300+0.787*[#51-2.000]+0.213*[#52-2.000])
+  (PullAndSweepHorizontallyFromTo [57.687 0.000 -0.300] [57.687 0.000] s=5.000)
     (DrillOrPullZFromTo -0.300 5.000)
-G00 Z5.000(=5.000+0.787*[#51-2.000]+0.213*[#52-2.000])
-G00 X57.687 Y0.000
+G00 Z5.000(=5.000+0.788*[#52-2.000]+0.212*[#51-2.000])
 G00 Z5.000
   (Fräslänge:     131 mm   ca.  2 min)
   (Bohrungen:       0 mm   ca.  0 min)
-  (Leerfahrten:    66 mm   ca.  1 min)
-  (Summe:         197 mm   ca.  2 min)
-  (Befehlszahl: 10)
+  (Leerfahrten:    73 mm   ca.  1 min)
+  (Summe:         204 mm   ca.  2 min)
+  (Befehlszahl: 12)
 M30
 %");
         Compare("8999.36P_Z.txt", $@"([57.606 242.590]/TH=2.000) #51=
@@ -3377,30 +3425,33 @@ G01 F150.000 X0.000 Y50.000 Z-0.200(=-0.200+0.392*[#51-1.000]+0.391*[#52-1.000]+
   (PullAndSweepHorizontallyFromTo [0.000 50.000 -0.200] [0.000 50.000] s=5.000)
   (MillLine s=[0.000 50.000] e=[20.000 70.000] fr=-0.200 to=-0.200)
 G01 F150.000 X20.000 Y70.000 Z-0.200(=-0.200+0.368*[#53-1.000]+0.365*[#52-1.000]+0.268*[#51-1.000])
-  (PullAndSweepHorizontallyFromTo [20.000 70.000 -0.200] [20.000 70.000] s=5.000)
-    (DrillOrPullZFromTo -0.200 -0.300)
-G01 Z-0.300(=-0.300+0.687*[#53-1.000]+0.186*[#52-1.000]+0.127*[#51-1.000])
-  (MillLine s=[20.000 70.000] e=[0.000 50.000] fr=-0.300 to=-0.300)
-G01 F150.000 X0.000 Y50.000 Z-0.300(=-0.300+0.687*[#53-1.000]+0.186*[#52-1.000]+0.127*[#51-1.000])
-  (PullAndSweepHorizontallyFromTo [0.000 50.000 -0.300] [0.000 50.000] s=5.000)
-  (MillLine s=[0.000 50.000] e=[0.000 20.000] fr=-0.300 to=-0.300)
-G01 F150.000 X0.000 Y20.000 Z-0.300(=-0.300+0.368*[#53-1.000]+0.365*[#52-1.000]+0.268*[#51-1.000])
+  (PullAndSweepHorizontallyFromTo [20.000 70.000 -0.200] [20.000 0.000] s=5.000)
+    (DrillOrPullZFromTo -0.200 5.000)
+G00 Z5.000(=5.000+0.687*[#53-1.000]+0.186*[#52-1.000]+0.127*[#51-1.000])
+G00 X20.000 Y0.000
+    (DrillOrPullZFromTo 5.000 -0.300)
+G00 Z1.000(=1.000+0.606*[#51-1.000]+0.273*[#52-1.000]+0.121*[#53-1.000])
+G01 Z-0.300(=-0.300+0.606*[#51-1.000]+0.273*[#52-1.000]+0.121*[#53-1.000])
+  (MillLine s=[20.000 0.000] e=[0.000 20.000] fr=-0.300 to=-0.300)
+G01 F150.000 X0.000 Y20.000 Z-0.300(=-0.300+0.606*[#51-1.000]+0.273*[#52-1.000]+0.121*[#53-1.000])
   (PullAndSweepHorizontallyFromTo [0.000 20.000 -0.300] [0.000 20.000] s=5.000)
-  (MillLine s=[0.000 20.000] e=[20.000 0.000] fr=-0.300 to=-0.300)
-G01 F150.000 X20.000 Y0.000 Z-0.300(=-0.300+0.392*[#51-1.000]+0.391*[#52-1.000]+0.217*[#53-1.000])
-  (PullAndSweepHorizontallyFromTo [20.000 0.000 -0.300] [20.000 70.000] s=5.000)
+  (MillLine s=[0.000 20.000] e=[0.000 50.000] fr=-0.300 to=-0.300)
+G01 F150.000 X0.000 Y50.000 Z-0.300(=-0.300+0.392*[#51-1.000]+0.391*[#52-1.000]+0.217*[#53-1.000])
+  (PullAndSweepHorizontallyFromTo [0.000 50.000 -0.300] [0.000 50.000] s=5.000)
+  (MillLine s=[0.000 50.000] e=[20.000 70.000] fr=-0.300 to=-0.300)
+G01 F150.000 X20.000 Y70.000 Z-0.300(=-0.300+0.368*[#53-1.000]+0.365*[#52-1.000]+0.268*[#51-1.000])
+  (PullAndSweepHorizontallyFromTo [20.000 70.000 -0.300] [20.000 70.000] s=5.000)
     (DrillOrPullZFromTo -0.300 5.000)
-G00 Z5.000(=5.000+0.606*[#51-1.000]+0.273*[#52-1.000]+0.121*[#53-1.000])
-; G00 X20.000 Y70.000
+G00 Z5.000(=5.000+0.687*[#53-1.000]+0.186*[#52-1.000]+0.127*[#51-1.000])
   (END Subpath 8998.2P[8998.dxf] t=[ [120.000 170.000]=>[20.000 0.000] / [120.000 100.000]=>[20.000 70.000] ])
   (PullAndSweepHorizontallyFromTo [20.000 70.000 5.000] [0.000 70.000] s=5.000)
 G00 X0.000 Y70.000
 G00 Z5.000
   (Fräslänge:     173 mm   ca.  2 min)
-  (Bohrungen:       1 mm   ca.  1 min)
-  (Leerfahrten:    49 mm   ca.  1 min)
-  (Summe:         224 mm   ca.  2 min)
-  (Befehlszahl: 14)
+  (Bohrungen:       2 mm   ca.  1 min)
+  (Leerfahrten:   129 mm   ca.  1 min)
+  (Summe:         304 mm   ca.  3 min)
+  (Befehlszahl: 17)
 M30
 %");
             Compare(tempDir.Combine("8999.37P_Z.txt"), $@"([130.841 109.211]/TH=1.000) #51=
@@ -3607,18 +3658,21 @@ G01 F100.000 X8.580 Y0.000 Z1.400
 G01 F100.000 X0.000 Y0.000 Z0.800
   (MillLine s=[0.000 0.000] e=[30.000 0.000] fr=0.800 to=0.800)
 G01 F100.000 X30.000 Y0.000 Z0.800
-  (PullAndSweepHorizontallyFromTo [30.000 0.000 0.800] [30.000 0.000] s=15.000)
-    (DrillOrPullZFromTo 0.800 -0.300)
-  (MillLine s=[30.000 0.000] e=[21.420 0.000] fr=0.800 to=0.250)
-G01 F100.000 X21.420 Y0.000 Z0.250
-  (MillLine s=[21.420 0.000] e=[30.000 0.000] fr=0.250 to=-0.300)
+  (PullAndSweepHorizontallyFromTo [30.000 0.000 0.800] [0.000 0.000] s=15.000)
+    (DrillOrPullZFromTo 0.800 15.000)
+G00 Z15.000
+G00 X0.000 Y0.000
+    (DrillOrPullZFromTo 15.000 -0.300)
+G00 Z2.000
+  (MillLine s=[0.000 0.000] e=[8.580 0.000] fr=2.000 to=0.850)
+G01 F75.279 X8.580 Y0.000 Z0.850
+  (MillLine s=[8.580 0.000] e=[0.000 0.000] fr=0.850 to=-0.300)
+G01 F75.279 X0.000 Y0.000 Z-0.300
+  (MillLine s=[0.000 0.000] e=[30.000 0.000] fr=-0.300 to=-0.300)
 G01 F100.000 X30.000 Y0.000 Z-0.300
-  (MillLine s=[30.000 0.000] e=[0.000 0.000] fr=-0.300 to=-0.300)
-G01 F100.000 X0.000 Y0.000 Z-0.300
-  (PullAndSweepHorizontallyFromTo [0.000 0.000 -0.300] [30.000 0.000] s=15.000)
+  (PullAndSweepHorizontallyFromTo [30.000 0.000 -0.300] [30.000 0.000] s=15.000)
     (DrillOrPullZFromTo -0.300 15.000)
 G00 Z15.000
-; G00 X30.000 Y0.000
   (PullAndSweepHorizontallyFromTo [30.000 0.000 15.000] [0.000 -11.000] s=15.000)
 G00 X0.000 Y-11.000
   (PullAndSweepHorizontallyFromTo [0.000 -11.000 15.000] [0.000 -11.000] s=15.000)
@@ -3630,18 +3684,21 @@ G01 F100.000 X8.580 Y-11.000 Z1.400
 G01 F100.000 X0.000 Y-11.000 Z0.800
   (MillLine s=[0.000 -11.000] e=[15.000 -11.000] fr=0.800 to=0.800)
 G01 F100.000 X15.000 Y-11.000 Z0.800
-  (PullAndSweepHorizontallyFromTo [15.000 -11.000 0.800] [15.000 -11.000] s=15.000)
-    (DrillOrPullZFromTo 0.800 -0.300)
-  (MillLine s=[15.000 -11.000] e=[6.420 -11.000] fr=0.800 to=0.250)
-G01 F100.000 X6.420 Y-11.000 Z0.250
-  (MillLine s=[6.420 -11.000] e=[15.000 -11.000] fr=0.250 to=-0.300)
+  (PullAndSweepHorizontallyFromTo [15.000 -11.000 0.800] [0.000 -11.000] s=15.000)
+    (DrillOrPullZFromTo 0.800 15.000)
+G00 Z15.000
+G00 X0.000 Y-11.000
+    (DrillOrPullZFromTo 15.000 -0.300)
+G00 Z2.000
+  (MillLine s=[0.000 -11.000] e=[8.580 -11.000] fr=2.000 to=0.850)
+G01 F75.279 X8.580 Y-11.000 Z0.850
+  (MillLine s=[8.580 -11.000] e=[0.000 -11.000] fr=0.850 to=-0.300)
+G01 F75.279 X0.000 Y-11.000 Z-0.300
+  (MillLine s=[0.000 -11.000] e=[15.000 -11.000] fr=-0.300 to=-0.300)
 G01 F100.000 X15.000 Y-11.000 Z-0.300
-  (MillLine s=[15.000 -11.000] e=[0.000 -11.000] fr=-0.300 to=-0.300)
-G01 F100.000 X0.000 Y-11.000 Z-0.300
-  (PullAndSweepHorizontallyFromTo [0.000 -11.000 -0.300] [15.000 -11.000] s=15.000)
+  (PullAndSweepHorizontallyFromTo [15.000 -11.000 -0.300] [15.000 -11.000] s=15.000)
     (DrillOrPullZFromTo -0.300 15.000)
 G00 Z15.000
-; G00 X15.000 Y-11.000
   (PullAndSweepHorizontallyFromTo [15.000 -11.000 15.000] [0.000 -22.000] s=15.000)
 G00 X0.000 Y-22.000
   (PullAndSweepHorizontallyFromTo [0.000 -22.000 15.000] [0.000 -22.000] s=15.000)
@@ -3653,18 +3710,21 @@ G01 F83.931 X5.000 Y-22.000 Z1.400
 G01 F83.931 X0.000 Y-22.000 Z0.800
   (MillLine s=[0.000 -22.000] e=[5.000 -22.000] fr=0.800 to=0.800)
 G01 F100.000 X5.000 Y-22.000 Z0.800
-  (PullAndSweepHorizontallyFromTo [5.000 -22.000 0.800] [5.000 -22.000] s=15.000)
-    (DrillOrPullZFromTo 0.800 -0.300)
-  (MillLine s=[5.000 -22.000] e=[0.000 -22.000] fr=0.800 to=0.250)
-G01 F91.457 X0.000 Y-22.000 Z0.250
-  (MillLine s=[0.000 -22.000] e=[5.000 -22.000] fr=0.250 to=-0.300)
-G01 F91.457 X5.000 Y-22.000 Z-0.300
-  (MillLine s=[5.000 -22.000] e=[0.000 -22.000] fr=-0.300 to=-0.300)
-G01 F100.000 X0.000 Y-22.000 Z-0.300
-  (PullAndSweepHorizontallyFromTo [0.000 -22.000 -0.300] [5.000 -22.000] s=15.000)
+  (PullAndSweepHorizontallyFromTo [5.000 -22.000 0.800] [0.000 -22.000] s=15.000)
+    (DrillOrPullZFromTo 0.800 15.000)
+G00 Z15.000
+G00 X0.000 Y-22.000
+    (DrillOrPullZFromTo 15.000 -0.300)
+G00 Z2.000
+  (MillLine s=[0.000 -22.000] e=[5.000 -22.000] fr=2.000 to=0.850)
+G01 F44.613 X5.000 Y-22.000 Z0.850
+  (MillLine s=[5.000 -22.000] e=[0.000 -22.000] fr=0.850 to=-0.300)
+G01 F44.613 X0.000 Y-22.000 Z-0.300
+  (MillLine s=[0.000 -22.000] e=[5.000 -22.000] fr=-0.300 to=-0.300)
+G01 F100.000 X5.000 Y-22.000 Z-0.300
+  (PullAndSweepHorizontallyFromTo [5.000 -22.000 -0.300] [5.000 -22.000] s=15.000)
     (DrillOrPullZFromTo -0.300 15.000)
 G00 Z15.000
-; G00 X5.000 Y-22.000
   (PullAndSweepHorizontallyFromTo [5.000 -22.000 15.000] [0.000 -33.000] s=15.000)
 G00 X0.000 Y-33.000
   (PullAndSweepHorizontallyFromTo [0.000 -33.000 15.000] [0.000 -33.000] s=15.000)
@@ -3676,18 +3736,21 @@ G01 F34.801 X2.000 Y-33.000 Z1.400
 G01 F34.801 X0.000 Y-33.000 Z0.800
   (MillLine s=[0.000 -33.000] e=[2.000 -33.000] fr=0.800 to=0.800)
 G01 F100.000 X2.000 Y-33.000 Z0.800
-  (PullAndSweepHorizontallyFromTo [2.000 -33.000 0.800] [2.000 -33.000] s=15.000)
-    (DrillOrPullZFromTo 0.800 -0.300)
-  (MillLine s=[2.000 -33.000] e=[0.000 -33.000] fr=0.800 to=0.250)
-G01 F37.714 X0.000 Y-33.000 Z0.250
-  (MillLine s=[0.000 -33.000] e=[2.000 -33.000] fr=0.250 to=-0.300)
-G01 F37.714 X2.000 Y-33.000 Z-0.300
-  (MillLine s=[2.000 -33.000] e=[0.000 -33.000] fr=-0.300 to=-0.300)
-G01 F100.000 X0.000 Y-33.000 Z-0.300
-  (PullAndSweepHorizontallyFromTo [0.000 -33.000 -0.300] [2.000 -33.000] s=15.000)
+  (PullAndSweepHorizontallyFromTo [2.000 -33.000 0.800] [0.000 -33.000] s=15.000)
+    (DrillOrPullZFromTo 0.800 15.000)
+G00 Z15.000
+G00 X0.000 Y-33.000
+    (DrillOrPullZFromTo 15.000 -0.300)
+G00 Z2.000
+  (MillLine s=[0.000 -33.000] e=[2.000 -33.000] fr=2.000 to=0.850)
+G01 F20.061 X2.000 Y-33.000 Z0.850
+  (MillLine s=[2.000 -33.000] e=[0.000 -33.000] fr=0.850 to=-0.300)
+G01 F20.061 X0.000 Y-33.000 Z-0.300
+  (MillLine s=[0.000 -33.000] e=[2.000 -33.000] fr=-0.300 to=-0.300)
+G01 F100.000 X2.000 Y-33.000 Z-0.300
+  (PullAndSweepHorizontallyFromTo [2.000 -33.000 -0.300] [2.000 -33.000] s=15.000)
     (DrillOrPullZFromTo -0.300 15.000)
 G00 Z15.000
-; G00 X2.000 Y-33.000
   (PullAndSweepHorizontallyFromTo [2.000 -33.000 15.000] [0.000 -44.000] s=15.000)
 G00 X0.000 Y-44.000
   (PullAndSweepHorizontallyFromTo [0.000 -44.000 15.000] [0.000 -44.000] s=15.000)
@@ -3699,18 +3762,21 @@ G01 F19.437 X1.000 Y-44.000 Z1.400
 G01 F19.437 X0.000 Y-44.000 Z0.800
   (MillLine s=[0.000 -44.000] e=[1.000 -44.000] fr=0.800 to=0.800)
 G01 F100.000 X1.000 Y-44.000 Z0.800
-  (PullAndSweepHorizontallyFromTo [1.000 -44.000 0.800] [1.000 -44.000] s=15.000)
-    (DrillOrPullZFromTo 0.800 -0.300)
-  (MillLine s=[1.000 -44.000] e=[0.000 -44.000] fr=0.800 to=0.250)
-G01 F20.750 X0.000 Y-44.000 Z0.250
-  (MillLine s=[0.000 -44.000] e=[1.000 -44.000] fr=0.250 to=-0.300)
-G01 F20.750 X1.000 Y-44.000 Z-0.300
-  (MillLine s=[1.000 -44.000] e=[0.000 -44.000] fr=-0.300 to=-0.300)
-G01 F100.000 X0.000 Y-44.000 Z-0.300
-  (PullAndSweepHorizontallyFromTo [0.000 -44.000 -0.300] [1.000 -44.000] s=15.000)
+  (PullAndSweepHorizontallyFromTo [1.000 -44.000 0.800] [0.000 -44.000] s=15.000)
+    (DrillOrPullZFromTo 0.800 15.000)
+G00 Z15.000
+G00 X0.000 Y-44.000
+    (DrillOrPullZFromTo 15.000 -0.300)
+G00 Z2.000
+  (MillLine s=[0.000 -44.000] e=[1.000 -44.000] fr=2.000 to=0.850)
+G01 F13.252 X1.000 Y-44.000 Z0.850
+  (MillLine s=[1.000 -44.000] e=[0.000 -44.000] fr=0.850 to=-0.300)
+G01 F13.252 X0.000 Y-44.000 Z-0.300
+  (MillLine s=[0.000 -44.000] e=[1.000 -44.000] fr=-0.300 to=-0.300)
+G01 F100.000 X1.000 Y-44.000 Z-0.300
+  (PullAndSweepHorizontallyFromTo [1.000 -44.000 -0.300] [1.000 -44.000] s=15.000)
     (DrillOrPullZFromTo -0.300 15.000)
 G00 Z15.000
-; G00 X1.000 Y-44.000
   (PullAndSweepHorizontallyFromTo [1.000 -44.000 15.000] [0.000 -55.000] s=15.000)
 G00 X0.000 Y-55.000
   (PullAndSweepHorizontallyFromTo [0.000 -55.000 15.000] [0.000 -55.000] s=15.000)
@@ -3722,26 +3788,29 @@ G01 F10.138 X0.100 Y-55.000 Z1.400
 G01 F10.138 X0.000 Y-55.000 Z0.800
   (MillLine s=[0.000 -55.000] e=[0.100 -55.000] fr=0.800 to=0.800)
 G01 F100.000 X0.100 Y-55.000 Z0.800
-  (PullAndSweepHorizontallyFromTo [0.100 -55.000 0.800] [0.100 -55.000] s=15.000)
-    (DrillOrPullZFromTo 0.800 -0.300)
-  (MillLine s=[0.100 -55.000] e=[0.000 -55.000] fr=0.800 to=0.250)
-G01 F10.164 X0.000 Y-55.000 Z0.250
-  (MillLine s=[0.000 -55.000] e=[0.100 -55.000] fr=0.250 to=-0.300)
-G01 F10.164 X0.100 Y-55.000 Z-0.300
-  (MillLine s=[0.100 -55.000] e=[0.000 -55.000] fr=-0.300 to=-0.300)
-G01 F100.000 X0.000 Y-55.000 Z-0.300
-  (PullAndSweepHorizontallyFromTo [0.000 -55.000 -0.300] [0.100 -55.000] s=15.000)
+  (PullAndSweepHorizontallyFromTo [0.100 -55.000 0.800] [0.000 -55.000] s=15.000)
+    (DrillOrPullZFromTo 0.800 15.000)
+G00 Z15.000
+G00 X0.000 Y-55.000
+    (DrillOrPullZFromTo 15.000 -0.300)
+G00 Z2.000
+  (MillLine s=[0.000 -55.000] e=[0.100 -55.000] fr=2.000 to=0.850)
+G01 F10.038 X0.100 Y-55.000 Z0.850
+  (MillLine s=[0.100 -55.000] e=[0.000 -55.000] fr=0.850 to=-0.300)
+G01 F10.038 X0.000 Y-55.000 Z-0.300
+  (MillLine s=[0.000 -55.000] e=[0.100 -55.000] fr=-0.300 to=-0.300)
+G01 F100.000 X0.100 Y-55.000 Z-0.300
+  (PullAndSweepHorizontallyFromTo [0.100 -55.000 -0.300] [0.100 -55.000] s=15.000)
     (DrillOrPullZFromTo -0.300 15.000)
 G00 Z15.000
-; G00 X0.100 Y-55.000
   (PullAndSweepHorizontallyFromTo [0.100 -55.000 15.000] [10.000 -55.000] s=15.000)
 G00 X10.000 Y-55.000
 G00 Z15.000
   (Fräslänge:     207 mm   ca.  4 min)
   (Bohrungen:       0 mm   ca.  0 min)
-  (Leerfahrten:   265 mm   ca.  1 min)
-  (Summe:         472 mm   ca.  5 min)
-  (Befehlszahl: 55)
+  (Leerfahrten:   481 mm   ca.  2 min)
+  (Summe:         688 mm   ca.  6 min)
+  (Befehlszahl: 73)
 M30
 %");
     }
@@ -3772,21 +3841,24 @@ G02 F100.000 I13.229 J-15.000 X26.458 Y-0.000 Z0.800
   (PullAndSweepHorizontallyFromTo [26.458 -0.000 0.800] [26.458 0.000] s=15.000)
   (MillArc l=[35.118 -5.000] r=10.000 a0=150.000 a1=90.000 fr=0.800 to=0.800 p0=[26.458 0.000] p1=[35.118 5.000])
 G02 F100.000 I8.660 J-5.000 X35.118 Y5.000 Z0.800
-  (PullAndSweepHorizontallyFromTo [35.118 5.000 0.800] [35.118 5.000] s=15.000)
-    (DrillOrPullZFromTo 0.800 -0.300)
-  (MillArc l=[35.118 -5.000] r=10.000 a0=90.000 a1=139.162 fr=0.800 to=0.250 p0=[35.118 5.000] p1=[27.552 1.539])
-G03 F100.000 I0.000 J-10.000 X27.552 Y1.539 Z0.250
-  (MillArc l=[35.118 -5.000] r=10.000 a0=139.162 a1=90.000 fr=0.250 to=-0.300 p0=[27.552 1.539] p1=[35.118 5.000])
-G02 F100.000 I7.566 J-6.539 X35.118 Y5.000 Z-0.300
-  (MillArc l=[35.118 -5.000] r=10.000 a0=90.000 a1=150.000 fr=-0.300 to=-0.300 p0=[35.118 5.000] p1=[26.458 0.000])
-G03 F100.000 I0.000 J-10.000 X26.458 Y0.000 Z-0.300
-  (PullAndSweepHorizontallyFromTo [26.458 0.000 -0.300] [26.458 -0.000] s=15.000)
-  (MillArc l=[13.229 -15.000] r=20.000 a0=48.590 a1=131.410 fr=-0.300 to=-0.300 p0=[26.458 -0.000] p1=[-0.000 -0.000])
-G03 F100.000 I-13.229 J-15.000 X-0.000 Y-0.000 Z-0.300
-  (PullAndSweepHorizontallyFromTo [-0.000 -0.000 -0.300] [35.118 5.000] s=15.000)
+  (PullAndSweepHorizontallyFromTo [35.118 5.000 0.800] [-0.000 -0.000] s=15.000)
+    (DrillOrPullZFromTo 0.800 15.000)
+G00 Z15.000
+G00 X-0.000 Y-0.000
+    (DrillOrPullZFromTo 15.000 -0.300)
+G00 Z2.000
+  (MillArc l=[13.229 -15.000] r=20.000 a0=131.410 a1=106.829 fr=2.000 to=0.850 p0=[-0.000 -0.000] p1=[7.439 4.144])
+G02 F75.279 I13.229 J-15.000 X7.439 Y4.144 Z0.850
+  (MillArc l=[13.229 -15.000] r=20.000 a0=106.829 a1=131.410 fr=0.850 to=-0.300 p0=[7.439 4.144] p1=[-0.000 -0.000])
+G03 F75.279 I5.790 J-19.144 X-0.000 Y-0.000 Z-0.300
+  (MillArc l=[13.229 -15.000] r=20.000 a0=131.410 a1=48.590 fr=-0.300 to=-0.300 p0=[-0.000 -0.000] p1=[26.458 -0.000])
+G02 F100.000 I13.229 J-15.000 X26.458 Y-0.000 Z-0.300
+  (PullAndSweepHorizontallyFromTo [26.458 -0.000 -0.300] [26.458 0.000] s=15.000)
+  (MillArc l=[35.118 -5.000] r=10.000 a0=150.000 a1=90.000 fr=-0.300 to=-0.300 p0=[26.458 0.000] p1=[35.118 5.000])
+G02 F100.000 I8.660 J-5.000 X35.118 Y5.000 Z-0.300
+  (PullAndSweepHorizontallyFromTo [35.118 5.000 -0.300] [35.118 5.000] s=15.000)
     (DrillOrPullZFromTo -0.300 15.000)
 G00 Z15.000
-; G00 X35.118 Y5.000
   (PullAndSweepHorizontallyFromTo [35.118 5.000 15.000] [0.000 -22.000] s=15.000)
 G00 X0.000 Y-22.000
   (PullAndSweepHorizontallyFromTo [0.000 -22.000 15.000] [-0.000 -22.000] s=15.000)
@@ -3801,21 +3873,24 @@ G02 F100.000 I13.229 J-15.000 X26.458 Y-22.000 Z0.800
   (PullAndSweepHorizontallyFromTo [26.458 -22.000 0.800] [26.458 -22.000] s=15.000)
   (MillArc l=[35.118 -27.000] r=10.000 a0=150.000 a1=90.000 fr=0.800 to=0.800 p0=[26.458 -22.000] p1=[35.118 -17.000])
 G02 F100.000 I8.660 J-5.000 X35.118 Y-17.000 Z0.800
-  (PullAndSweepHorizontallyFromTo [35.118 -17.000 0.800] [35.118 -17.000] s=15.000)
-    (DrillOrPullZFromTo 0.800 -0.300)
-  (MillArc l=[35.118 -27.000] r=10.000 a0=90.000 a1=114.461 fr=0.800 to=0.250 p0=[35.118 -17.000] p1=[30.977 -17.898])
-G03 F78.264 I0.000 J-10.000 X30.977 Y-17.898 Z0.250
-  (MillArc l=[35.118 -27.000] r=10.000 a0=114.461 a1=90.000 fr=0.250 to=-0.300 p0=[30.977 -17.898] p1=[35.118 -17.000])
-G02 F78.264 I4.141 J-9.102 X35.118 Y-17.000 Z-0.300
-  (MillArc l=[35.118 -27.000] r=10.000 a0=90.000 a1=150.000 fr=-0.300 to=-0.300 p0=[35.118 -17.000] p1=[26.458 -22.000])
-G03 F100.000 I0.000 J-10.000 X26.458 Y-22.000 Z-0.300
+  (PullAndSweepHorizontallyFromTo [35.118 -17.000 0.800] [-0.000 -22.000] s=15.000)
+    (DrillOrPullZFromTo 0.800 15.000)
+G00 Z15.000
+G00 X-0.000 Y-22.000
+    (DrillOrPullZFromTo 15.000 -0.300)
+G00 Z2.000
+  (MillArc l=[13.229 -37.000] r=20.000 a0=131.410 a1=119.179 fr=2.000 to=0.850 p0=[-0.000 -22.000] p1=[3.478 -19.538])
+G02 F38.447 I13.229 J-15.000 X3.478 Y-19.538 Z0.850
+  (MillArc l=[13.229 -37.000] r=20.000 a0=119.179 a1=131.410 fr=0.850 to=-0.300 p0=[3.478 -19.538] p1=[-0.000 -22.000])
+G03 F38.447 I9.751 J-17.462 X-0.000 Y-22.000 Z-0.300
+  (MillArc l=[13.229 -37.000] r=20.000 a0=131.410 a1=48.590 fr=-0.300 to=-0.300 p0=[-0.000 -22.000] p1=[26.458 -22.000])
+G02 F100.000 I13.229 J-15.000 X26.458 Y-22.000 Z-0.300
   (PullAndSweepHorizontallyFromTo [26.458 -22.000 -0.300] [26.458 -22.000] s=15.000)
-  (MillArc l=[13.229 -37.000] r=20.000 a0=48.590 a1=131.410 fr=-0.300 to=-0.300 p0=[26.458 -22.000] p1=[-0.000 -22.000])
-G03 F100.000 I-13.229 J-15.000 X-0.000 Y-22.000 Z-0.300
-  (PullAndSweepHorizontallyFromTo [-0.000 -22.000 -0.300] [35.118 -17.000] s=15.000)
+  (MillArc l=[35.118 -27.000] r=10.000 a0=150.000 a1=90.000 fr=-0.300 to=-0.300 p0=[26.458 -22.000] p1=[35.118 -17.000])
+G02 F100.000 I8.660 J-5.000 X35.118 Y-17.000 Z-0.300
+  (PullAndSweepHorizontallyFromTo [35.118 -17.000 -0.300] [35.118 -17.000] s=15.000)
     (DrillOrPullZFromTo -0.300 15.000)
 G00 Z15.000
-; G00 X35.118 Y-17.000
   (PullAndSweepHorizontallyFromTo [35.118 -17.000 15.000] [0.000 -33.000] s=15.000)
 G00 X0.000 Y-33.000
   (PullAndSweepHorizontallyFromTo [0.000 -33.000 15.000] [-0.000 -33.000] s=15.000)
@@ -3830,21 +3905,24 @@ G02 F100.000 I13.229 J-15.000 X26.458 Y-33.000 Z0.800
   (PullAndSweepHorizontallyFromTo [26.458 -33.000 0.800] [26.458 -33.000] s=15.000)
   (MillArc l=[35.118 -38.000] r=10.000 a0=150.000 a1=90.000 fr=0.800 to=0.800 p0=[26.458 -33.000] p1=[35.118 -28.000])
 G02 F100.000 I8.660 J-5.000 X35.118 Y-28.000 Z0.800
-  (PullAndSweepHorizontallyFromTo [35.118 -28.000 0.800] [35.118 -28.000] s=15.000)
-    (DrillOrPullZFromTo 0.800 -0.300)
-  (MillArc l=[35.118 -38.000] r=10.000 a0=90.000 a1=101.989 fr=0.800 to=0.250 p0=[35.118 -28.000] p1=[33.041 -28.218])
-G03 F39.337 I0.000 J-10.000 X33.041 Y-28.218 Z0.250
-  (MillArc l=[35.118 -38.000] r=10.000 a0=101.989 a1=90.000 fr=0.250 to=-0.300 p0=[33.041 -28.218] p1=[35.118 -28.000])
-G02 F39.337 I2.077 J-9.782 X35.118 Y-28.000 Z-0.300
-  (MillArc l=[35.118 -38.000] r=10.000 a0=90.000 a1=150.000 fr=-0.300 to=-0.300 p0=[35.118 -28.000] p1=[26.458 -33.000])
-G03 F100.000 I0.000 J-10.000 X26.458 Y-33.000 Z-0.300
+  (PullAndSweepHorizontallyFromTo [35.118 -28.000 0.800] [-0.000 -33.000] s=15.000)
+    (DrillOrPullZFromTo 0.800 15.000)
+G00 Z15.000
+G00 X-0.000 Y-33.000
+    (DrillOrPullZFromTo 15.000 -0.300)
+G00 Z2.000
+  (MillArc l=[13.229 -48.000] r=20.000 a0=131.410 a1=125.415 fr=2.000 to=0.850 p0=[-0.000 -33.000] p1=[1.639 -31.701])
+G02 F20.762 I13.229 J-15.000 X1.639 Y-31.701 Z0.850
+  (MillArc l=[13.229 -48.000] r=20.000 a0=125.415 a1=131.410 fr=0.850 to=-0.300 p0=[1.639 -31.701] p1=[-0.000 -33.000])
+G03 F20.762 I11.590 J-16.299 X-0.000 Y-33.000 Z-0.300
+  (MillArc l=[13.229 -48.000] r=20.000 a0=131.410 a1=48.590 fr=-0.300 to=-0.300 p0=[-0.000 -33.000] p1=[26.458 -33.000])
+G02 F100.000 I13.229 J-15.000 X26.458 Y-33.000 Z-0.300
   (PullAndSweepHorizontallyFromTo [26.458 -33.000 -0.300] [26.458 -33.000] s=15.000)
-  (MillArc l=[13.229 -48.000] r=20.000 a0=48.590 a1=131.410 fr=-0.300 to=-0.300 p0=[26.458 -33.000] p1=[-0.000 -33.000])
-G03 F100.000 I-13.229 J-15.000 X-0.000 Y-33.000 Z-0.300
-  (PullAndSweepHorizontallyFromTo [-0.000 -33.000 -0.300] [35.118 -28.000] s=15.000)
+  (MillArc l=[35.118 -38.000] r=10.000 a0=150.000 a1=90.000 fr=-0.300 to=-0.300 p0=[26.458 -33.000] p1=[35.118 -28.000])
+G02 F100.000 I8.660 J-5.000 X35.118 Y-28.000 Z-0.300
+  (PullAndSweepHorizontallyFromTo [35.118 -28.000 -0.300] [35.118 -28.000] s=15.000)
     (DrillOrPullZFromTo -0.300 15.000)
 G00 Z15.000
-; G00 X35.118 Y-28.000
   (PullAndSweepHorizontallyFromTo [35.118 -28.000 15.000] [0.000 -44.000] s=15.000)
 G00 X0.000 Y-44.000
   (PullAndSweepHorizontallyFromTo [0.000 -44.000 15.000] [-0.000 -44.000] s=15.000)
@@ -3859,21 +3937,24 @@ G02 F100.000 I13.229 J-15.000 X26.458 Y-44.000 Z0.800
   (PullAndSweepHorizontallyFromTo [26.458 -44.000 0.800] [26.458 -44.000] s=15.000)
   (MillArc l=[35.118 -49.000] r=10.000 a0=150.000 a1=90.000 fr=0.800 to=0.800 p0=[26.458 -44.000] p1=[35.118 -39.000])
 G02 F100.000 I8.660 J-5.000 X35.118 Y-39.000 Z0.800
-  (PullAndSweepHorizontallyFromTo [35.118 -39.000 0.800] [35.118 -39.000] s=15.000)
-    (DrillOrPullZFromTo 0.800 -0.300)
-  (MillArc l=[35.118 -49.000] r=10.000 a0=90.000 a1=95.502 fr=0.800 to=0.250 p0=[35.118 -39.000] p1=[34.159 -39.046])
-G03 F20.119 I0.000 J-10.000 X34.159 Y-39.046 Z0.250
-  (MillArc l=[35.118 -49.000] r=10.000 a0=95.502 a1=90.000 fr=0.250 to=-0.300 p0=[34.159 -39.046] p1=[35.118 -39.000])
-G02 F20.119 I0.959 J-9.954 X35.118 Y-39.000 Z-0.300
-  (MillArc l=[35.118 -49.000] r=10.000 a0=90.000 a1=150.000 fr=-0.300 to=-0.300 p0=[35.118 -39.000] p1=[26.458 -44.000])
-G03 F100.000 I0.000 J-10.000 X26.458 Y-44.000 Z-0.300
+  (PullAndSweepHorizontallyFromTo [35.118 -39.000 0.800] [-0.000 -44.000] s=15.000)
+    (DrillOrPullZFromTo 0.800 15.000)
+G00 Z15.000
+G00 X-0.000 Y-44.000
+    (DrillOrPullZFromTo 15.000 -0.300)
+G00 Z2.000
+  (MillArc l=[13.229 -59.000] r=20.000 a0=131.410 a1=128.659 fr=2.000 to=0.850 p0=[-0.000 -44.000] p1=[0.735 -43.382])
+G02 F13.027 I13.229 J-15.000 X0.735 Y-43.382 Z0.850
+  (MillArc l=[13.229 -59.000] r=20.000 a0=128.659 a1=131.410 fr=0.850 to=-0.300 p0=[0.735 -43.382] p1=[-0.000 -44.000])
+G03 F13.027 I12.494 J-15.618 X-0.000 Y-44.000 Z-0.300
+  (MillArc l=[13.229 -59.000] r=20.000 a0=131.410 a1=48.590 fr=-0.300 to=-0.300 p0=[-0.000 -44.000] p1=[26.458 -44.000])
+G02 F100.000 I13.229 J-15.000 X26.458 Y-44.000 Z-0.300
   (PullAndSweepHorizontallyFromTo [26.458 -44.000 -0.300] [26.458 -44.000] s=15.000)
-  (MillArc l=[13.229 -59.000] r=20.000 a0=48.590 a1=131.410 fr=-0.300 to=-0.300 p0=[26.458 -44.000] p1=[-0.000 -44.000])
-G03 F100.000 I-13.229 J-15.000 X-0.000 Y-44.000 Z-0.300
-  (PullAndSweepHorizontallyFromTo [-0.000 -44.000 -0.300] [35.118 -39.000] s=15.000)
+  (MillArc l=[35.118 -49.000] r=10.000 a0=150.000 a1=90.000 fr=-0.300 to=-0.300 p0=[26.458 -44.000] p1=[35.118 -39.000])
+G02 F100.000 I8.660 J-5.000 X35.118 Y-39.000 Z-0.300
+  (PullAndSweepHorizontallyFromTo [35.118 -39.000 -0.300] [35.118 -39.000] s=15.000)
     (DrillOrPullZFromTo -0.300 15.000)
 G00 Z15.000
-; G00 X35.118 Y-39.000
   (PullAndSweepHorizontallyFromTo [35.118 -39.000 15.000] [0.000 -55.000] s=15.000)
 G00 X0.000 Y-55.000
   (PullAndSweepHorizontallyFromTo [0.000 -55.000 15.000] [-0.000 -55.000] s=15.000)
@@ -3888,21 +3969,24 @@ G02 F100.000 I13.229 J-15.000 X26.458 Y-55.000 Z0.800
   (PullAndSweepHorizontallyFromTo [26.458 -55.000 0.800] [26.458 -55.000] s=15.000)
   (MillArc l=[35.118 -60.000] r=10.000 a0=150.000 a1=90.000 fr=0.800 to=0.800 p0=[26.458 -55.000] p1=[35.118 -50.000])
 G02 F100.000 I8.660 J-5.000 X35.118 Y-50.000 Z0.800
-  (PullAndSweepHorizontallyFromTo [35.118 -50.000 0.800] [35.118 -50.000] s=15.000)
-    (DrillOrPullZFromTo 0.800 -0.300)
-  (MillArc l=[35.118 -60.000] r=10.000 a0=90.000 a1=91.677 fr=0.800 to=0.250 p0=[35.118 -50.000] p1=[34.825 -50.004])
-G03 F11.327 I0.000 J-10.000 X34.825 Y-50.004 Z0.250
-  (MillArc l=[35.118 -60.000] r=10.000 a0=91.677 a1=90.000 fr=0.250 to=-0.300 p0=[34.825 -50.004] p1=[35.118 -50.000])
-G02 F11.327 I0.293 J-9.996 X35.118 Y-50.000 Z-0.300
-  (MillArc l=[35.118 -60.000] r=10.000 a0=90.000 a1=150.000 fr=-0.300 to=-0.300 p0=[35.118 -50.000] p1=[26.458 -55.000])
-G03 F100.000 I0.000 J-10.000 X26.458 Y-55.000 Z-0.300
+  (PullAndSweepHorizontallyFromTo [35.118 -50.000 0.800] [-0.000 -55.000] s=15.000)
+    (DrillOrPullZFromTo 0.800 15.000)
+G00 Z15.000
+G00 X-0.000 Y-55.000
+    (DrillOrPullZFromTo 15.000 -0.300)
+G00 Z2.000
+  (MillArc l=[13.229 -70.000] r=20.000 a0=131.410 a1=130.571 fr=2.000 to=0.850 p0=[-0.000 -55.000] p1=[0.221 -54.808])
+G02 F10.319 I13.229 J-15.000 X0.221 Y-54.808 Z0.850
+  (MillArc l=[13.229 -70.000] r=20.000 a0=130.571 a1=131.410 fr=0.850 to=-0.300 p0=[0.221 -54.808] p1=[-0.000 -55.000])
+G03 F10.319 I13.008 J-15.192 X-0.000 Y-55.000 Z-0.300
+  (MillArc l=[13.229 -70.000] r=20.000 a0=131.410 a1=48.590 fr=-0.300 to=-0.300 p0=[-0.000 -55.000] p1=[26.458 -55.000])
+G02 F100.000 I13.229 J-15.000 X26.458 Y-55.000 Z-0.300
   (PullAndSweepHorizontallyFromTo [26.458 -55.000 -0.300] [26.458 -55.000] s=15.000)
-  (MillArc l=[13.229 -70.000] r=20.000 a0=48.590 a1=131.410 fr=-0.300 to=-0.300 p0=[26.458 -55.000] p1=[-0.000 -55.000])
-G03 F100.000 I-13.229 J-15.000 X-0.000 Y-55.000 Z-0.300
-  (PullAndSweepHorizontallyFromTo [-0.000 -55.000 -0.300] [35.118 -50.000] s=15.000)
+  (MillArc l=[35.118 -60.000] r=10.000 a0=150.000 a1=90.000 fr=-0.300 to=-0.300 p0=[26.458 -55.000] p1=[35.118 -50.000])
+G02 F100.000 I8.660 J-5.000 X35.118 Y-50.000 Z-0.300
+  (PullAndSweepHorizontallyFromTo [35.118 -50.000 -0.300] [35.118 -50.000] s=15.000)
     (DrillOrPullZFromTo -0.300 15.000)
 G00 Z15.000
-; G00 X35.118 Y-50.000
   (PullAndSweepHorizontallyFromTo [35.118 -50.000 15.000] [0.000 -66.000] s=15.000)
 G00 X0.000 Y-66.000
   (PullAndSweepHorizontallyFromTo [0.000 -66.000 15.000] [-0.000 -66.000] s=15.000)
@@ -3914,24 +3998,27 @@ G02 F100.000 I13.229 J-15.000 X26.458 Y-66.000 Z0.800
   (PullAndSweepHorizontallyFromTo [26.458 -66.000 0.800] [26.458 -66.000] s=15.000)
   (MillArc l=[35.118 -71.000] r=10.000 a0=150.000 a1=90.000 fr=0.800 to=0.800 p0=[26.458 -66.000] p1=[35.118 -61.000])
 G02 F100.000 I8.660 J-5.000 X35.118 Y-61.000 Z0.800
-  (PullAndSweepHorizontallyFromTo [35.118 -61.000 0.800] [35.118 -61.000] s=15.000)
-    (DrillOrPullZFromTo 0.800 -0.300)
+  (PullAndSweepHorizontallyFromTo [35.118 -61.000 0.800] [-0.000 -66.000] s=15.000)
+    (DrillOrPullZFromTo 0.800 15.000)
+G00 Z15.000
+G00 X-0.000 Y-66.000
+    (DrillOrPullZFromTo 15.000 -0.300)
+G00 Z2.000
 G01 Z-0.300
-  (MillArc l=[35.118 -71.000] r=10.000 a0=90.000 a1=150.000 fr=-0.300 to=-0.300 p0=[35.118 -61.000] p1=[26.458 -66.000])
-G03 F100.000 I0.000 J-10.000 X26.458 Y-66.000 Z-0.300
+  (MillArc l=[13.229 -81.000] r=20.000 a0=131.410 a1=48.590 fr=-0.300 to=-0.300 p0=[-0.000 -66.000] p1=[26.458 -66.000])
+G02 F100.000 I13.229 J-15.000 X26.458 Y-66.000 Z-0.300
   (PullAndSweepHorizontallyFromTo [26.458 -66.000 -0.300] [26.458 -66.000] s=15.000)
-  (MillArc l=[13.229 -81.000] r=20.000 a0=48.590 a1=131.410 fr=-0.300 to=-0.300 p0=[26.458 -66.000] p1=[-0.000 -66.000])
-G03 F100.000 I-13.229 J-15.000 X-0.000 Y-66.000 Z-0.300
-  (PullAndSweepHorizontallyFromTo [-0.000 -66.000 -0.300] [35.118 -61.000] s=15.000)
+  (MillArc l=[35.118 -71.000] r=10.000 a0=150.000 a1=90.000 fr=-0.300 to=-0.300 p0=[26.458 -66.000] p1=[35.118 -61.000])
+G02 F100.000 I8.660 J-5.000 X35.118 Y-61.000 Z-0.300
+  (PullAndSweepHorizontallyFromTo [35.118 -61.000 -0.300] [35.118 -61.000] s=15.000)
     (DrillOrPullZFromTo -0.300 15.000)
 G00 Z15.000
-G00 X35.118 Y-61.000
 G00 Z15.000
   (Fräslänge:     537 mm   ca.  9 min)
-  (Bohrungen:       2 mm   ca.  1 min)
-  (Leerfahrten:   404 mm   ca.  2 min)
-  (Summe:         944 mm   ca. 10 min)
-  (Befehlszahl: 65)
+  (Bohrungen:       4 mm   ca.  1 min)
+  (Leerfahrten:   744 mm   ca.  3 min)
+  (Summe:        1285 mm   ca. 12 min)
+  (Befehlszahl: 82)
 M30
 %");
     }
