@@ -85,6 +85,7 @@ public class DrillGCode : GCode {
         stats.AddDrillLength(_lg_mm, _g_mmpmin);
     }
 }
+
 public class OtherGCode : GCode {
     public override char Letter => DEFAULT_LETTER;
 

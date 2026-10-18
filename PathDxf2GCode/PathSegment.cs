@@ -270,11 +270,11 @@ public class MillChain : PathSegment {
                 Vector3 NearestMillingTip() => nearestConnectAtStart ? nearest!.Start(t) : nearest!.End(t);
 
                 foreach (var candidate in edges.Where(e => e.TopUnmilled)) {
-                    double distToCandidateStart_mm = headPos.Distance(candidate.Start(t));
-                    double distToCandidateEnd_mm = headPos.Distance(candidate.End(t));
+                    double distToCandidateStart_mm = headPos.EdgeDistanceTo(candidate.Start(t));
+                    double distToCandidateEnd_mm = headPos.EdgeDistanceTo(candidate.End(t));
                     bool candStartIsNearer = distToCandidateStart_mm.Lt(distToCandidateEnd_mm);
                     double distToNearerCandidateTip = candStartIsNearer ? distToCandidateStart_mm : distToCandidateEnd_mm;
-                    if (nearest == null || distToNearerCandidateTip.Lt(headPos.Distance(NearestMillingTip()))) {
+                    if (nearest == null || distToNearerCandidateTip.Lt(headPos.EdgeDistanceTo(NearestMillingTip()))) {
                         nearest = candidate;
                         nearestConnectAtStart = candStartIsNearer;
                     }
@@ -285,8 +285,10 @@ public class MillChain : PathSegment {
                     // ensure that pieces that are, in their milled state, fastened at only a few extreme
                     // points are not "freed" at an unexpected place - where they might "wobble" into the
                     // milling bit and get damaged, or damage the bit.
-                    // Thus, such edeges get an infinite candidate distance to its End point, so that only
-                    // their Start point is found as a connection point for continuing milling.
+                    // Algorithmically, if only an edge with botteom <= 0 is found that would be milled from
+                    // the end, instead we start searching for unmilled edges in edgesBySegment, i.e., along
+                    // the segment order. There must be such an edge, as we found jsut one (only with wrong
+                    // orientation).
                     nearest = edgesBySegment.SelectMany(e => e).First(e => e.Milled == EdgeMilled.Unknown);
                     nearestConnectAtStart = true;
                 }
@@ -597,7 +599,7 @@ public class HelixSegment : MarkOrMillPathSegment<HelixSegment.RawSegment, Helix
         // First, we mill as long as we can mill complete circles (actually,two semicircles).
         {
             double helixCircumference_mm = 2 * millingRadius_mm * Math.PI;
-            double helixInfeed_mm = Math.Max(helixCircumference_mm * Math.Tan(_params.J_deg * MathHelper.DegToRad), infeed_mm);
+            double helixInfeed_mm = infeed_mm;
             double speed_mmpmin = _params.Speed_mmpmin(helixInfeed_mm, helixCircumference_mm);
 
             for (double d_mm = th_mm; done_mm.Gt(fullMillBottom_mm); d_mm -= helixInfeed_mm) {
@@ -690,7 +692,7 @@ public class DrillSegment : MarkOrMillPathSegment<DrillSegment.RawSegment, Drill
         gcodes.AddComment($"Drill l={c.F3()}", 2);
         AddQComment(gcodes, _params!.Q);
         double bottom_mm = h_mm + (IsMark ? _params.D_mm : _params.B_mm);
-        GCodeHelpers.DrillOrPullZFromTo(currPos, bottom_mm, th_mm: h_mm + _params.T_mm, g_mmpmin: _params.F_mmpmin, t, gcodes);
+        GCodeHelpers.DrillOrPullZFromTo(currPos, bottom_mm, th_mm: h_mm + _params.T_mm, g_mmpmin: _params.G_mmpmin, t, gcodes);
         return c.AsVector3(bottom_mm);
     }
 }

@@ -103,6 +103,16 @@ public static class GeometryHelpers {
     public static double Distance(this Vector3 a, Vector3 b)
         => Vector3.Distance(a, b);
 
+    public static double EdgeDistanceTo(this Vector3 from, Vector3 to)
+    // An edge that is above the previously milled edge is preferred. This is achieved by ignoring
+    // the Z distance if the target edge is above the previous edge; and in case that there are
+    // other edges emanating at the same spot, an edge that is NOT above the previous edge is
+    // punished with a slight eps so that it loses against edges at the same point above.
+    // The edge traversal algorithm accepts arbitrary orders of edges (it will safely sweep between
+    // them if they are not near each other), so there is no danger if this heuristic is not perfect.
+    ////=> to.Z.Gt(from.Z) ? from.XY().Distance(to.XY()) : from.Distance(to) + MathHelper.Epsilon;
+    => from.Distance(to);
+
     #endregion
 
     #region Formatting

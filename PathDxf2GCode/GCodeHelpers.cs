@@ -52,7 +52,7 @@ public static class GCodeHelpers {
     }
 
     public static Vector3 DrillFromTo(Vector3 currPos, double toZ_mm, double g_mmpmin, Transformation3 zCorr, List<GCode> gcodes) {
-        gcodes.AddDrill($"G01 Z{zCorr.Expr(toZ_mm, currPos.XY())}", Math.Abs(currPos.Z - toZ_mm), g_mmpmin);
+        gcodes.AddDrill($"G01 F{g_mmpmin.F3()} Z{zCorr.Expr(toZ_mm, currPos.XY())}", Math.Abs(currPos.Z - toZ_mm), g_mmpmin);
         return currPos.XY().AsVector3(toZ_mm);
     }
 
