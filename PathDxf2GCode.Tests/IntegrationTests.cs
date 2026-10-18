@@ -2037,7 +2037,17 @@ G01 F150.000 X300.000 Y0.000 Z0.800
   (PullAndSweepHorizontallyFromTo [300.000 0.000 0.800] [300.000 0.000] s=5.000)
   (MillLine s=[300.000 0.000] e=[300.000 -50.000] fr=0.800 to=0.800)
 G01 F150.000 X300.000 Y-50.000 Z0.800
-  (PullAndSweepHorizontallyFromTo [300.000 -50.000 0.800] [200.000 0.000] s=5.000)
+  (PullAndSweepHorizontallyFromTo [300.000 -50.000 0.800] [300.000 -50.000] s=5.000)
+    (DrillOrPullZFromTo 0.800 1.800)
+G00 Z1.800
+  (MillArc l=[330.000 -29.793] r=36.170 a0=213.962 a1=326.038 fr=1.800 to=1.800 p0=[300.000 -50.000] p1=[360.000 -50.000])
+G03 F150.000 I30.000 J20.207 X360.000 Y-50.000 Z1.800
+  (PullAndSweepHorizontallyFromTo [360.000 -50.000 1.800] [360.000 -50.000] s=5.000)
+    (DrillOrPullZFromTo 1.800 0.800)
+G01 F37.500 Z0.800
+  (MillLine s=[360.000 -50.000] e=[360.000 25.000] fr=0.800 to=0.800)
+G01 F150.000 X360.000 Y25.000 Z0.800
+  (PullAndSweepHorizontallyFromTo [360.000 25.000 0.800] [200.000 0.000] s=5.000)
     (DrillOrPullZFromTo 0.800 5.000)
 G00 Z5.000
 G00 X200.000 Y0.000
@@ -2049,18 +2059,8 @@ G01 F150.000 X300.000 Y0.000 Z-0.100
   (PullAndSweepHorizontallyFromTo [300.000 0.000 -0.100] [300.000 0.000] s=5.000)
   (MillLine s=[300.000 0.000] e=[300.000 -50.000] fr=-0.100 to=-0.100)
 G01 F150.000 X300.000 Y-50.000 Z-0.100
-  (PullAndSweepHorizontallyFromTo [300.000 -50.000 -0.100] [300.000 -50.000] s=5.000)
-    (DrillOrPullZFromTo -0.100 1.800)
-G00 Z1.800
-  (MillArc l=[330.000 -29.793] r=36.170 a0=213.962 a1=326.038 fr=1.800 to=1.800 p0=[300.000 -50.000] p1=[360.000 -50.000])
-G03 F150.000 I30.000 J20.207 X360.000 Y-50.000 Z1.800
-  (PullAndSweepHorizontallyFromTo [360.000 -50.000 1.800] [360.000 -50.000] s=5.000)
-    (DrillOrPullZFromTo 1.800 0.800)
-G01 F37.500 Z0.800
-  (MillLine s=[360.000 -50.000] e=[360.000 25.000] fr=0.800 to=0.800)
-G01 F150.000 X360.000 Y25.000 Z0.800
-  (PullAndSweepHorizontallyFromTo [360.000 25.000 0.800] [360.000 -50.000] s=5.000)
-    (DrillOrPullZFromTo 0.800 5.000)
+  (PullAndSweepHorizontallyFromTo [300.000 -50.000 -0.100] [360.000 -50.000] s=5.000)
+    (DrillOrPullZFromTo -0.100 5.000)
 G00 Z5.000
 G00 X360.000 Y-50.000
     (DrillOrPullZFromTo 5.000 -0.100)
@@ -2074,8 +2074,8 @@ G00 Z5.000
 G00 Z5.000
   (Fräslänge:     992 mm   ca. 10 min)
   (Bohrungen:      12 mm   ca.  1 min)
-  (Leerfahrten:   523 mm   ca.  2 min)
-  (Summe:        1527 mm   ca. 12 min)
+  (Leerfahrten:   558 mm   ca.  2 min)
+  (Summe:        1562 mm   ca. 12 min)
   (Befehlszahl: 42)
 M30
 %");

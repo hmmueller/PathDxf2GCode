@@ -110,9 +110,8 @@ public static class GeometryHelpers {
     // punished with a slight eps so that it loses against edges at the same point above.
     // The edge traversal algorithm accepts arbitrary orders of edges (it will safely sweep between
     // them if they are not near each other), so there is no danger if this heuristic is not perfect.
-    ////=> to.Z.Gt(from.Z) ? from.XY().Distance(to.XY()) : from.Distance(to) + MathHelper.Epsilon;
-    => from.Distance(to);
-
+    => to.Z.Gt(from.Z) ? from.XY().Distance(to.XY()) : from.Distance(to) + MathHelper.Epsilon;
+    
     #endregion
 
     #region Formatting
