@@ -39,10 +39,9 @@ public class LineGeometry : IMillGeometry {
     public Vector3 EmitGCode(Vector3 currPos, Transformation3 t, List<GCode> gcodes, double toZ_mm,
             double th_mm, double f_mmpmin, bool backtracking) {
         LineGeometry l = Transform(t);
-        var fromZ_mm = currPos.Z;
+        double fromZ_mm = currPos.Z;
         currPos = GCodeHelpers.DrillOrPullZFromTo(currPos, l.Start.AsVector3(fromZ_mm), th_mm, f_mmpmin, t, gcodes);
-        gcodes.AddComment($"MillLine s={l.Start.F3()} e={l.End.F3()} fr={fromZ_mm.F3()} to={toZ_mm.F3()}", 2); //  bt={backtracking}
-
+        gcodes.AddComment($"MillLine s={l.Start.F3()} e={l.End.F3()} fr={fromZ_mm.F3()} to={toZ_mm.F3()}", currPos, 2);
         gcodes.AddMill($"G01 F{f_mmpmin.F3()} X{l.End.X.F3()} Y{l.End.Y.F3()} Z{t.Expr(toZ_mm, l.Start)}",
             (l.End - l.Start).Modulus(), f_mmpmin);
 
@@ -100,10 +99,10 @@ public class ArcGeometry : IMillGeometry {
     public Vector3 EmitGCode(Vector3 currPos, Transformation3 t, List<GCode> gcodes, double toZ_mm,
             double th_mm, double f_mmpmin, bool backtracking) {
         ArcGeometry a = Transform(t);
-        var fromZ_mm = currPos.Z;
+        double fromZ_mm = currPos.Z;
         currPos = GCodeHelpers.DrillOrPullZFromTo(currPos, a.Start.AsVector3(fromZ_mm), th_mm, f_mmpmin, t, gcodes);
 
-        gcodes.AddComment($"MillArc l={a.Center.F3()} r={Radius_mm.F3()} a0={a.StartAngle_deg.F3()} a1={a.EndAngle_deg.F3()} fr={fromZ_mm.F3()} to={toZ_mm.F3()} p0={a.Start.F3()} p1={a.End.F3()}", 2); //  bt={backtracking}
+        gcodes.AddComment($"MillArc l={a.Center.F3()} r={Radius_mm.F3()} a0={a.StartAngle_deg.F3()} a1={a.EndAngle_deg.F3()} fr={fromZ_mm.F3()} to={toZ_mm.F3()} p0={a.Start.F3()} p1={a.End.F3()}", currPos, 2);
         string g = Counterclockwise ? "G03" : "G02";
 
         gcodes.AddMill($"{g} F{f_mmpmin.F3()} I{(a.Center.X - a.Start.X).F3()} J{(a.Center.Y - a.Start.Y).F3()} X{a.End.X.F3()} Y{a.End.Y.F3()} Z{t.Expr(toZ_mm, a.Start)}",

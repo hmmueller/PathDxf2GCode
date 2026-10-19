@@ -8,6 +8,10 @@ public static class GCodeHelpers {
         gcodes.Add(new CommentGCode(comment.AsComment(indent)));
     }
 
+    public static void AddComment(this List<GCode> gcodes, string comment, Vector3 currPos, int indent) {
+        gcodes.AddComment(comment + $" | G00 X{currPos.X.F3()} Y{currPos.Y.F3()} | G00 Z{currPos.Z.F3()}", indent);
+    }
+
     public static void AddHorizontalG00(this List<GCode> gcodes, Vector2 to, double lg_mm) {
         gcodes.Add(new HorizontalSweepGCode(to.X, to.Y, lg_mm));
     }
